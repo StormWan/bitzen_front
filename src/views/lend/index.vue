@@ -10,7 +10,9 @@ import { mapMutations } from 'vuex'
 export default {
   name: 'user',
   async mounted () {
-    this.setActiveTab(3)
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
+    this.setActiveTab(4)
   },
   methods: {
     ...mapMutations({

@@ -74,7 +74,9 @@ export default {
     }
   },
   async mounted () {
-    this.setActiveTab(4)
+    this.setActiveTab(5)
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
   },
   methods: {
     ...mapMutations({

@@ -263,6 +263,8 @@ export default {
     [Tabs.name]: Tabs
   },
   async mounted () {
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
     this.setActiveTab(1)
     // 轮播
     window.triggerSwiper3 = () => {
