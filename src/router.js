@@ -16,8 +16,9 @@ const router = new Router({
       },
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
+      // children:[]
     },
     {
       path: '/otc',
@@ -28,7 +29,7 @@ const router = new Router({
       },
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     {
@@ -40,7 +41,19 @@ const router = new Router({
       },
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
+      }
+    },
+    {
+      path: '/Coin',
+      name: 'Coin',
+      components: {
+        default: () => import('./views/Coin/index.vue'),
+        tabbar: () => import('./components/tabbar/index.vue')
+      },
+      meta: {
+        keepAlive: true,
+        Auth: false
       }
     },
     {
@@ -52,7 +65,7 @@ const router = new Router({
       },
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     {

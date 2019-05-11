@@ -27,7 +27,7 @@
 
 <script>
 import { InputItem, Field, Button, Toast } from 'mand-mobile'
-import { NavBar } from 'vant';
+import { NavBar } from 'vant'
 
 export default {
   name: 'login-phone',

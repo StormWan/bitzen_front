@@ -1,13 +1,12 @@
 <template>
   <div id="app">
-    <keep-alive>
+<!--    <keep-alive>-->
       <router-view class="view-router"  v-if="$route.meta.keepAlive"></router-view>
-    </keep-alive>
+<!--    </keep-alive>-->
     <router-view class="view-router" v-if="!$route.meta.keepAlive"></router-view>
     <router-view name="tabbar"></router-view>
   </div>
 </template>
 
 <style scoped>
-
 </style>
