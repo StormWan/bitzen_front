@@ -342,17 +342,17 @@ export default {
     },
     async api () {
       const { data } = await this.$api.bb.pairDetail(this.$route.params.id)
-      console.log(data.data)
+      // console.log(data.data)
       if (data.code === 200) {
         this.pair = data.data
         this.base_symbol = data.data.base.symbol
         this.quote_symbol = data.data.quote.symbol
-        console.log(this.pair)
         if (this.active_index === 0) {
           // 渲染
           if (this.pair.base.icon_url) {
             this.price_img = this.pair.base.icon_url
           }
+          this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
           this.price_title = this.pair.bestorderbookmodel.best_buy_exchange.name
           this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000
         } else {
@@ -360,6 +360,7 @@ export default {
           if (this.pair.quote.icon_url) {
             this.price_img = this.pair.quote.icon_url
           }
+          this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
           this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
           this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000
         }
@@ -454,7 +455,6 @@ export default {
         this.api()
       }
     }, 1500)
-    this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
     // 红点提示
     if (this.active_index === 0) {
       this.brief = '最小下单 ' + (Math.floor(this.pair.buy_min * 100)) / 100 + ' ' + this.pair.quote.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
