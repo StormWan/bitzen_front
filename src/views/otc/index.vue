@@ -2,7 +2,7 @@
   <div class="Legal_currency">
     <div class="header"> 法 币 </div>
     <!--趋势-->
-    <a href="" v-for="(Mala,index) in Market_label" :key="index">
+    <div class="div" v-for="(Mala,index) in Market_label" :key="index" @click="text_click(index)">
       <!--名称-->
       <div class="Market">
         <div class="img">
@@ -27,7 +27,7 @@
       <div class="Fall_rise">
         交易
       </div>
-    </a>
+    </div>
   </div>
 </template>
 
@@ -35,7 +35,7 @@
 import { mapMutations } from 'vuex'
 import { Icon } from 'vant'
 export default {
-  data(){
+  data () {
     return {
       // 行情标签涨幅
       Market_label: [
@@ -256,53 +256,66 @@ export default {
     }
   },
   async mounted () {
-    document.body.scrollTop = 0
-    document.documentElement.scrollTop = 0
     this.setActiveTab(2)
   },
   methods: {
     ...mapMutations({
       setActiveTab: 'tabbar/setActiveTab'
-    })
+    }),
+    text_click (e) {
+      localStorage.setItem('Send_out', JSON.stringify(this.Market_label[e]))
+      this.$router.push({
+        path: '/transaction'
+      })
+    }
   },
   components: {
     [Icon.name]: Icon
+  },
+  // router-link触发
+  activated () {
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
   }
 }
 </script>
 
-<style scoped lang="less">
+<style lang="less">
+  /*底部改变*/
+  .md-icon.icon-font.md{
+    font-size: 16px;
+  }
   /*菜单栏*/
   .Legal_currency{
-    margin-bottom: 95px;
+    margin-bottom: 43px;
     height: 100%;
     .header{
       background-color: #87CEFA;
       text-align: center;
-      font-size: 35px;
-      line-height: 105px;
-      -webkit-border-radius: 0 0 25px 25px;
-      -moz-border-radius: 0 0 25px 25px;
-      border-radius: 0 0 80px 80px;
+      font-size: 18px;
+      line-height: 53px;
+      -webkit-border-radius: 0 0 40px 40px;
+      -moz-border-radius: 0 0 40px 40px;
+      border-radius: 0 0 40px 40px;
       color: #696969;
     }
     /*行情标签*/
-        a{
+        .div{
           width: 90%;
-          margin: 30px auto;
+          margin: 15px auto;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 40px 20px;
+          padding: 20px 10px;
           color: #000;
-          font-size: 25px;
+          font-size: 13px;
           /*box-shadow: 2px 1px 7px #000;*/
-          -webkit-border-radius: 15px;
-          -moz-border-radius: 15px;
-          border-radius: 15px;
-          -moz-box-shadow:0 0 10px red,2px 2px 10px 10px yellow,4px 4px 12px 12px green;
-          -webkit-box-shadow:0 0 10px red,2px 2px 10px 10px yellow,4px 4px 12px 12px green;
-          box-shadow:0 0 10px red,2px 2px 3px 3px yellow,4px 4px 3px 3px green;
+          -webkit-border-radius: 8px;
+          -moz-border-radius: 8px;
+          border-radius: 8px;
+          -moz-box-shadow:0 0 3px red,1px 1px 3px 3px yellow,2px 2px 4px 3px green;
+          -webkit-box-shadow:0 0 3px red,1px 1px 3px 3px yellow,2px 2px 4px 3px green;
+          box-shadow:0 0 3px red,1px 1px 3px 3px yellow,2px 2px 4px 3px green;
           div{
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -314,8 +327,8 @@ export default {
             display: flex;
             align-items: center;
             .img{
-              width: 70px;
-              height: 70px;
+              width: 35px;
+              height: 35px;
               -webkit-border-radius: 50%;
               -moz-border-radius: 50%;
               border-radius: 50%;
@@ -326,50 +339,50 @@ export default {
               }
             }
             .title{
-              font-size: 30px;
+              font-size: 15px;
               color: #708090;
-              padding-left: 30px;
+              padding-left: 15px;
             }
           }
           /*价格*/
           .Price_icon{
-            font-size: 28px;
+            font-size: 14px;
             /*价格详情*/
             .Price{
-              margin-bottom: 10px;
+              margin-bottom: 5px;
               .Price_box{
                 color: #FF4500;
-                font-size: 35px;
+                font-size: 18px;
               }
               .name{
-                font-size: 23px;
+                font-size: 12px;
                 color: #999;
-                margin-left: 15px;
+                margin-left: 8px;
               }
             }
             /*币币名称图标*/
             .icon{
-              font-size: 30px;
+              font-size: 15px;
               text-align: right;
               .icon_fire{
-                font-size: 30px;
+                font-size: 15px;
               }
               .name{
-                font-size: 21px;
+                font-size: 12px;
                 color: #ccc;
-                margin-left: 20px;
+                margin-left: 10px;
               }
             }
           }
           /*交易按钮*/
           .Fall_rise{
             background-color: #00BFFF;
-            -webkit-border-radius: 15px;
-            -moz-border-radius: 15px;
-            border-radius: 15px;
+            -webkit-border-radius: 8px;
+            -moz-border-radius: 8px;
+            border-radius: 8px;
             color: white;
-            padding: 20px 35px;
-            font-size: 24px;
+            padding: 10px 18px;
+            font-size: 12px;
           }
         }
   }

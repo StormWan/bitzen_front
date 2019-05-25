@@ -10,7 +10,7 @@
         <md-input-item
           type="phone"
           v-model="phone"
-          title="手机号码"
+          title="+86"
           clearable
         ></md-input-item>
       </md-field>
@@ -50,7 +50,8 @@ export default {
       const { data } = await this.$api.account.auth({ phone: this.phone, area_code: this.areaCode })
       Toast.hide()
       if (data.code === 200) {
-        console.log(data)
+        // console.log(data.data)
+        localStorage.setItem('key', data.data.key)
         this.$store.commit({ type: 'account/auth', areaCode: this.areaCode, phone: this.phone, key: data.data.key })
         Toast.succeed('验证码已发送')
         setTimeout(() => {
@@ -67,12 +68,33 @@ export default {
 }
 </script>
 
-<style lang="stylus">
-  .login-phone
-    .error
-      float left
-      width 100%
-      .error-action
-        float right
-        color #5878B4
+<style lang="less">
+  .login-phone{
+    .error{
+      float: left;
+      width: 100%;
+      .error-action{
+        float: right;
+        color: #5878B4;
+      }
+    }
+    .md-field-item-content{
+      min-height: 0;
+    }
+    .md-input-item.left .md-input-item-fake, .md-input-item.left .md-input-item-input{
+      height: 40px;
+      font-size: 20px;
+    }
+    .md-field-item.is-solid .md-field-item-title{
+      width: 100px;
+      font-size: 22px;
+      text-align: center;
+    }
+    .md-button.block{
+      height: 55px;
+    }
+    .md-button-content{
+      font-size: 18px;
+    }
+  }
 </style>

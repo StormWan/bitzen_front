@@ -22,6 +22,9 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style>
+  /*底部改变*/
+  .md-icon.icon-font.md{
+    font-size: 16px;
+  }
 </style>

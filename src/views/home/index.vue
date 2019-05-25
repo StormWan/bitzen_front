@@ -22,13 +22,13 @@
         @before-change="beforeChange"
         @after-change="afterChange"
         ref="swiper">
-        <md-swiper-item :key="$index" v-for="(item, $index) in mulit">
+        <md-swiper-item :key="$index" v-for="(item, $index) in list">
           <ul>
             <li :key="$index1" v-for="(sub, $index1) in item">
               <a href="javascript:void(0)" class="banner-item">
-                <p class="name">{{sub.name}}</p>
+                <p class="name">{{sub.market}}</p>
                 <p class="Price">{{sub.Price}}</p>
-                <p class="Quotation">{{sub.Quotation}}</p>
+                <p class="Quotation">{{sub.Fall_rise}}</p>
               </a>
             </li>
           </ul>
@@ -51,7 +51,7 @@
             :autoplay="2000"
             transition="slideY">
             <md-swiper-item :key="$index" v-for="(item, $index) in simple">
-              <span class="banner-item">{{item.Notice}}</span>
+              <span class="banner-item">{{item.text}}</span>
             </md-swiper-item>
           </md-swiper>
         </span>
@@ -61,12 +61,12 @@
     <!--工具栏-->
     <div class="toolbar">
       <div v-for="(toolbar,index) in toolbar" :key="index">
-        <a href="">
+        <router-link :to="toolbar.path">
           <p class="icon">
             <md-icon :name='toolbar.icon_service'></md-icon>
           </p>
           <p>{{toolbar.name}}</p>
-        </a>
+        </router-link>
       </div>
     </div>
 
@@ -80,7 +80,7 @@
     <!--行情标签-->
     <div class="Quotation">
       <van-tabs class="order-tabs" v-model="active" sticky>
-        <van-tab v-for="(item,index) in title" :title="item.name" :key="index">
+        <van-tab v-for="(item,index) in title" :title="item.name" :key="index" @change="tab(index)">
           <div class="content">
             <div class="bg_color">
               <div>市场</div>
@@ -90,35 +90,39 @@
           </div>
           <!--涨幅榜-->
           <div v-if="index==0" class="rise">
-            <a href="" v-for="(Mala,index) in Market_label" :key="index">
-              <div class="Market">
-                <span class="title">{{Mala.market}}</span>
-                /
-                <span class="currency">{{Mala.currency}}</span>
-              </div>
-              <div class="Price">
-                {{Mala.Price}}
-              </div>
-              <div class="Fall_rise">
-                {{Mala.Fall_rise}}
-              </div>
-            </a>
+            <div v-for="(item,index) in data" :key="index">
+              <router-link :to="'/pair/' + item.id" v-if="item.rate.charAt(0) !== '-'">
+                <div class="Market">
+                  <span class="title">{{item.base.symbol}}</span>
+                  /
+                  <span class="currency">{{item.quote.symbol}}</span>
+                </div>
+                <div class="Price">
+                  {{(Math.floor(item.price * 100) / 100).toFixed(4)}}
+                </div>
+                <div class="Fall_rise">
+                  {{(Math.floor(item.rate * 100) / 100).toFixed(5)}}
+                </div>
+              </router-link>
+            </div>
           </div>
           <!--跌幅榜-->
           <div v-if="index==1" class="rise">
-            <a href="" v-for="(Mala,index) in fall" :key="index">
-              <div class="Market">
-                <span class="title">{{Mala.market}}</span>
-                /
-                <span class="currency">{{Mala.currency}}</span>
-              </div>
-              <div class="Price">
-                {{Mala.Price}}
-              </div>
-              <div class="fall">
-                {{Mala.Fall_rise}}
-              </div>
-            </a>
+            <div v-for="(item,index) in data" :key="index">
+              <router-link :to="'/pair/' + item.id" v-if="item.rate.charAt(0) === '-'">
+                <div class="Market">
+                  <span class="title">{{item.base.symbol}}</span>
+                  /
+                  <span class="currency">{{item.quote.symbol}}</span>
+                </div>
+                <div class="Price">
+                  {{(Math.floor(item.price * 100) / 100).toFixed(4)}}
+                </div>
+                <div class="fall">
+                  {{(Math.floor(item.rate * 100) / 100).toFixed(5)}}
+                </div>
+              </router-link>
+            </div>
           </div>
         </van-tab>
       </van-tabs>
@@ -133,7 +137,7 @@
 
     <!--加载更多-->
     <div class="More">
-      <a href="">更多》</a>
+      <router-link to="/bb">更多》</router-link>
     </div>
   </div>
 </template>
@@ -141,37 +145,85 @@
 <script>
 import { mapMutations } from 'vuex'
 import { Swiper, SwiperItem, Icon } from 'mand-mobile'
-import simple from 'mand-mobile/components/swiper/demo/data/simple'
-import mulit from 'mand-mobile/components/swiper/demo/data/mulit-item'
 import MdIcon from 'mand-mobile/components/icon/index'
-import { Tab, Tabs } from 'vant'
+import { Tab, Tabs, NoticeBar, Toast } from 'vant'
 
 export default {
   data () {
     return {
-      simple,
-      mulit,
+      // 行情轮播
+      list: [
+        [
+          {
+            market: 'BNB / BTC',
+            Price: 0.0034836,
+            Fall_rise: '-6.52%'
+          },
+          {
+            market: 'EOS / BTC',
+            Price: 0.0034836,
+            Fall_rise: '-6.52%'
+          },
+          {
+            market: 'XRP / BTC',
+            Price: 0.0034836,
+            Fall_rise: '-6.52%'
+          }
+        ],
+        [
+          {
+            market: 'EOS / BTC',
+            Price: 0.0034836,
+            Fall_rise: '-6.52%'
+          },
+          {
+            market: 'BNB / BTC',
+            Price: 0.0034836,
+            Fall_rise: '-6.52%'
+          },
+          {
+            market: 'XRP / BTC',
+            Price: 0.0034836,
+            Fall_rise: '-6.52%'
+          }
+        ]
+      ],
+      // 公告轮播
+      simple: [
+        {
+          color: '#4390EE',
+          text: '给时光以生命，给岁月以文明。'
+        },
+        {
+          color: '#364d79',
+          text: '你的无畏来源于无知。'
+        },
+        {
+          color: '#CA4040',
+          text: 'FADT 几天预告会涨幅'
+        }
+      ],
       current_bav: 1,
       // 工具栏
       toolbar: [
         {
           name: '帮助',
-          path: '',
+          path: '/common',
           icon_service: 'service'
         },
         {
           name: '自选',
-          path: '',
+          path: '/bb',
           icon_service: 'motor-vehicle'
         },
         {
           name: '充值',
-          path: '',
+          path: '/wallet',
           icon_service: 'security'
         },
         {
           name: '提现',
-          path: '',
+          path: '/wallet',
           icon_service: 'rmb'
         }
       ],
@@ -202,18 +254,6 @@ export default {
           market: 'MFT',
           currency: 'BTC',
           Price: 0.0000054,
-          Fall_rise: '+15.46%'
-        },
-        {
-          market: 'TRX',
-          currency: 'BTC',
-          Price: 0.00000420,
-          Fall_rise: '+15.46%'
-        },
-        {
-          market: 'CVC',
-          currency: 'BTC',
-          Price: 0.00001234,
           Fall_rise: '+15.46%'
         }
       ],
@@ -250,7 +290,9 @@ export default {
           Fall_rise: '- 15.46%'
         }
       ],
-      active: 0
+      active: 0,
+      // 数据
+      data: []
     }
   },
   components: {
@@ -260,18 +302,32 @@ export default {
     [SwiperItem.name]: SwiperItem,
     [Icon.name]: Icon,
     [Tab.name]: Tab,
-    [Tabs.name]: Tabs
+    [Tabs.name]: Tabs,
+    [NoticeBar.name]: NoticeBar
   },
   async mounted () {
-    document.body.scrollTop = 0
-    document.documentElement.scrollTop = 0
     this.setActiveTab(1)
     // 轮播
     window.triggerSwiper3 = () => {
       this.goto()
     }
+    await this.getPairs()
   },
   methods: {
+    // 获取数据
+    async getPairs () {
+      const { data } = await this.$api.bb.pairList()
+      console.log(data.data)
+      if (data.code === 200) {
+        this.data = data.data
+      } else {
+        Toast('获取数据失败，请刷新')
+      }
+    },
+    // 涨跌榜
+    tab (i) {
+      console.log(i)
+    },
     ...mapMutations({
       setActiveTab: 'tabbar/setActiveTab'
     }),
@@ -296,30 +352,34 @@ export default {
     goto () {
       this.$refs.swiper.goto(2)
     }
+  },
+  // keep-alive 组件激活时调用
+  activated () {
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
   }
 }
 </script>
 
 <style lang="less">
-  /*修改tab样式*/
-  .order-tabs .van-ellipsis {
-    font-size: 25px;
-    font-weight: bold;
-  }
   /*全部*/
   .home{
-    padding-bottom: 103px;
+    padding-bottom: 50px;
     /*头部轮播图*/
     .md-example-child-swiper-2{
       width: 100%;
-      height: 300px;
+      height: 150px;
+      .md-swiper-indicator{
+        height: 1px;
+        width: 10px;
+      }
       .banner-item{
         float: left;
         width: 100%;
         height: 100%;
-        line-height: 300px;
+        line-height: 150px;
         text-align: center;
-        font-size: 28px;
+        font-size: 14px;
         color: #FFF;
         box-align: center;
         align-items: center;
@@ -331,92 +391,89 @@ export default {
     }
     /*行情轮播*/
     .md-example-child-swiper-3{
-      height: 120px;
-      margin: 10px 0;
+      height: 60px;
+      margin: 5px 0;
+      .md-swiper-indicator{
+        height: 1px;
+        width: 0px;
+      }
       ul{
         display: flex;
         justify-content: space-around;
         li{
-          height: 125px;
+          height: 62px;
           width: 100%;
           .banner-item{
             float: left;
             width: 100%;
             height: 100%;
             text-align: center;
-            font-size: 28px;
+            font-size: 14px;
             box-align: center;
             align-items: center;
             box-pack: center;
             justify-content: center;
             p{
-              padding-top: 10px;
+              padding-top: 5px;
             }
             .name{
-              font-size: 22px;
+              font-size: 11px;
               color: #191970;
             }
             .Price{
-              font-size: 30px;
+              font-size: 15px;
               color: #BA55D3;
             }
             .Quotation{
-              font-size: 20px;
+              font-size: 10px;
               color: #BA55D3;
             }
           }
         }
         li:nth-child(2){
-          border-left: 2px solid #999999;
-          border-right: 2px solid #999999;
+          border-left: 1px solid #999999;
+          border-right: 1px solid #999999;
         }
       }
     }
     /*公告*/
     .Notice{
-      font-size: 25px;
+      font-size: 12px;
       border-top: 1px solid #999999;
-      line-height: 70px;
-      padding-left: 30px;
-      padding-top: 10px;
-      overflow: hidden;
+      line-height: 35px;
+      padding-left: 15px;
+      padding-top: 5px;
       .icon_title{
         vertical-align: middle;
         span{
           display: inline-block;
-          line-height: 70px;
+          line-height: 35px;
         }
         .md-icon.icon-font.md{
-          font-size: 27px;
+          font-size: 18.5px;
           color: #191970;
         }
         .icon{
-          margin-right: 15px;
-          height: 45px;
+          margin-right: 8px;
+          height: 23px;
         }
         .title{
-          font-size: 23px;
-          height: 45px;
+          font-size: 12px;
+          height: 23px;
           position: relative;
           width: 70%;
           color: #999999;
           .banner-item{
-            font-size: 23px;
+            font-size: 12px;
           }
         }
         .md-example-child,.md-example-child-swiper,.md-example-child-swiper-1{
           .md-swiper,md-swiper-vertical{
             position: relative;
           }
-          .md-swiper::after{
-            content: '';
-            display: inline-block;
-            width:30px;
-            height: 130%;
-            background: white;
-            position: absolute;
-            right: 0;
-            top: -5px;
+          .md-swiper-indicator{
+            height: 0px;
+            width: 0px;
           }
         }
       }
@@ -425,24 +482,24 @@ export default {
     .toolbar{
       display: flex;
       justify-content: space-around;
-      font-size: 28px;
+      font-size: 14px;
       a{
         color: #999999;
         text-align: center;
         .icon{
-          padding: 8px 0;
+          padding: 4px 0;
         }
       }
     }
     /*邀请好友*/
     .Invitation{
       width: 85%;
-      height: 140px;
-      margin: 30px auto;
-      -webkit-border-radius: 30px;
-      -moz-border-radius: 30px;
-      border-radius: 30px;
-      box-shadow: darkgrey 8px 8px 30px 3px;
+      height: 70px;
+      margin: 15px auto;
+      -webkit-border-radius: 15px;
+      -moz-border-radius: 15px;
+      border-radius: 15px;
+      box-shadow: darkgrey 4px 4px 15px 2px;
       a{
         display: block;
         width: 100%;
@@ -450,9 +507,9 @@ export default {
         img{
           width: 100%;
           height: 100%;
-          -webkit-border-radius: 30px;
-          -moz-border-radius: 30px;
-          border-radius: 30px;
+          -webkit-border-radius: 15px;
+          -moz-border-radius: 15px;
+          border-radius: 15px;
         }
       }
     }
@@ -467,9 +524,9 @@ export default {
           margin: 0 auto;
           display: flex;
           justify-content: space-between;
-          line-height: 80px;
+          line-height: 40px;
           div{
-            font-size: 25px;
+            font-size: 13px;
             color: #ccc;
           }
         }
@@ -481,9 +538,10 @@ export default {
         a{
           display: flex;
           justify-content: space-between;
-          padding: 15px 0;
+          padding: 18px 0;
           border-bottom: 1px solid #e9e9e9;
           color: #000;
+          align-items: center;
           div{
             white-space: nowrap;
             text-overflow: ellipsis;
@@ -492,48 +550,44 @@ export default {
           }
           /*行情名字*/
           .Market{
-            font-size: 20px;
+            font-size: 15px;
             .title{
-              font-size: 28px;
+              font-size: 20px;
             }
+          }
+          .Fall_rise, .fall{
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+            color: white;
+            padding: 4px 5px;
+            font-size: 12px;
           }
           /*涨*/
           .Fall_rise{
             background-color: green;
-            -webkit-border-radius: 10px;
-            -moz-border-radius: 10px;
-            border-radius: 10px;
-            color: white;
-            padding: 7px 10px;
-            font-size: 24px;
           }
           /*跌*/
           .fall{
             background-color: #DC143C;
-            -webkit-border-radius: 10px;
-            -moz-border-radius: 10px;
-            border-radius: 10px;
-            color: white;
-            padding: 7px 10px;
-            font-size: 24px;
           }
           .Price{
-            font-size: 30px;
+            font-size: 19px;
           }
         }
       }
     }
     .md-example-child-tabs{
       .content{
-        font-size: 28px;
+        font-size: 14px;
         background: #FFF;
         width: 80%;
-        padding-top: 20px;
+        padding-top: 10px;
         margin: 0 auto;
         line-height: 1.5;
         box-sizing: border-box;
         .md-tabs-content{
-          min-height: 200px;
+          min-height: 100px;
           background: #FFF;
         }
       }
@@ -541,14 +595,13 @@ export default {
 
     /*更多*/
     .More{
-      font-size: 28px;
-      line-height: 70px;
+      font-size: 20px;
+      line-height: 50px;
       text-align: center;
       a{
         display: inline-block;
         width: 100%;
         color: #999;
-
       }
     }
   }

@@ -36,8 +36,9 @@ export default {
         this.$router.replace({ name: 'login' })
       }
       Toast.loading('加载中...')
-      const { data } = await this.$api.account.auth({ phone: this.phone, area_code: this.areaCode })
+      const { data } = await this.$api.account.verify({ verify_code: this.verifyCode, key: localStorage.getItem('key') })
       Toast.hide()
+      console.log(localStorage.getItem('key'))
       if (data.code === 200) {
         this.$store.commit({ type: 'account/auth', areaCode: this.areaCode, phone: this.phone, key: data.data.key })
         Toast.succeed('验证码已发送')
@@ -47,7 +48,7 @@ export default {
       }
     },
     submit (code) {
-      console.log(code)
+      // console.log(code)
       this.verifyCode = code
     },
     async login () {
@@ -79,10 +80,40 @@ export default {
 
 </script>
 
-<style lang="stylus">
-  .login-verify
-    height 650px
-    padding 30px 0
-    .md-number-keyboard
-      margin-top 30px
+<style lang="less">
+  .login-verify{
+    width: 100%;
+    overflow: hidden;
+    padding-top: 30px;
+    .md-number-keyboard{
+      margin-top: 30px;
+    }
+    .md-captcha-content{
+      font-size: 16px;
+    }
+    .md-captcha-footer{
+      padding: 14px 10px;
+      .md-captcha-brief{
+        font-size: 16px;
+      }
+      .md-captcha-btn{
+        font-size: 16px;
+      }
+    }
+    .md-number-keyboard-container .keyboard-number .keyboard-number-list .keyboard-number-item{
+      height: 80px;
+      line-height: 80px;
+      font-size: 28px;
+    }
+    .md-number-keyboard-container{
+      height: 320px;
+    }
+    .md-button.block{
+      height: 72px;
+      .md-button-content{
+        height: 70px;
+        font-size: 28px;
+      }
+    }
+  }
 </style>

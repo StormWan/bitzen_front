@@ -24,7 +24,6 @@
 import { TabBar, Icon } from 'mand-mobile'
 
 export default {
-  name: 'c-tab-bar',
   components: {
     [TabBar.name]: TabBar,
     [Icon.name]: Icon
@@ -33,9 +32,9 @@ export default {
     return {
       items: [
         { name: 1, label: '首页', icon: 'home', path: '/' },
-        { name: 2, label: '法币', icon: 'user', path: '/otc' },
-        { name: 3, label: '币币', icon: 'motor-vehicle', path: '/Coin' },
-        { name: 4, label: '借贷', icon: 'rmb', path: '/lend' },
+        // { name: 2, label: '法币', icon: 'user', path: '/otc' },
+        { name: 3, label: '币币', icon: 'motor-vehicle', path: '/bb' },
+        // { name: 4, label: '借贷', icon: 'rmb', path: '/lend' },
         { name: 5, label: '我的', icon: 'setting', path: '/user' }
       ]
     }
@@ -65,6 +64,9 @@ export default {
     bottom 0px
     left 0px
     width 100%
+    .md-tab-bar
+      padding: 0
+      height: 100px
     .custom-item
       display flex
       flex-direction column
@@ -74,4 +76,6 @@ export default {
       flex 1
       .text
         font-size 20px
+  .md-tab-bar-item
+    min-height: 0
 </style>
