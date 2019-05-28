@@ -38,13 +38,13 @@ export default {
       Toast.loading('加载中...')
       const { data } = await this.$api.account.verify({ verify_code: this.verifyCode, key: localStorage.getItem('key') })
       Toast.hide()
-      console.log(localStorage.getItem('key'))
+      // console.log(localStorage.getItem('key'))
       if (data.code === 200) {
         this.$store.commit({ type: 'account/auth', areaCode: this.areaCode, phone: this.phone, key: data.data.key })
         Toast.succeed('验证码已发送')
       } else {
         console.log(data)
-        Toast.failed('网络错误，请重试')
+        Toast.failed('请输入验证码')
       }
     },
     submit (code) {
@@ -54,6 +54,7 @@ export default {
     async login () {
       console.log({ key: this.key, verify_code: this.verifyCode })
       const { data } = await this.$api.account.verify({ key: this.key, verify_code: this.verifyCode })
+      console.log(data)
       if (data.code === 200) {
         console.log(data)
         localStorage.setItem('token', data.data.token)

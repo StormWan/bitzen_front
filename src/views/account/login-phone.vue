@@ -6,6 +6,8 @@
         left-arrow
         @click-left="onClickLeft"
       />
+      <!--提示语-->
+      <div class="Tips">请输入手机号码</div>
       <md-field>
         <md-input-item
           type="phone"
@@ -26,7 +28,7 @@
 </template>
 
 <script>
-import { InputItem, Field, Button, Toast } from 'mand-mobile'
+import { InputItem, Field, Button, Toast, DropMenu } from 'mand-mobile'
 import { NavBar } from 'vant'
 
 export default {
@@ -35,13 +37,29 @@ export default {
     [InputItem.name]: InputItem,
     [Field.name]: Field,
     [Button.name]: Button,
-    [NavBar.name]: NavBar
+    [NavBar.name]: NavBar,
+    [DropMenu.name]: DropMenu
   },
   data () {
     return {
       phone: '',
       areaCode: '+86',
-      isError: false
+      isError: false,
+      data: [
+        {
+          text: '一级选项1',
+          options: [
+            {
+              value: '0',
+              text: '二级选项1'
+            },
+            {
+              value: '1',
+              text: '二级选项2'
+            }
+          ]
+        }
+      ]
     }
   },
   methods: {
@@ -78,23 +96,31 @@ export default {
         color: #5878B4;
       }
     }
-    .md-field-item-content{
-      min-height: 0;
-    }
-    .md-input-item.left .md-input-item-fake, .md-input-item.left .md-input-item-input{
-      height: 40px;
-      font-size: 20px;
-    }
-    .md-field-item.is-solid .md-field-item-title{
-      width: 100px;
-      font-size: 22px;
-      text-align: center;
+    .md-field{
+      padding-top: 0;
+      .md-field-item-content{
+        min-height: 0;
+      }
+      .md-input-item.left .md-input-item-fake, .md-input-item.left .md-input-item-input{
+        height: 40px;
+        font-size: 20px;
+      }
+      .md-field-item.is-solid .md-field-item-title{
+        width: 50px;
+        font-size: 22px;
+        /*text-align: center;*/
+      }
     }
     .md-button.block{
       height: 55px;
     }
     .md-button-content{
       font-size: 18px;
+    }
+    .Tips{
+      text-align: center;
+      font-size: 16px;
+      padding: 20px 0;
     }
   }
 </style>

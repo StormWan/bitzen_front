@@ -29,8 +29,8 @@
                     <div class="cent">{{item.bestorderbookmodel.best_buy_price}}</div>
                     <!--24小时涨跌-->
                     <div class="tail">
-                      <div class="green" v-if="!item.rate">- -</div>
-                      <div class="green" v-else :class="{red: item.rate.charAt(0) === '-'}">{{(Math.floor(item.rate * 1000) / 1000).toFixed(4)}}%</div>
+                      <div class="green" v-if="!item.bestorderbookmodel.percentage">- -</div>
+                      <div class="green" v-else :class="{red: (item.bestorderbookmodel.percentage).toString().charAt(0) === '-'}">{{(Math.floor(item.bestorderbookmodel.percentage * 1000) / 1000).toFixed(2)}}%</div>
                     </div>
                   </div>
                 </div>
@@ -76,12 +76,12 @@ export default {
       // 默认不排序
       letter: '',
       // 默认从小到大排列
-      original: false
+      original: false,
+      set: false
     }
   },
   async mounted () {
     this.setActiveTab(3)
-    await this.getPairs()
   },
   methods: {
     ...mapMutations({
@@ -89,6 +89,7 @@ export default {
     }),
     // 过滤选择引擎
     title_click (index, title) {
+      this.active = index
       this.arr = []
       if (index === 0) {
         this.arr = []
@@ -106,7 +107,8 @@ export default {
         this.list = data.data
         // 原始推值进去arr渲染
         for (let i = 0; i <= this.list.length - 1; i++) {
-          if (this.list[i].quote.symbol.search(this.title[1].tiele_name) !== -1) {
+          if (this.list[i].quote.symbol.search(this.title[this.active].tiele_name) !== -1) {
+            this.arr = []
             this.arr.push(this.list[i])
           }
         }
@@ -128,9 +130,23 @@ export default {
   computed: {
   },
   // keep-alive 组件激活时调用
-  activated () {
+  async activated () {
     document.body.scrollTop = 0
     document.documentElement.scrollTop = 0
+    this.set = false
+    await this.getPairs()
+    let set = await setInterval(() => {
+      if (this.set === true) {
+        clearInterval(set)
+      } else {
+        this.getPairs()
+      }
+    }, 5000)
+  },
+  watch: {
+    '$route' (to, from) {
+      this.set = true
+    }
   }
 }
 </script>

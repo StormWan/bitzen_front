@@ -15,6 +15,9 @@ const bb = {
     return axios.get(`${base.base_api}/bb/pairs/${id}/`, {
       params: params
     })
+  },
+  orders () {
+    return axios.get(`${base.base_api}/bb/orders/`)
   }
 }
 

@@ -10,117 +10,149 @@
           <van-icon name="arrow-left"></van-icon>
         </div>
         <div class="title">
-          <span>
-            <van-icon name="fire"></van-icon>
-          </span>
           <span>{{pair.pair}}</span>
         </div>
       </div>
 
-      <!--金额-->
-      <div class="price">
-        <div class="price_bg">
-          <div class="price_img">
-            <img :src="price_img" alt="">
+      <div class="details_box">
+<!--        标题-->
+        <div class="details_title">
+          <div>数量</div>
+          <div>(买家)出价</div>
+          <div>(卖家)出价</div>
+          <div>数量</div>
+        </div>
+<!--        数据-->
+        <div class="details_data">
+          <div>
+            <div class="sell" v-for="(item,index) in sell" :key="index">
+              <div v-if="!item[0]">- -</div>
+              <div v-else>{{item[1].toFixed(2)}}</div>
+              <div v-if="!item[1]">- -</div>
+              <div v-else>{{item[0].toFixed(4)}}</div>
+            </div>
           </div>
-          <div>{{price_bg}}</div>
-          <div class="price_title">{{price_title}}</div>
+          <div>
+            <div v-for="(item,index) in buy" :key="index" class="buy">
+              <div v-if="!item[0]">- -</div>
+              <div v-else>{{item[0].toFixed(4)}}</div>
+              <div v-if="!item[1]">- -</div>
+              <div v-else>{{item[1].toFixed(2)}}</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!--买入卖出-->
-      <div class="Business">
-        <div class="Purchase" :class="{active: active_index === 0}" @click="active_click(0)">买入</div>
-        <div class="Sell_out" :class="{active: active_index === 1}" @click="active_click(1)">卖出</div>
-      </div>
+      <van-tabs @click="active_click" sticky>
+        <!--金额-->
+        <div class="price">
+          <div class="price_bg">
+            <div class="img_title">
+              <div class="price_img">
+                <img :src="price_img" alt="">
+              </div>
+              <div class="price_title">{{price_title}}</div>
+            </div>
+            <div>{{price_bg}}</div>
+          </div>
+        </div>
+<!--        买入-->
+        <van-tab title="买入">
+          <!--数量价格0-->
+          <div class="md-example-child md-example-child-input-item-3" v-if="active_index === 0">
+            <md-field :title="md_title">
+              <md-input-item
+                type="money"
+                v-model="value"
+                :brief="brief"
+                :placeholder="placeholder"
+                :size="size"
+                is-amount
+                is-highlight
+                ref="input10"
+                is-virtual-keyboard
+                clearable
+                :maxlength="input_size"
+              >
+                <div class="input-operator" slot="right">
+                  <div class="title">
+                    <span :class="{active_false: checked === false}" v-if="checked === false">市价单</span><span :class="{active_true: checked === true}" v-if="checked === true">限价单</span>
+                  </div>
+                  <div>
+                    <van-switch
+                      v-model="checked"
+                      size="24px"
+                      @input="onInput"
+                    />
+                  </div>
+                </div>
+              </md-input-item>
+            </md-field>
+            <!--定点买入金额-->
+            <div class="fixed">
+              <md-input-item
+                type="Number"
+                v-model="money"
+                :placeholder="pla_money"
+                v-if="checked"
+                :size="fixed"
+              ></md-input-item>
+            </div>
+            <!--下单按钮-->
+            <div class="Place">
+              <div @click="but_submit" class="Place_box" :class="{active: Place_active}">下单{{quote_symbol}}</div>
+            </div>
+          </div>
+        </van-tab>
 
-      <!--数量价格0-->
-      <div class="md-example-child md-example-child-input-item-3" v-if="active_index === 0">
-        <md-field :title="md_title">
-          <md-input-item
-            type="money"
-            v-model="value"
-            :brief="brief"
-            :placeholder="placeholder"
-            :size="size"
-            is-amount
-            is-highlight
-            ref="input10"
-            is-virtual-keyboard
-            clearable
-            :maxlength="input_size"
-          >
-            <div class="input-operator" slot="right">
-              <div>
-                <van-switch
-                  v-model="checked"
-                  size="24px"
-                />
-              </div>
-              <div class="title">
-                <span :class="{active: checked === false}" v-if="checked === false">市价单</span><span :class="{active: checked === true}" v-if="checked === true">限价单</span>
-              </div>
+<!--        卖出-->
+        <van-tab title="卖出">
+          <!--数量价格1-->
+          <div class="md-example-child md-example-child-input-item-3" v-if="active_index === 1">
+            <md-field :title="md_title">
+              <md-input-item
+                type="money"
+                v-model="value"
+                :brief="brief"
+                :placeholder="placeholder"
+                :size="size"
+                is-amount
+                is-highlight
+                ref="input10"
+                is-virtual-keyboard
+                clearable
+              >
+                <div class="input-operator" slot="right">
+                  <div class="title">
+                    <span :class="{active_false: checked === false}" v-if="checked === false">市价单</span><span :class="{active_true: checked === true}" v-if="checked === true">限价单</span>
+                  </div>
+                  <div>
+                    <van-switch
+                      v-model="checked"
+                      size="24px"
+                      @input="onInput"
+                    />
+                  </div>
+                </div>
+              </md-input-item>
+            </md-field>
+            <!--买入金额-->
+            <div class="fixed">
+              <md-input-item
+                type="Number"
+                v-model="money"
+                :placeholder="pla_money"
+                v-if="checked"
+                :size="fixed"
+              ></md-input-item>
             </div>
-          </md-input-item>
-        </md-field>
-        <!--定点买入金额-->
-        <div class="fixed">
-          <md-input-item
-            type="money"
-            v-model="money"
-            :placeholder="pla_money"
-            v-if="checked"
-            :size="fixed"
-          ></md-input-item>
-        </div>
-        <!--下单按钮-->
-        <div class="Place">
-          <div @click="but_submit" class="Place_box" :class="{active: Place_active}">下单{{quote_symbol}}</div>
-        </div>
-      </div>
-      <!--数量价格1-->
-      <div class="md-example-child md-example-child-input-item-3" v-if="active_index === 1">
-        <md-field :title="md_title">
-          <md-input-item
-            type="money"
-            v-model="value"
-            :brief="brief"
-            :placeholder="placeholder"
-            :size="size"
-            is-amount
-            is-highlight
-            ref="input10"
-            is-virtual-keyboard
-            clearable
-          >
-            <div class="input-operator" slot="right">
-              <div>
-                <van-switch
-                  v-model="checked"
-                  size="24px"
-                />
-              </div>
-              <div class="title">
-                <span :class="{active: checked === false}" v-if="checked === false">市价单</span><span :class="{active: checked === true}" v-if="checked === true">限价单</span>
-              </div>
+            <!--下单-->
+            <div class="Place">
+              <div @click="but_submit" class="Place_box" :class="{active: Place_active}">下单{{base_symbol}}</div>
             </div>
-          </md-input-item>
-        </md-field>
-        <!--买入金额-->
-        <div class="fixed">
-          <md-input-item
-            type="money"
-            v-model="money"
-            :placeholder="pla_money"
-            v-if="checked"
-            :size="fixed"
-          ></md-input-item>
-        </div>
-        <!--下单-->
-        <div class="Place">
-          <div @click="but_submit" class="Place_box" :class="{active: Place_active}">下单{{base_symbol}}</div>
-        </div>
-      </div>
+          </div>
+        </van-tab>
+      </van-tabs>
 
       <!--付款方式-->
       <div class="wallet_box" @click="wallet_box">
@@ -185,15 +217,19 @@
 </template>
 
 <script>
-import { Icon, Toast, Switch } from 'vant'
+import { Icon, Toast, Switch, Dialog, Tab, Tabs } from 'vant'
 import { InputItem, Field, NumberKeyboard } from 'mand-mobile'
 var msgpack = require('msgpack-lite')
 var uuidv4 = require('uuid/v4')
 
-// import '@examples/assets/images/bank-zs.svg'
 export default {
   data () {
     return {
+      // 模拟数据
+      buy: [],
+      sell: [],
+      arr_buy: [],
+      arr_sell: [],
       // 接收数据
       pair: [],
       active_index: 0,
@@ -247,18 +283,30 @@ export default {
       price_title: '',
       pla_money: '0',
       // 定时器
-      set: false
+      set: false,
+      show: false,
+      time: 10
     }
   },
-  async mounted () {
+  mounted () {
   },
   methods: {
+    async onInput (checked) {
+      if (checked) {
+        const { data } = await this.$api.bb.pairDetail(this.$route.params.id)
+        if (this.active_index === 0) {
+          this.money = data.data.bestorderbookmodel.best_buy_price
+        } else {
+          this.money = data.data.bestorderbookmodel.best_sell_price
+        }
+      }
+    },
     // 箭头
     Arrow () {
       this.$router.go(-1)
       localStorage.removeItem('Currency')
     },
-    // 买入卖出点击
+    // 买入卖出点击点击
     active_click (e) {
       this.active_index = e
       // 红点提示
@@ -273,6 +321,8 @@ export default {
         }
         this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
         this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
+        // let money = this.pair.bestorderbookmodel.best_sell_price
+        // this.money = (Math.floor(money * 10000) / 10000).toString()
       } else {
         this.brief = '最小下单 ' + (Math.floor(this.pair.buy_min * 100)) / 100 + ' ' + this.pair.quote.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
         this.value = ''
@@ -284,6 +334,8 @@ export default {
         }
         this.price_title = this.pair.bestorderbookmodel.best_buy_exchange.name
         this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
+        // let money = this.pair.bestorderbookmodel.best_buy_price
+        // this.money = (Math.floor(money * 10000) / 10000).toString()
       }
     },
     // 下单按钮
@@ -320,6 +372,17 @@ export default {
           const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}&amount=${amount}&trace=${trace}&memo=${memo}`
           window.location.href = payUrl
         }
+        // 支付成功提醒
+        Dialog.confirm({
+          title: '付款结果',
+          message: '是否成功支付'
+        }).then(() => {
+          // on confirm
+          console.log('成功')
+        }).catch(() => {
+          // on cancel
+          console.log('失败')
+        })
       }
     },
     // 钱包选择付款
@@ -355,6 +418,9 @@ export default {
           this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
           this.price_title = this.pair.bestorderbookmodel.best_buy_exchange.name
           this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000
+          this.arr_buy = JSON.parse(data.data.bestorderbookmodel.best_buy_depth)
+          this.sell = this.arr_buy.bids.slice(this.item - 10, this.time)
+          this.buy = this.arr_buy.asks.slice(this.item - 10, this.time)
         } else {
           // 渲染
           if (this.pair.quote.icon_url) {
@@ -363,6 +429,9 @@ export default {
           this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
           this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
           this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000
+          this.arr_sell = JSON.parse(data.data.bestorderbookmodel.best_sell_depth)
+          this.sell = this.arr_sell.bids.slice(this.item - 10, this.time)
+          this.buy = this.arr_sell.asks.slice(this.item - 10, this.time)
         }
       } else {
         Toast('获取数据失败，请刷新页面')
@@ -373,10 +442,16 @@ export default {
     // input框value值监听
     size (e) {
       let that = this
-      if (e.value.match(/^\d*(\.?\d{0,3})/g)[0].length + 1 === this.value.length) {
-        that.input_size = that.value.length
-      } else {
-        that.input_size = 9
+      if (this.value) {
+        // console.log(this.pair.buy_decimal_digit.toString())
+        // let a = this.pair.buy_decimal_digit.toString()
+        // let aaa = new RegExp('^(\\d{0,5}.\\d{0,3})(\\.\\d{1,' + a + '})?$')
+        // console.log(e.value.match(/^(\\d{0,5}.\\d{0,3})(\\.\\d{1,' + a + '})?$/g))
+        if (e.value.match(/^\d*(\.?\d{0,2})/g)[0].length + 1 === this.value.length) {
+          that.input_size = that.value.length
+        } else {
+          that.input_size = 9
+        }
       }
       // 判断active_index为0时的事件
       if (this.active_index === 0) {
@@ -384,11 +459,12 @@ export default {
           that.md_title = '请输入正确金额'
           if (this.value === '0' || this.value === '.') {
             that.Place_active = false
+            console.log(1)
           } else {
             that.Place_active = true
             that.md_title = '大约可以兑换' + ' ' + (this.value / this.pair.bestorderbookmodel.best_buy_price).toFixed(5) + ' ' + this.pair.base.symbol
             // 计算超出金额
-            if (parseFloat(this.value) > parseFloat(this.pair.sell_max)) {
+            if (parseFloat(this.value) > parseFloat(this.pair.buy_max)) {
               that.Place_active = false
               that.brief = '你已超出约' + ' ' + (this.value - this.pair.buy_max).toFixed(3) + ' ' + this.pair.quote.symbol
             } else {
@@ -411,11 +487,11 @@ export default {
             that.Place_active = true
             that.md_title = '大约可以兑换' + ' ' + (this.value * this.pair.bestorderbookmodel.best_sell_price).toFixed(3) + ' ' + this.pair.quote.symbol
             // 计算超出金额
-            if (parseFloat(this.value) > parseFloat(this.pair.buy_max)) {
+            if (parseFloat(this.value) > parseFloat(this.pair.sell_max)) {
               that.Place_active = false
-              that.brief = '你已超出约' + ' ' + (this.value - this.pair.buy_max).toFixed(2) + ' ' + this.pair.base.symbol
+              that.brief = '你已超出约' + ' ' + (this.value - this.pair.sell_max).toFixed(2) + ' ' + this.pair.base.symbol
             } else {
-              that.brief = '最小下单 ' + Math.floor(this.pair.buy_min * 100) / 100 + ' ' + this.pair.base.symbol + ', 最大下单 ' + (Math.floor(this.pair.buy_max * 100) / 100).toFixed(this.pair.sell_decimal_digit) + ' ' + this.pair.base.symbol
+              that.brief = '最小下单 ' + Math.floor(this.pair.sell_min * 100) / 100 + ' ' + this.pair.base.symbol + ', 最大下单 ' + (Math.floor(this.pair.sell_max * 100) / 100).toFixed(this.pair.sell_decimal_digit) + ' ' + this.pair.base.symbol
             }
           }
         } else {
@@ -447,6 +523,8 @@ export default {
   // keep-alive 组件激活时调用
   async activated () {
     this.set = false
+    // const { data } = await this.$api.bb.pairDetail(this.$route.params.id)
+    // this.money = data.data.bestorderbookmodel.best_buy_price
     await this.api()
     let set = await setInterval(() => {
       if (this.set === true) {
@@ -454,7 +532,7 @@ export default {
       } else {
         this.api()
       }
-    }, 1500)
+    }, 3000)
     // 红点提示
     if (this.active_index === 0) {
       this.brief = '最小下单 ' + (Math.floor(this.pair.buy_min * 100)) / 100 + ' ' + this.pair.quote.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
@@ -471,7 +549,10 @@ export default {
     [InputItem.name]: InputItem,
     [Field.name]: Field,
     [NumberKeyboard.name]: NumberKeyboard,
-    [Switch.name]: Switch
+    [Switch.name]: Switch,
+    [Dialog.name]: Dialog,
+    [Tab.name]: Tab,
+    [Tabs.name]: Tabs
   },
   // 监听离开页面
   watch: {
@@ -507,10 +588,47 @@ export default {
         span{
           vertical-align: middle;
         }
-        span:nth-child(1){
-          color: blue;
-          font-size: 18px;
-          margin-right: 5px;
+      }
+    }
+    /*详情*/
+    .details_box {
+      width: 92%;
+      margin: 0 auto;
+      text-align: center;
+      .details_title {
+        font-size: 13px;
+        display: flex;
+        line-height: 48px;
+        color: #999;
+        div {
+          width: 25%;
+        }
+      }
+      .details_data {
+        display: flex;
+        font-size: 12px;
+        color: #999;
+        div{
+          width: 50%;
+          padding: 3px 0;
+        }
+
+        /*div:nth-child(4){*/
+        /*  color: #FF6347;*/
+        /*}*/
+        .buy{
+          display: flex;
+          width: 100%;
+          div:nth-child(1){
+            color: #FF6347;
+          }
+        }
+        .sell{
+          display: flex;
+          width: 100%;
+          div:nth-child(2){
+            color: #40E0D0;
+          }
         }
       }
     }
@@ -518,33 +636,36 @@ export default {
     .price{
       font-weight: bold;
       font-size: 27px;
-      padding: 18px 0;
+      padding-top: 30px;
       .price_bg{
         width: 110px;
-        height: 110px;
         border-radius: 50%;
         margin: 0 auto;
         color: #FFFAFA;
-        background-color: #FF8C00;
+        /*background-color: #FF8C00;*/
         text-align: center;
         padding: 5px 5px;
-        .price_img{
-          width: 30px;
-          margin: 0 auto;
-          img{
-            width: 100%;
-            -webkit-border-radius: 50%;
-            -moz-border-radius: 50%;
-            border-radius: 50%;
+        .img_title{
+          display: flex;
+          align-items: center;
+          .price_img{
+            width: 25px;
+            margin: 0 8px 0 10px;
+            img{
+              width: 100%;
+              -webkit-border-radius: 50%;
+              -moz-border-radius: 50%;
+              border-radius: 50%;
+            }
+          }
+          .price_title{
+            font-size: 18px;
+            color: #4682B4;
           }
         }
         div:nth-child(2){
           margin: 3px 0;
           color: #FFD700;
-        }
-        .price_title{
-          font-size: 18px;
-          color: #4682B4;
         }
       }
     }
@@ -594,7 +715,7 @@ export default {
       }
       .md-field{
         padding-bottom: 5px;
-        padding-top: 25px;
+        padding-top: 5px;
         .md-field-title{
           font-size: 20px;
         }
@@ -606,8 +727,12 @@ export default {
           .title{
             color: #000;
             font-size: 14px;
-            .active{
+            margin-left: 8px;
+            .active_false{
               color: red;
+            }
+            .active_true{
+              color: green;
             }
           }
         }
@@ -861,12 +986,21 @@ export default {
       }
     }
   }
+  /*支付弹起*/
+  .payment{
+
+  }
   /*弹起键盘*/
   .md-number-keyboard-container{
     height: 250px;
     .keyboard-number .keyboard-number-list .keyboard-number-item{
       height: 60px;
       line-height: 60px;
+      font-size: 20px;
+    }
+    .keyboard-number .keyboard-number-list .keyboard-number-item.slidedown{
+      -webkit-background-size: 25px;
+      background-size: 25px;
     }
   }
 </style>

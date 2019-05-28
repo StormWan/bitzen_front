@@ -29,8 +29,8 @@
             </div>
             <!--市值-->
             <div class="market_value">
-              <span class="value">0.26579506</span>
-              <span class="market">BTC</span>
+              <span class="value">{{market}}</span>
+              <span class="market">{{surface}}</span>
             </div>
             <!--显示资产-->
             <div class="money">
@@ -39,21 +39,20 @@
             </div>
             <!--充值提现-->
             <div class="Chg_and_wir">
-              <a href=""><span>
+              <router-link to="/wallet_recharge"><span>
                 <van-icon class="icon" name="balance-list"></van-icon>
-              </span>充值</a>
-              <a href=""><span>
+              </span>充值</router-link>
+              <router-link to="/withdrawal"><span>
                 <van-icon class="icon" name="card"></van-icon>
-              </span>提现</a>
+              </span>提现</router-link>
             </div>
           </div>
           <!--卡包-->
           <div class="card">
-            <!--卡包小额隐藏-->
             <div class="display">
               <!--价格-->
               <div class="Price">
-                <p> <span :class="{active: bbgcolor}">销量</span> <span :class="{active: sales}" @click="orderFn('sales', false)"> ↑ </span>
+                <p> <span :class="{active: bbgcolor}">名称</span> <span :class="{active: sales}" @click="orderFn('sales', false)"> ↑ </span>
                   <span :class="{active: sales_lower}" @click="orderFn('sales', true)"> ↓ </span>
                 </p>
               </div>
@@ -63,21 +62,21 @@
               </div>
               <!--销量-->
               <div class="Sales_volume">
-                <p> <span :class="{active: tbgcolor}">价格</span> <span @click="orderFn('price', false)" :class="{active: price}"> ↑ </span>
+                <p> <span :class="{active: tbgcolor}">余额</span> <span @click="orderFn('price', false)" :class="{active: price}"> ↑ </span>
                   <span @click="orderFn('price', true)" :class="{active: price_lower}"> ↓ </span>
                 </p>
               </div>
             </div>
             <!--卡包信息-->
-            <div class="information" v-for='(item, key) in list1' :key="key">
+            <div class="information" v-for="(item, key) in lists" :key="key">
               <a href="">
                 <div class="left">
                   <div class="img">
-                    <img :src="item.img" />
+                    <img :src="item.icon_url" />
                   </div>
                 </div>
-                <div class="cent">{{item.name}} <span>({{item.title_name}})</span></div>
-                <div class="right">{{item.price}}</div>
+                <div class="cent">{{item.symbol}} <span>({{item.name}})</span></div>
+                <div class="right">{{item.balance}}</div>
               </a>
             </div>
           </div>
@@ -87,12 +86,13 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, Toast } from 'vant'
 
 export default {
   data () {
     return {
-      money: '11355.49',
+      money_box: 0,
+      money: 0,
       icon: 'eye-o',
       icon_run: true,
       // 默认输入为空
@@ -104,41 +104,22 @@ export default {
       // 隐藏小额
       isactive: false,
       // 搜索引擎
-      goodsList: [
-        {
-          name: 'AST',
-          title_name: 'AirSwap',
-          price: 5200,
-          sales: 2.6,
-          img: require('../../../assets/cat_top.jpg')
-        },
-        {
-          name: 'ARK',
-          title_name: 'AirSwap',
-          price: 2500,
-          sales: 2.2,
-          img: require('../../../assets/cat_top.jpg')
-        },
-        {
-          name: 'ANB',
-          title_name: 'BirSwap',
-          price: 2800,
-          sales: 1.6,
-          img: require('../../../assets/cat_top.jpg')
-        }
-      ],
       price: false,
       sales: false,
       sales_lower: false,
       price_lower: false,
       tbgcolor: false,
-      bbgcolor: false
+      bbgcolor: false,
+      wallet_data: [],
+      market: 0,
+      surface: ''
     }
   },
   components: {
     [Icon.name]: Icon
   },
   methods: {
+    // 箭头
     icon_arrow () {
       this.$router.go(-1)
     },
@@ -150,7 +131,7 @@ export default {
         this.icon_run = false
       } else {
         this.icon = 'eye-o'
-        this.money = '11355.49'
+        this.money = this.money_box
         this.icon_run = true
       }
     },
@@ -211,22 +192,38 @@ export default {
           this.sales_lower = false
         }
       }
+    },
+    // 数据获取
+    async wallet () {
+      const { data } = await this.$api.wallet.walletAssets()
+      console.log(data.data)
+      this.market = data.data[1].asset.price_usd.toFixed(4)
+      this.surface = data.data[0].asset.symbol
+      if (data.code === 200) {
+        for (let i = 0; i < data.data.length; i++) {
+          this.wallet_data.push(data.data[i].asset)
+          this.money_box = (this.money_box * 10 ^ 4 + data.data[i].asset.balance * 10 ^ 4) / 10 ^ 4
+          console.log(data.data[i].asset)
+        }
+        this.money = this.money_box
+      } else {
+        Toast('获取数据失败，请刷新')
+      }
     }
   },
   computed: {
-    list1: function () {
+    lists: function () {
       let _this = this
       let arrByZM = []
       // console.log(this.searchVal)
-      for (let i = 0; i < this.goodsList.length; i++) {
+      for (let i = 0; i < this.wallet_data.length; i++) {
         // for循环数据中的每一项（根据name值）
-        if (this.goodsList[i].name.search(this.searchVal) !== -1 || this.goodsList[i].title_name.search(this.searchVal) !== -1) {
+        if (this.wallet_data[i].symbol.search(this.searchVal) !== -1 || this.wallet_data[i].name.search(this.searchVal) !== -1) {
           // 判断输入框中的值是否可以匹配到数据，如果匹配成功
-          arrByZM.push(this.goodsList[i])
+          arrByZM.push(this.wallet_data[i])
           // 向空数组中添加数据
         }
       }
-      // 逻辑-->升序降序排列  false: 默认从小到大  true：默认从大到小
       // 判断，如果要letter不为空，说明要进行排序
       if (this.letter !== '') {
         arrByZM.sort(function (a, b) {
@@ -239,6 +236,9 @@ export default {
       }
       return arrByZM
     }
+  },
+  async created () {
+    await this.wallet()
   }
 }
 </script>
@@ -313,12 +313,17 @@ export default {
             color: #000;
             span{
               font-size: 20px;
+              vertical-align: bottom;
+            }
+            .market{
+              color: #999;
+              font-size: 16px;
             }
           }
           /*余额显示*/
           .money{
             span{
-              font-size: 16px;
+              font-size: 17px;
               color: #808080;
             }
           }
@@ -458,7 +463,7 @@ export default {
               }
             }
             .cent{
-              width: 70%;
+              width: 60%;
               font-size: 16px;
               color: #87CEEB;
               span{
@@ -467,8 +472,8 @@ export default {
               }
             }
             .right{
-              width: 15%;
-              text-align: right;
+              width: 25%;
+              text-align: center;
             }
           }
         }

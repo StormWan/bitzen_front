@@ -13,8 +13,8 @@
         </div>
         <!--用户名字-->
         <div class="user_name">
-          <div v-if="Sing">
-            <router-link to="/Sign_in" href="">请登录</router-link>
+          <div v-if="Sing" @click="Onlogin">
+            <router-link :to="login">请登录</router-link>
           </div>
           <div v-else>
             <div class="Title">{{user_name}}</div>
@@ -187,11 +187,17 @@ export default {
       ],
       user_name: '',
       user_ID: '',
-      Exse_none: false
+      Exse_none: false,
+      login: ''
     }
   },
   async mounted () {
     this.setActiveTab(5)
+    let user = JSON.parse(localStorage.getItem('userInfo'))
+    this.Sing = false
+    this.user_name = user.full_name
+    this.user_ID = user.identity_num
+    this.Exse_none = true
   },
   methods: {
     ...mapMutations({
@@ -200,14 +206,20 @@ export default {
     // 退出
     Exse () {
       localStorage.clear()
-      alert('成功推出')
-      if (localStorage.getItem('user_name')) {
+      alert('退出成功')
+      this.Sing = true
+    },
+    Onlogin () {
+      let user = JSON.parse(localStorage.getItem('userInfo'))
+      if (JSON.parse(localStorage.getItem('userInfo'))) {
         this.Sing = false
-        this.user_name = localStorage.getItem('user_name')
-        this.user_ID = localStorage.getItem('user_ID')
+        this.user_name = user.full_name
+        this.user_ID = user.identity_num
+        this.Exse_none = true
       } else {
-        this.Sing = true
-        this.Exse_none = false
+        this.$router.push({
+          path: '/login'
+        })
       }
     }
   },
