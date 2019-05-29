@@ -121,6 +121,7 @@
                 ref="input10"
                 is-virtual-keyboard
                 clearable
+                :maxlength="input_size"
               >
                 <div class="input-operator" slot="right">
                   <div class="title">
@@ -270,7 +271,7 @@ export default {
           text: '如果您不能完全理解Bit-OX提供的服务，建议下小订单尝试。'
         },
         {
-          text: '如需帮助请联系Bit-OX客服，Mixin ID：37026545，微信：ggyy'
+          text: '如需帮助请联系Bit-OX客服，Mixin ID：28749，微信：jc_castle'
         }
       ],
       buy_price: '',
@@ -447,19 +448,18 @@ export default {
         // let a = this.pair.buy_decimal_digit.toString()
         // let aaa = new RegExp('^(\\d{0,5}.\\d{0,3})(\\.\\d{1,' + a + '})?$')
         // console.log(e.value.match(/^(\\d{0,5}.\\d{0,3})(\\.\\d{1,' + a + '})?$/g))
-        if (e.value.match(/^\d*(\.?\d{0,2})/g)[0].length + 1 === this.value.length) {
+      }
+      // 判断active_index为0时的事件
+      if (this.active_index === 0) {
+        if (e.value.match(/^\d*(\.?\d{0,3})/g)[0].length + 1 === this.value.length) {
           that.input_size = that.value.length
         } else {
           that.input_size = 9
         }
-      }
-      // 判断active_index为0时的事件
-      if (this.active_index === 0) {
         if (this.value) {
           that.md_title = '请输入正确金额'
           if (this.value === '0' || this.value === '.') {
             that.Place_active = false
-            console.log(1)
           } else {
             that.Place_active = true
             that.md_title = '大约可以兑换' + ' ' + (this.value / this.pair.bestorderbookmodel.best_buy_price).toFixed(5) + ' ' + this.pair.base.symbol
@@ -478,6 +478,11 @@ export default {
       }
       // 判断active_index为1时的事件
       if (this.active_index === 1) {
+        if (e.value.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.value.length) {
+          that.input_size = that.value.length
+        } else {
+          that.input_size = 9
+        }
         that.md_title = ''
         if (this.value) {
           that.md_title = '请输入正确金额'
@@ -485,7 +490,7 @@ export default {
             that.Place_active = false
           } else {
             that.Place_active = true
-            that.md_title = '大约可以兑换' + ' ' + (this.value * this.pair.bestorderbookmodel.best_sell_price).toFixed(3) + ' ' + this.pair.quote.symbol
+            that.md_title = '大约可以兑换' + ' ' + (this.value * this.pair.bestorderbookmodel.best_sell_price).toFixed(4) + ' ' + this.pair.quote.symbol
             // 计算超出金额
             if (parseFloat(this.value) > parseFloat(this.pair.sell_max)) {
               that.Place_active = false
@@ -647,10 +652,12 @@ export default {
         padding: 5px 5px;
         .img_title{
           display: flex;
+          justify-content: center;
           align-items: center;
+          text-align: center;
           .price_img{
-            width: 25px;
-            margin: 0 8px 0 10px;
+            width: 23px;
+            margin: 0 3px 0 0px;
             img{
               width: 100%;
               -webkit-border-radius: 50%;
@@ -664,7 +671,7 @@ export default {
           }
         }
         div:nth-child(2){
-          margin: 3px 0;
+          margin: 5px 0;
           color: #FFD700;
         }
       }
@@ -708,7 +715,7 @@ export default {
     .md-example-child-input-item-3{
       font-size: 16px;
       .md-field-header{
-        margin-bottom: 5px;
+        margin-bottom: 50px;
       }
       .md-input-item-fake-placeholder{
         font-size: 18px;
@@ -861,7 +868,7 @@ export default {
     /*付款方式钱包*/
     .dis_but{
       position: fixed;
-      z-index: 6;
+      z-index: 1001;
       bottom: 0;
       background-color: white;
       width: 100%;
@@ -956,11 +963,11 @@ export default {
     .mask{
       left: 0;
       top: 0;
-      position: absolute;
+      position: fixed;
       width: 100%;
       height: 100%;
       background-color: rgba(0,0,0,.3);
-      z-index: 5;
+      z-index: 1000;
     }
     /*说明*/
     .Explain{

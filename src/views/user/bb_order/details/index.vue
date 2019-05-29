@@ -37,7 +37,7 @@
       </div>
 
       <!--说明-->
-      <div class="Explain">如需帮助请联系Bit-OX客服，Mixin ID：37026545，微信：exin520</div>
+      <div class="Explain">如需帮助请联系Bit-OX客服，Mixin ID：28749，微信：jc_castle</div>
     </div>
   </div>
 </template>
@@ -96,11 +96,7 @@ export default {
     }
 
     // 成交状态
-    if (!localStorage.getItem('value')) {
-      this.title = '已取消'
-      this.active = 0
-      this.title_sta = true
-    } else if (localStorage.getItem('value') === '0') {
+    if (localStorage.getItem('value') === '0') {
       this.title = '支付成功'
       this.title_sta = false
     } else if (localStorage.getItem('value') === '50') {
@@ -108,6 +104,11 @@ export default {
       this.title = '支付成功'
     } else if (localStorage.getItem('value') === '100') {
       this.active = 2
+      this.title = '支付成功'
+    } else {
+      this.title = '已取消'
+      this.active = 0
+      this.title_sta = true
     }
 
     // 成交获得

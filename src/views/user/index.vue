@@ -194,6 +194,7 @@ export default {
   async mounted () {
     this.setActiveTab(5)
     let user = JSON.parse(localStorage.getItem('userInfo'))
+    // console.log(user)
     this.Sing = false
     this.user_name = user.full_name
     this.user_ID = user.identity_num

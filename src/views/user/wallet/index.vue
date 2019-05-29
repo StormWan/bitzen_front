@@ -34,26 +34,26 @@
             </div>
             <!--显示资产-->
             <div class="money">
-              <span>￥</span>
+              <span>≈</span>
               <span>{{money}}</span>
             </div>
             <!--充值提现-->
-            <div class="Chg_and_wir">
-              <router-link to="/wallet_recharge"><span>
-                <van-icon class="icon" name="balance-list"></van-icon>
-              </span>充值</router-link>
-              <router-link to="/withdrawal"><span>
-                <van-icon class="icon" name="card"></van-icon>
-              </span>提现</router-link>
-            </div>
+<!--            <div class="Chg_and_wir">-->
+<!--              <router-link to="/wallet_recharge"><span>-->
+<!--                <van-icon class="icon" name="balance-list"></van-icon>-->
+<!--              </span>充值</router-link>-->
+<!--              <router-link to="/withdrawal"><span>-->
+<!--                <van-icon class="icon" name="card"></van-icon>-->
+<!--              </span>提现</router-link>-->
+<!--            </div>-->
           </div>
           <!--卡包-->
           <div class="card">
             <div class="display">
               <!--价格-->
               <div class="Price">
-                <p> <span :class="{active: bbgcolor}">名称</span> <span :class="{active: sales}" @click="orderFn('sales', false)"> ↑ </span>
-                  <span :class="{active: sales_lower}" @click="orderFn('sales', true)"> ↓ </span>
+                <p> <span :class="{active: bbgcolor}">资产</span> <span :class="{active: sales}" @click="orderFn('price_btc', false)"> ↑ </span>
+                  <span :class="{active: sales_lower}" @click="orderFn('price_btc', true)"> ↓ </span>
                 </p>
               </div>
               <!--搜索-->
@@ -62,14 +62,14 @@
               </div>
               <!--销量-->
               <div class="Sales_volume">
-                <p> <span :class="{active: tbgcolor}">余额</span> <span @click="orderFn('price', false)" :class="{active: price}"> ↑ </span>
-                  <span @click="orderFn('price', true)" :class="{active: price_lower}"> ↓ </span>
+                <p> <span :class="{active: tbgcolor}">余额</span> <span @click="orderFn('balance', false)" :class="{active: price}"> ↑ </span>
+                  <span @click="orderFn('balance', true)" :class="{active: price_lower}"> ↓ </span>
                 </p>
               </div>
             </div>
             <!--卡包信息-->
             <div class="information" v-for="(item, key) in lists" :key="key">
-              <a href="">
+              <a @click="onlists(key)">
                 <div class="left">
                   <div class="img">
                     <img :src="item.icon_url" />
@@ -111,6 +111,7 @@ export default {
       tbgcolor: false,
       bbgcolor: false,
       wallet_data: [],
+      market_box: 0,
       market: 0,
       surface: ''
     }
@@ -159,7 +160,7 @@ export default {
       this.letter = letter
       // 排序方式  up or down
       this.original = original
-      if (this.letter === 'price') {
+      if (this.letter === 'balance') {
         this.tbgcolor = true
         this.bbgcolor = false
         if (this.price === true) {
@@ -175,7 +176,7 @@ export default {
           this.sales_lower = false
         }
       }
-      if (this.letter === 'sales') {
+      if (this.letter === 'price_btc') {
         this.tbgcolor = false
         this.bbgcolor = true
         if (this.sales === true) {
@@ -196,19 +197,29 @@ export default {
     // 数据获取
     async wallet () {
       const { data } = await this.$api.wallet.walletAssets()
-      console.log(data.data)
-      this.market = data.data[1].asset.price_usd.toFixed(4)
       this.surface = data.data[0].asset.symbol
       if (data.code === 200) {
         for (let i = 0; i < data.data.length; i++) {
           this.wallet_data.push(data.data[i].asset)
-          this.money_box = (this.money_box * 10 ^ 4 + data.data[i].asset.balance * 10 ^ 4) / 10 ^ 4
-          console.log(data.data[i].asset)
+          this.money_box += (data.data[i].asset.price_usd * data.data[i].asset.balance)
+          this.market_box += (data.data[i].asset.price_btc * data.data[i].asset.balance)
         }
-        this.money = this.money_box
+        this.money = Math.floor(this.money_box * 1000) / 1000
+        this.market = Math.floor(this.market_box * 10000) / 10000
       } else {
         Toast('获取数据失败，请刷新')
       }
+    },
+    // 钱包跳转
+    onlists (i) {
+      // console.log(this.lists[i])
+      this.$router.push({
+        name: 'charg_withd',
+        params: {
+          arr: this.lists[i]
+        }
+      })
+      localStorage.setItem('lists', JSON.stringify(this.lists[i]))
     }
   },
   computed: {
@@ -226,6 +237,7 @@ export default {
       }
       // 判断，如果要letter不为空，说明要进行排序
       if (this.letter !== '') {
+        console.log(arrByZM)
         arrByZM.sort(function (a, b) {
           if (_this.original) {
             return b[_this.letter] - a[_this.letter]
@@ -276,6 +288,7 @@ export default {
         margin: 0 auto;
         .Asset{
           text-align: center;
+          padding: 20px 0;
           /*全局*/
           div{
             font-size: 0;
@@ -318,6 +331,7 @@ export default {
             .market{
               color: #999;
               font-size: 16px;
+              margin-left: 3px;
             }
           }
           /*余额显示*/
@@ -325,6 +339,10 @@ export default {
             span{
               font-size: 17px;
               color: #808080;
+              vertical-align: middle;
+            }
+            span:nth-child(1){
+              margin-right: 3px;
             }
           }
           /*充值提现*/

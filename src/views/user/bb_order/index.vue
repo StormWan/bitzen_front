@@ -27,7 +27,7 @@
               <div v-else><span>{{item[0].pair.price_usdt}}</span>EPC</div>
             </md-detail-item>
             <md-detail-item title="实际到账">
-              <span v-if="!item[0].pair.price">--</span><span v-else>{{item[0].pair.price}} </span> {{item[0].pair.base.symbol}}
+              <span v-if="!item[0].exchangeinstantordermodel.cost">--</span><span v-else>{{item[0].exchangeinstantordermodel.cost}} </span> {{item[0].pair.base.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
               <div class="loding"><van-progress :percentage="value" /></div>
@@ -98,22 +98,17 @@ export default {
       // 单价
       localStorage.setItem('price', this.order[0][0].price)
 
-
       // 市列表
       localStorage.setItem('pair', this.order[0][0].pair.pair)
-
-
 
       // 成交市名
       localStorage.setItem('symbol', this.order[0][0].pair.base.symbol)
 
-
       // 成交USDT
       localStorage.setItem('pay_asset', this.order[0][0].pay_asset.symbol)
 
-
       // 成交获得
-      localStorage.setItem('pair_price', this.order[0][0].pair.price)
+      localStorage.setItem('pair_price', this.order[0][0].exchangeinstantordermodel.cost)
     },
     Arrow () {
       this.$router.go(-1)
@@ -123,22 +118,23 @@ export default {
       const { data } = await this.$api.bb.orders()
       if (data.code === 200) {
         this.order.push(data.data)
+        console.log(this.order[0][0])
         // 处理状态
-        if (!this.order[0][0].transfer_state) {
-          this.state = '已取消'
-          this.icon_red = true
-          this.value = 0
-          this.passed = 'close'
-        } else if (this.order[0][0].transfer_state === 'pending') {
+        if (this.order[0][0].transfer_state === 'pending') {
           this.state = '已挂单'
           this.icon_red = false
           this.value = 50
           this.passed = 'clock-o'
-        } else if (this.order[0][0].transfer_state === 'solved') {
+        } else if (this.order[0][0].transfer_state === 'fail') {
           this.icon_red = false
           this.state = '已成功'
           this.value = 100
           this.passed = 'passed'
+        } else {
+          this.state = '已取消'
+          this.icon_red = true
+          this.value = 0
+          this.passed = 'close'
         }
         // 判断买入卖出
         if (this.order[0][0].side === 'buy') {

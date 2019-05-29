@@ -91,7 +91,7 @@
           <!--涨幅榜-->
           <div v-if="index==0" class="rise">
             <div v-for="(item,index) in data" :key="index">
-              <router-link :to="'/pair/' + item.id" v-if="item.rate.charAt(0) !== '-'">
+              <router-link :to="'/pair/' + item.id" v-if="(item.bestorderbookmodel.percentage).toString().charAt(0) !== '-'">
                 <div class="Market">
                   <span class="title">{{item.base.symbol}}</span>
                   /
@@ -101,7 +101,7 @@
                   {{(Math.floor(item.price * 100) / 100).toFixed(4)}}
                 </div>
                 <div class="Fall_rise">
-                  {{(Math.floor(item.rate * 100) / 100).toFixed(5)}}
+                  {{(Math.floor(item.bestorderbookmodel.percentage * 100) / 100).toFixed(5)}}
                 </div>
               </router-link>
             </div>
@@ -109,7 +109,7 @@
           <!--跌幅榜-->
           <div v-if="index==1" class="rise">
             <div v-for="(item,index) in data" :key="index">
-              <router-link :to="'/pair/' + item.id" v-if="item.rate.charAt(0) === '-'">
+              <router-link :to="'/pair/' + item.id" v-if="(item.bestorderbookmodel.percentage).toString().charAt(0) === '-'">
                 <div class="Market">
                   <span class="title">{{item.base.symbol}}</span>
                   /
@@ -119,7 +119,7 @@
                   {{(Math.floor(item.price * 100) / 100).toFixed(4)}}
                 </div>
                 <div class="fall">
-                  {{(Math.floor(item.rate * 100) / 100).toFixed(5)}}
+                  {{(Math.floor(item.bestorderbookmodel.percentage * 100) / 100).toFixed(5)}}
                 </div>
               </router-link>
             </div>
@@ -218,12 +218,12 @@ export default {
         },
         {
           name: '充值',
-          path: '/wallet',
+          path: '/wallet_recharge',
           icon_service: 'security'
         },
         {
           name: '提现',
-          path: '/wallet',
+          path: '/withdrawal',
           icon_service: 'rmb'
         }
       ],
@@ -236,63 +236,10 @@ export default {
           name: '跌幅榜'
         }
       ],
-      // 涨幅榜
-      Market_label: [
-        {
-          market: 'DGD',
-          currency: 'BTC',
-          Price: 0.005803,
-          Fall_rise: '+15.46%'
-        },
-        {
-          market: 'ZEN',
-          currency: 'BTC',
-          Price: 0.001748,
-          Fall_rise: '+15.46%'
-        },
-        {
-          market: 'MFT',
-          currency: 'BTC',
-          Price: 0.0000054,
-          Fall_rise: '+15.46%'
-        }
-      ],
-      // 跌幅榜
-      fall: [
-        {
-          market: 'DGD',
-          currency: 'BTC',
-          Price: 0.005803,
-          Fall_rise: '- 15.46%'
-        },
-        {
-          market: 'ZEN',
-          currency: 'BTC',
-          Price: 0.001748,
-          Fall_rise: '- 15.46%'
-        },
-        {
-          market: 'MFT',
-          currency: 'BTC',
-          Price: 0.0000054,
-          Fall_rise: '- 15.46%'
-        },
-        {
-          market: 'TRX',
-          currency: 'BTC',
-          Price: 0.00000420,
-          Fall_rise: '- 15.46%'
-        },
-        {
-          market: 'CVC',
-          currency: 'BTC',
-          Price: 0.00001234,
-          Fall_rise: '- 15.46%'
-        }
-      ],
       active: 0,
       // 数据
-      data: []
+      data: [],
+      set: false
     }
   },
   components: {
@@ -311,13 +258,11 @@ export default {
     window.triggerSwiper3 = () => {
       this.goto()
     }
-    await this.getPairs()
   },
   methods: {
     // 获取数据
     async getPairs () {
       const { data } = await this.$api.bb.pairList()
-      console.log(data.data)
       if (data.code === 200) {
         this.data = data.data
       } else {
@@ -354,9 +299,23 @@ export default {
     }
   },
   // keep-alive 组件激活时调用
-  activated () {
+  async activated () {
     document.body.scrollTop = 0
     document.documentElement.scrollTop = 0
+    this.set = false
+    await this.getPairs()
+    let set = await setInterval(() => {
+      if (this.set === true) {
+        clearInterval(set)
+      } else {
+        this.getPairs()
+      }
+    }, 5000)
+  },
+  watch: {
+    '$route' (to, from) {
+      this.set = true
+    }
   }
 }
 </script>

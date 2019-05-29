@@ -100,11 +100,21 @@ const router = new Router({
         Auth: true
       }
     },
+    // 市名充值提现
+    {
+      path: '/charg_withd',
+      name: 'charg_withd',
+      component: () => import('./views/user/wallet/charg_withd/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
     // 充值
     {
       path: '/wallet_recharge',
       name: 'wallet_recharge',
-      component: () => import('./views/user/wallet/recharge/index.vue'),
+      component: () => import('./views/user/wallet/charg_withd/recharge/index.vue'),
       meta: {
         keepAlive: true,
         Auth: true
@@ -114,7 +124,7 @@ const router = new Router({
     {
       path: '/withdrawal',
       name: 'withdrawal',
-      component: () => import('./views/user/wallet/withdrawal/index.vue'),
+      component: () => import('./views/user/wallet/charg_withd/withdrawal/index.vue'),
       meta: {
         keepAlive: true,
         Auth: true

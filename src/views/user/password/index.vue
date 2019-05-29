@@ -60,7 +60,8 @@ export default {
           if (localStorage.getItem('New_password')) {
             if (this.value !== localStorage.getItem('New_password')) {
               this.Tips = true
-              this.Tips_title = '请重新输入原密码'
+              this.Tips_title = '请重新输入新密码'
+              this.info = '重新输入新密码'
               localStorage.removeItem('New_password')
               console.log(123)
               setTimeout(() => {
@@ -71,8 +72,10 @@ export default {
               localStorage.setItem('user_pas', this.value)
               localStorage.removeItem('New_password')
               setTimeout(() => {
-                this.value = ''
-                this.$router.go(-1)
+                setTimeout(() => {
+                  this.$router.go(-1)
+                  this.value = ''
+                }, 800)
               })
             }
           } else {
