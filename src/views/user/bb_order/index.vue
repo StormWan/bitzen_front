@@ -11,34 +11,111 @@
       </div>
       <div class="BG" v-for="(item,index) in order" :key="index">
         <!--订单详情-->
-        <div class="md-example-child md-example-child-bill-1">
+        <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'buy'">
           <md-bill
-            :title="item[0].pair.pair + side"
-            :no="item[0].created.substring(0, 10) + ' ' + item[0].created.substring(11, 19)"
+            :title="item.pair.pair + ' 买入'"
+            :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
             water-mark="Bit-OX">
             <md-detail-item title="委托数量">
-              <span>{{Math.floor(item[0].pay_amount * 100) /100}} </span>{{item[0].pay_asset.symbol}}
+              <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
             </md-detail-item>
             <md-detail-item title="平均成交价">
-              <span v-if="!item[0].price">- -</span><span v-else>{{(Math.floor(item[0].price * 100) / 100).toFixed(3)}}</span>{{item[0].pair.pair}}
+              <span v-if="!item.price">- -</span><span v-else>{{(Math.floor(item.price * 100) / 100).toFixed(3)}}</span>{{item.pair.pair}}
             </md-detail-item>
             <md-detail-item title="服务费">
-              <div v-if="!item[0].pair.price_usdt"><span>- -</span></div>
-              <div v-else><span>{{item[0].pair.price_usdt}}</span>EPC</div>
+              <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
+              <div v-else><span>{{item.exchangeinstantordermodel.fee_cost}}</span>EPC</div>
             </md-detail-item>
             <md-detail-item title="实际到账">
-              <span v-if="!item[0].exchangeinstantordermodel.cost">--</span><span v-else>{{item[0].exchangeinstantordermodel.cost}} </span> {{item[0].pair.base.symbol}}
+              <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
-              <div class="loding"><van-progress :percentage="value" /></div>
+              <!--进度条-->
+              <div class="loding" v-if="item.state && !item.transfer_state"><van-progress :percentage="0" /></div>
+              <div class="loding" v-else-if="item.transfer_state && !item.exchange_state"><van-progress :percentage="50" /></div>
+              <div class="loding" v-if="item.exchange_state"><van-progress :percentage="100" /></div>
+              <!--支付状态-->
               <div class="state">
-                <div class="complete" :class="{active: icon_red}">
-                  <span>
-                    <van-icon class="icon" :name="passed"></van-icon>
+                <div class="complete" :class="{active: item.transfer_state === 'fail' || item.state === 'pending'}">
+                  <!--icon-->
+                  <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">
+                    <van-icon class="icon" name="passed"></van-icon>
                   </span>
-                  <span>{{state}}</span>
+                  <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">
+                    <van-icon class="icon" name="passed"></van-icon>
+                  </span>
+                  <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">
+                    <van-icon class="icon" name="passed"></van-icon>
+                  </span>
+                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">
+                    <van-icon class="icon" name="close"></van-icon>
+                  </span>
+                  <span v-else>
+                    <van-icon class="icon" name="close"></van-icon>
+                  </span>
+                  <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
+                  <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
+                  <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
+                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">支付失败</span>
+                  <span v-else>交易未知</span>
                 </div>
-                <div @click="item_pass">
+                <div @click="item_pass(index)">
+                  <router-link to="/details">详情</router-link>
+                </div>
+              </div>
+            </div>
+          </md-bill>
+        </div>
+        <!--订单详情-->
+        <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'sell'">
+          <md-bill
+            :title="item.pair.pair + ' 卖出'"
+            :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
+            water-mark="Bit-OX">
+            <md-detail-item title="委托数量">
+              <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
+            </md-detail-item>
+            <md-detail-item title="平均成交价">
+              <span v-if="!item.price">- -</span><span v-else>{{(Math.floor(item.price * 100) / 100).toFixed(3)}}</span>{{item.pair.pair}}
+            </md-detail-item>
+            <md-detail-item title="服务费">
+              <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
+              <div v-else><span>{{item.exchangeinstantordermodel.fee_cost}}</span>EPC</div>
+            </md-detail-item>
+            <md-detail-item title="实际到账">
+              <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}
+            </md-detail-item>
+            <div class="footer-slot" slot="footer">
+              <!--进度条-->
+              <div class="loding" v-if="item.state && !item.transfer_state"><van-progress :percentage="0" /></div>
+              <div class="loding" v-else-if="item.transfer_state && !item.exchange_state"><van-progress :percentage="50" /></div>
+              <div class="loding" v-if="item.exchange_state"><van-progress :percentage="100" /></div>
+              <!--支付状态-->
+              <div class="state">
+                <div class="complete" :class="{active: item.transfer_state === 'fail' || item.state === 'pending'}">
+                  <!--icon-->
+                  <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">
+                    <van-icon class="icon" name="passed"></van-icon>
+                  </span>
+                  <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">
+                    <van-icon class="icon" name="passed"></van-icon>
+                  </span>
+                  <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">
+                    <van-icon class="icon" name="passed"></van-icon>
+                  </span>
+                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">
+                    <van-icon class="icon" name="close"></van-icon>
+                  </span>
+                  <span v-else>
+                    <van-icon class="icon" name="close"></van-icon>
+                  </span>
+                  <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
+                  <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
+                  <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
+                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">支付失败</span>
+                  <span v-else>交易未知</span>
+                </div>
+                <div @click="item_pass(index)">
                   <router-link to="/details">详情</router-link>
                 </div>
               </div>
@@ -55,60 +132,63 @@ import { Icon, Progress, Toast } from 'vant'
 export default {
   data () {
     return {
-      value: Number,
+      value: 1,
       color: 'red',
-      // 取消颜色 false为不显示
-      icon_red: false,
-      // icon名称 close为失败
-      passed: 'passed',
-      // 状态 失败与完成
-      state: '',
       order: [],
-      side: ''
+      data_sta: [],
+      order_index: Number
     }
   },
   methods: {
     // 传输
-    item_pass () {
+    item_pass (i) {
       // 纯时间
-      let date = new Date(this.order[0][0].created)
+      let date = new Date(this.order[i].created)
       let result, year, month, day
       year = date.getYear() + 1900
       month = date.getMonth() + 1
       day = date.getDate()
       result = year.toString() + (month > 9 ? month : '0' + month) + (day > 9 ? day : '0' + day)
-      let item = result + this.order[0][0].created.substring(11, 13) + this.order[0][0].created.substring(14, 16) + this.order[0][0].created.substring(17, 19) + this.order[0][0].created.substring(20, 26)
-      localStorage.setItem('item_pure', item)
+      let obj_data = {
+        item: result + this.order[i].created.substring(11, 13) + this.order[i].created.substring(14, 16) + this.order[i].created.substring(17, 19) + this.order[i].created.substring(20, 26),
+        item_pow: this.order[i].created.substring(0, 10) + ' ' + this.order[i].created.substring(11, 19),
+        price: this.order[i].price,
+        side: this.order[i].side,
+        pay_amount: this.order[i].pay_amount,
+        pair: this.order[i].pair.pair,
+        symbol: this.order[i].pair.base.symbol,
+        pay_asset: this.order[i].pay_asset.symbol,
+        pair_price: this.order[i].exchangeinstantordermodel.cost,
+        state: this.order[i].state,
+        exchange_state: this.order[i].exchange_state,
+        transfer_state: this.order[i].transfer_state
+      }
+      localStorage.setItem('obj_data', JSON.stringify(obj_data))
+      // let item = result + this.order[i].created.substring(11, 13) + this.order[i].created.substring(14, 16) + this.order[i].created.substring(17, 19) + this.order[i].created.substring(20, 26)
+      // localStorage.setItem('item_pure', item)
 
       // 时间排序
-      localStorage.setItem('item_pow', this.order[0][0].created.substring(0, 10) + ' ' + this.order[0][0].created.substring(11, 19))
+      // localStorage.setItem('item_pow', this.order[i].created.substring(0, 10) + ' ' + this.order[i].created.substring(11, 19))
 
       // 价格
-      localStorage.setItem('price', this.order[0][0].price)
+      // localStorage.setItem('price', this.order[i].price)
 
       // 买入卖出
-      localStorage.setItem('side', this.order[0][0].side)
-
-      // 完成状态
-      localStorage.setItem('value', this.value)
-
+      // localStorage.setItem('side', this.order[i].side)
       // 订单金额
-      localStorage.setItem('pay_amount', this.order[0][0].pay_amount)
-
-      // 单价
-      localStorage.setItem('price', this.order[0][0].price)
+      // localStorage.setItem('pay_amount', this.order[i].pay_amount)
 
       // 市列表
-      localStorage.setItem('pair', this.order[0][0].pair.pair)
+      // localStorage.setItem('pair', this.order[i].pair.pair)
 
       // 成交市名
-      localStorage.setItem('symbol', this.order[0][0].pair.base.symbol)
+      // localStorage.setItem('symbol', this.order[i].pair.base.symbol)
 
       // 成交USDT
-      localStorage.setItem('pay_asset', this.order[0][0].pay_asset.symbol)
+      // localStorage.setItem('pay_asset', this.order[i].pay_asset.symbol)
 
       // 成交获得
-      localStorage.setItem('pair_price', this.order[0][0].exchangeinstantordermodel.cost)
+      // localStorage.setItem('pair_price', this.order[i].exchangeinstantordermodel.cost)
     },
     Arrow () {
       this.$router.go(-1)
@@ -117,33 +197,9 @@ export default {
     async getPair (id) {
       const { data } = await this.$api.bb.orders()
       if (data.code === 200) {
-        this.order.push(data.data)
-        console.log(this.order[0][0])
-        // 处理状态
-        if (this.order[0][0].transfer_state === 'pending') {
-          this.state = '已挂单'
-          this.icon_red = false
-          this.value = 50
-          this.passed = 'clock-o'
-        } else if (this.order[0][0].transfer_state === 'fail') {
-          this.icon_red = false
-          this.state = '已成功'
-          this.value = 100
-          this.passed = 'passed'
-        } else {
-          this.state = '已取消'
-          this.icon_red = true
-          this.value = 0
-          this.passed = 'close'
-        }
-        // 判断买入卖出
-        if (this.order[0][0].side === 'buy') {
-          this.side = ' 买入'
-        } else if (this.order[0][0].side === 'sell') {
-          this.side = ' 卖出'
-        } else {
-          this.side = ' - -'
-        }
+        // this.order.push(data.data)
+        this.order = data.data
+        console.log(this.order)
       } else {
         Toast('获取数据失败，请刷新页面')
       }

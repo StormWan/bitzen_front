@@ -139,8 +139,10 @@ export default {
   activated () {
     if (localStorage.getItem('user_pas')) {
       this.info = '请输入原密码'
+      this.title = '修改 BlockPay 密码'
     } else {
       this.info = '新密码'
+      this.title = '创建 BlockPay 新密码'
     }
   }
 }

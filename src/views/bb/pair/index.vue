@@ -202,7 +202,25 @@
           </div>
         </div>
       </div>
-
+<!--      验证密码-->
+      <div class="pas_wo" v-if="verification" @click="pas_wor">
+        <div class="top">
+          <van-password-input
+            :value="value_pas"
+            :info="info"
+            @focus="showKeyboard = true"
+          />
+        </div>
+        <!-- 数字键盘 -->
+        <div class="bot">
+          <van-number-keyboard
+            :show="showKeyboard"
+            @input="onInput_pas"
+            @delete="onDelete"
+            @blur="showKeyboard = false"
+          />
+        </div>
+      </div>
       <!--说明-->
       <div class="Explain">
         <div class="Explain_text">
@@ -218,8 +236,8 @@
 </template>
 
 <script>
-import { Icon, Toast, Switch, Dialog, Tab, Tabs } from 'vant'
-import { InputItem, Field, NumberKeyboard } from 'mand-mobile'
+import { Icon, Toast, Switch, Dialog, Tab, Tabs, PasswordInput, NumberKeyboard } from 'vant'
+import { InputItem, Field } from 'mand-mobile'
 var msgpack = require('msgpack-lite')
 var uuidv4 = require('uuid/v4')
 
@@ -286,10 +304,15 @@ export default {
       // 定时器
       set: false,
       show: false,
-      time: 10
+      time: 10,
+      value_pas: '',
+      showKeyboard: true,
+      verification: false,
+      info: '密码为 6 位数字'
     }
   },
   mounted () {
+    this.bank = this.wallet[0].name
   },
   methods: {
     async onInput (checked) {
@@ -322,8 +345,6 @@ export default {
         }
         this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
         this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
-        // let money = this.pair.bestorderbookmodel.best_sell_price
-        // this.money = (Math.floor(money * 10000) / 10000).toString()
       } else {
         this.brief = '最小下单 ' + (Math.floor(this.pair.buy_min * 100)) / 100 + ' ' + this.pair.quote.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
         this.value = ''
@@ -335,56 +356,70 @@ export default {
         }
         this.price_title = this.pair.bestorderbookmodel.best_buy_exchange.name
         this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
-        // let money = this.pair.bestorderbookmodel.best_buy_price
-        // this.money = (Math.floor(money * 10000) / 10000).toString()
       }
     },
     // 下单按钮
     but_submit (e) {
       if (this.Place_active === true) {
-        // this.value为0
-        if (this.active_index === 0) {
-          const obj = { service: 'bb', side: 'buy', type: 'market', pair_id: this.pair.id, wallet: this.bank }
-          // buy/sell 买和卖; market/limit 市场表; mixin/blockpay 钱包;
-          const memo = msgpack.encode(obj).toString('base64')
-          const trace = uuidv4()
-          // 买入金额
-          const amount = this.value
-          // 买入的用户ID
-          // const asset = this.pair.base.asset_id
-          const asset = this.pair.quote.asset_id
-          // EOS_ASSET_ID = "f8127159-e473-389d-8e0c-9ac5a4dc8cc6"
-          const recipient = '28536b52-f840-4366-8619-3872fb5b3164'
-          const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}&amount=${amount}&trace=${trace}&memo=${memo}`
-          window.location.href = payUrl
+        if (this.bank.search('BlockPay') !== -1) {
+          if (localStorage.getItem('user_pas')) {
+            this.verification = true
+          } else {
+            this.$router.push({
+              path: '/password'
+            })
+          }
         } else {
-          // this.value为1
-          const obj = { service: 'bb', side: 'sell', type: 'limit', pair_id: this.pair.id, wallet: this.bank }
-          // buy/sell 买和卖; market/limit 市场表; mixin/blockpay 钱包;
-          const memo = msgpack.encode(obj).toString('base64')
-          const trace = uuidv4()
-          // 卖出金额
-          const amount = this.value
-          // 卖出的用户ID
-          // const asset = this.pair.quote.asset_id
-          const asset = this.pair.base.asset_id
-          // EOS_ASSET_ID = "f8127159-e473-389d-8e0c-9ac5a4dc8cc6"
-          const recipient = '28536b52-f840-4366-8619-3872fb5b3164'
-          const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}&amount=${amount}&trace=${trace}&memo=${memo}`
-          window.location.href = payUrl
+          this.payment()
         }
-        // 支付成功提醒
-        Dialog.confirm({
-          title: '付款结果',
-          message: '是否成功支付'
-        }).then(() => {
-          // on confirm
-          console.log('成功')
-        }).catch(() => {
-          // on cancel
-          console.log('失败')
-        })
       }
+    },
+    // 调用
+    payment () {
+      // this.value为0
+      if (this.active_index === 0) {
+        const obj = { service: 'bb', side: 'buy', type: 'market', pair_id: this.pair.id, wallet: this.bank }
+        // buy/sell 买和卖; market/limit 市场表; mixin/blockpay 钱包;
+        const memo = msgpack.encode(obj).toString('base64')
+        const trace = uuidv4()
+        // 买入金额
+        const amount = this.value
+        // 买入的用户ID
+        // const asset = this.pair.base.asset_id
+        const asset = this.pair.quote.asset_id
+        // EOS_ASSET_ID = "f8127159-e473-389d-8e0c-9ac5a4dc8cc6"
+        const recipient = '28536b52-f840-4366-8619-3872fb5b3164'
+        const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}&amount=${amount}&trace=${trace}&memo=${memo}`
+        window.location.href = payUrl
+      } else {
+        // this.value为1
+        const obj = { service: 'bb', side: 'sell', type: 'limit', pair_id: this.pair.id, wallet: this.bank }
+        // buy/sell 买和卖; market/limit 市场表; mixin/blockpay 钱包;
+        const memo = msgpack.encode(obj).toString('base64')
+        const trace = uuidv4()
+        // 卖出金额
+        const amount = this.value
+        // 卖出的用户ID
+        // const asset = this.pair.quote.asset_id
+        const asset = this.pair.base.asset_id
+        // EOS_ASSET_ID = "f8127159-e473-389d-8e0c-9ac5a4dc8cc6"
+        const recipient = '28536b52-f840-4366-8619-3872fb5b3164'
+        const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}&amount=${amount}&trace=${trace}&memo=${memo}`
+        window.location.href = payUrl
+      }
+      // 支付成功提醒
+      Dialog.confirm({
+        title: '付款结果',
+        message: '是否成功支付'
+      }).then(() => {
+        // on confirm
+        console.log('成功')
+        this.value = ''
+        this.Place_active = false
+      }).catch(() => {
+        // on cancel
+        console.log('失败')
+      })
     },
     // 钱包选择付款
     wallet_box () {
@@ -437,18 +472,37 @@ export default {
       } else {
         Toast('获取数据失败，请刷新页面')
       }
+    },
+    onInput_pas (key) {
+      this.value_pas = (this.value_pas + key).slice(0, 6)
+      if (this.value_pas.length >= 6) {
+        if (this.value_pas === localStorage.getItem('user_pas')) {
+          setTimeout(() => {
+            this.verification = false
+            this.payment()
+          }, 500)
+        } else {
+          this.info = '密码错误'
+          setTimeout(() => {
+            this.value_pas = ''
+            this.info = '密码为 6 位数字'
+          }, 500)
+        }
+      }
+    },
+    // 监听密码输入
+    onDelete () {
+      this.value_pas = this.value_pas.slice(0, this.value_pas.length - 1)
+    },
+    // 点击遮罩层触发
+    pas_wor () {
+      this.verification = false
     }
   },
   computed: {
     // input框value值监听
     size (e) {
       let that = this
-      if (this.value) {
-        // console.log(this.pair.buy_decimal_digit.toString())
-        // let a = this.pair.buy_decimal_digit.toString()
-        // let aaa = new RegExp('^(\\d{0,5}.\\d{0,3})(\\.\\d{1,' + a + '})?$')
-        // console.log(e.value.match(/^(\\d{0,5}.\\d{0,3})(\\.\\d{1,' + a + '})?$/g))
-      }
       // 判断active_index为0时的事件
       if (this.active_index === 0) {
         if (e.value.match(/^\d*(\.?\d{0,3})/g)[0].length + 1 === this.value.length) {
@@ -458,7 +512,7 @@ export default {
         }
         if (this.value) {
           that.md_title = '请输入正确金额'
-          if (this.value === '0' || this.value === '.') {
+          if (this.value === '0' || this.value === '.' || Math.floor(this.pair.buy_min * 100) / 100 > this.value) {
             that.Place_active = false
           } else {
             that.Place_active = true
@@ -486,7 +540,7 @@ export default {
         that.md_title = ''
         if (this.value) {
           that.md_title = '请输入正确金额'
-          if (this.value === '0' || this.value === '.') {
+          if (this.value === '0' || this.value === '.' || Math.floor(this.pair.sell_min * 100) / 100 > this.value) {
             that.Place_active = false
           } else {
             that.Place_active = true
@@ -504,7 +558,6 @@ export default {
           that.md_title = '兑换数量'
         }
       }
-      return this.value.length > 10 ? 'xx-small' : 'small'
     },
     fixed () {
       let that = this
@@ -527,9 +580,9 @@ export default {
   },
   // keep-alive 组件激活时调用
   async activated () {
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
     this.set = false
-    // const { data } = await this.$api.bb.pairDetail(this.$route.params.id)
-    // this.money = data.data.bestorderbookmodel.best_buy_price
     await this.api()
     let set = await setInterval(() => {
       if (this.set === true) {
@@ -547,7 +600,6 @@ export default {
 
     // input框提示
     this.placeholder = '请输入兑换数量'
-    this.bank = this.wallet[0].name
   },
   components: {
     [Icon.name]: Icon,
@@ -557,11 +609,14 @@ export default {
     [Switch.name]: Switch,
     [Dialog.name]: Dialog,
     [Tab.name]: Tab,
-    [Tabs.name]: Tabs
+    [Tabs.name]: Tabs,
+    [PasswordInput.name]: PasswordInput
   },
   // 监听离开页面
   watch: {
     '$route' (to, from) {
+      document.body.scrollTop = 0
+      document.documentElement.scrollTop = 0
       this.set = true
     }
   }
@@ -993,9 +1048,17 @@ export default {
       }
     }
   }
-  /*支付弹起*/
-  .payment{
-
+  /*验证密码*/
+  .pas_wo{
+    height: 100%;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    background-color: rgba(0,0,0,.7);
+    z-index: 1003;
+    .top{
+      padding-top: 100px;
+    }
   }
   /*弹起键盘*/
   .md-number-keyboard-container{

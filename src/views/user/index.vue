@@ -44,7 +44,7 @@
     <div class="share">
       <!--分享好友-->
       <div class="friend">
-        <a href="">
+        <router-link to="/share">
           <!--邀请文本-->
           <div class="bg_img">
             <div class="img_share">
@@ -56,7 +56,7 @@
             <!--箭头-->
             <div class="Arrow">></div>
           </div>
-        </a>
+        </router-link>
       </div>
     </div>
     <!--钱包作用页-->

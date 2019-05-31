@@ -98,7 +98,7 @@
                   <span class="currency">{{item.quote.symbol}}</span>
                 </div>
                 <div class="Price">
-                  {{(Math.floor(item.price * 100) / 100).toFixed(4)}}
+                  {{(Math.floor(item.bestorderbookmodel.best_buy_price * 100) / 100).toFixed(4)}}
                 </div>
                 <div class="Fall_rise">
                   {{(Math.floor(item.bestorderbookmodel.percentage * 100) / 100).toFixed(5)}}
@@ -116,7 +116,7 @@
                   <span class="currency">{{item.quote.symbol}}</span>
                 </div>
                 <div class="Price">
-                  {{(Math.floor(item.price * 100) / 100).toFixed(4)}}
+                  {{(Math.floor(item.bestorderbookmodel.best_buy_price * 100) / 100).toFixed(4)}}
                 </div>
                 <div class="fall">
                   {{(Math.floor(item.bestorderbookmodel.percentage * 100) / 100).toFixed(5)}}
@@ -218,12 +218,12 @@ export default {
         },
         {
           name: '充值',
-          path: '/wallet_recharge',
+          path: '/wallet',
           icon_service: 'security'
         },
         {
           name: '提现',
-          path: '/withdrawal',
+          path: '/wallet',
           icon_service: 'rmb'
         }
       ],
@@ -258,6 +258,17 @@ export default {
     window.triggerSwiper3 = () => {
       this.goto()
     }
+    document.body.scrollTop = 0
+    document.documentElement.scrollTop = 0
+    this.set = false
+    await this.getPairs()
+    let set = await setInterval(() => {
+      if (this.set === true) {
+        clearInterval(set)
+      } else {
+        this.getPairs()
+      }
+    }, 5000)
   },
   methods: {
     // 获取数据
@@ -299,23 +310,26 @@ export default {
     }
   },
   // keep-alive 组件激活时调用
-  async activated () {
-    document.body.scrollTop = 0
-    document.documentElement.scrollTop = 0
-    this.set = false
-    await this.getPairs()
-    let set = await setInterval(() => {
-      if (this.set === true) {
-        clearInterval(set)
-      } else {
-        this.getPairs()
-      }
-    }, 5000)
-  },
-  watch: {
-    '$route' (to, from) {
-      this.set = true
-    }
+  // async activated () {
+  //   document.body.scrollTop = 0
+  //   document.documentElement.scrollTop = 0
+  //   this.set = false
+  //   await this.getPairs()
+  //   let set = await setInterval(() => {
+  //     if (this.set === true) {
+  //       clearInterval(set)
+  //     } else {
+  //       this.getPairs()
+  //     }
+  //   }, 5000)
+  // },
+  // watch: {
+  //   '$route' (to, from) {
+  //     this.set = true
+  //   }
+  // },
+  destroyed () {
+    this.set = true
   }
 }
 </script>

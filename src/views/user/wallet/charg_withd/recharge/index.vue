@@ -37,7 +37,7 @@ export default {
     return {
       title: '- -',
       canvas: '',
-      img: require('../../../../../assets/cat_top.jpg'),
+      img: require('../../../../../assets/cat.jpg'),
       user_name: '- -',
       user_ID: '- -',
       code_ID: '- -'
@@ -91,6 +91,8 @@ export default {
         display: flex;
         align-items: center;
         font-size: 13px;
+        padding-left: 5px;
+        padding-top: 5px;
         .user_img{
           width: 40px;
           img{

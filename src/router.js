@@ -15,7 +15,7 @@ const router = new Router({
         tabbar: () => import('./components/tabbar/index.vue')
       },
       meta: {
-        keepAlive: true,
+        keepAlive: false,
         Auth: true
       }
     },
@@ -145,6 +145,16 @@ const router = new Router({
       path: '/pair/:id',
       name: 'pair',
       component: () => import('./views/bb/pair/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    // 分享
+    {
+      path: '/share',
+      name: 'share',
+      component: () => import('./views/user/share/index.vue'),
       meta: {
         keepAlive: true,
         Auth: true

@@ -3,7 +3,7 @@
     <!--标题-->
     <div class="head">
       <!--箭头-->
-      <div class="left_arrow" @click="Arrow">
+      <div @click="Arrow" class="left_arrow">
         <van-icon class="icon" name="arrow-left"></van-icon>
       </div>
       <!--title表头-->
@@ -13,24 +13,24 @@
       <!--订单详情-->
       <div class="md-example-child md-example-child-detail-item md-example-child-detail-item-0">
         <md-field>
-          <md-detail-item class="title" :title="'No.' + item_pure" :content="item_pow" bold />
-          <md-detail-item title="兑换价格" :content="Math.round(price * 100) / 100 + ' ' + pair" />
-          <md-detail-item title="兑换数量" :content="Math.round(pay_amount * 100) / 100 + ' ' + pay_asset" />
-          <md-detail-item title="成交获得" :content="pair_price + ' ' + symbol" />
+          <md-detail-item :content="item_pow" :title="'No.' + item_pure" bold class="title" />
+          <md-detail-item :content="price + ' ' + pair" title="兑换价格" />
+          <md-detail-item :content="pay_amount + ' ' + pay_asset" title="兑换数量" />
+          <md-detail-item :content="pair_price + ' ' + symbol" title="成交获得" />
         </md-field>
       </div>
       <!--进度条-->
       <div class="go_box">
         <div class="go">
-          <van-steps direction="vertical" :active="active">
+          <van-steps :active="active" direction="vertical">
             <van-step>
-              <h3 :class="{active: title_sta}">{{title}}</h3>
+              <h3>{{title}}</h3>
             </van-step>
             <van-step>
-              <h3>正在处理</h3>
+              <h3>{{ex_state}}</h3>
             </van-step>
             <van-step>
-              <h3>已完成</h3>
+              <h3>{{tr_state}}</h3>
             </van-step>
           </van-steps>
         </div>
@@ -57,18 +57,15 @@ export default {
       pay_amount: Number,
       pay_asset: '',
       symbol: '',
-      title: '',
+      title: '支付状态',
       pair_price: '',
-      title_sta: false
+      ex_state: '订单处理状态',
+      tr_state: '处理结果'
     }
   },
   methods: {
     Arrow () {
       this.$router.go(-1)
-    },
-    async api () {
-      // const { data } = await this.$api.bb.orders()
-      // console.log(data)
     }
   },
   components: {
@@ -79,43 +76,69 @@ export default {
     [Step.name]: Step,
     [Steps.name]: Steps
   },
-  async activated () {
-    await this.api()
-    this.item_pure = localStorage.getItem('item_pure')
-    this.item_pow = localStorage.getItem('item_pow')
-    this.pair = localStorage.getItem('pair')
-    this.price = localStorage.getItem('price')
-    this.pay_amount = localStorage.getItem('pay_amount')
-    this.pay_asset = localStorage.getItem('pay_asset')
-    this.symbol = localStorage.getItem('symbol')
+  activated () {
+    let obj_data = JSON.parse(localStorage.getItem('obj_data'))
+    this.item_pure = obj_data.item
+    this.item_pow = obj_data.item_pow
+    this.pair = obj_data.pair
+    this.pay_asset = obj_data.pay_asset
+    this.symbol = obj_data.symbol
     // 成交方式
-    if (localStorage.getItem('side') === 'buy') {
+    if (obj_data.side === 'buy') {
       this.side = '买入'
-    } else if (localStorage.getItem('side') === 'sell') {
+    } else if (obj_data.side === 'sell') {
       this.side = '卖出'
     }
-
-    // 成交状态
-    if (localStorage.getItem('value') === '0') {
-      this.title = '支付成功'
-      this.title_sta = false
-    } else if (localStorage.getItem('value') === '50') {
-      this.active = 1
-      this.title = '支付成功'
-    } else if (localStorage.getItem('value') === '100') {
-      this.active = 2
-      this.title = '支付成功'
+    // 兑换价格
+    if (!obj_data.price) {
+      this.price = '- -'
     } else {
-      this.title = '已取消'
-      this.active = 0
-      this.title_sta = true
+      this.price = Math.round(obj_data.price * 100) / 100
     }
-
+    // 兑换数量
+    if (!obj_data.pay_amount) {
+      this.pay_amount = '- -'
+    } else {
+      this.pay_amount = Math.round(obj_data.pay_amount * 100) / 100
+    }
+    // 成交状态
+    if (obj_data.state) {
+      this.active = 0
+      if (obj_data.state === 'paid') {
+        this.title = '已支付'
+      } else {
+        this.title = '未支付'
+      }
+    }
+    if (obj_data.exchange_state) {
+      this.active = 1
+      if (obj_data.exchange_state === 'pending') {
+        this.ex_state = '未挂单'
+      } else if (obj_data.exchange_state === 'open') {
+        this.ex_state = '已持单'
+      } else if (obj_data.exchange_state === 'closed') {
+        this.ex_state = '兑换完毕'
+      } else if (obj_data.exchange_state === 'cancled') {
+        this.ex_state = '已取消'
+      } else {
+        this.ex_state = '挂单失败'
+      }
+    }
+    if (obj_data.transfer_state) {
+      this.active = 2
+      if (obj_data.transfer_state === 'pending') {
+        this.tr_state = '待转账'
+      } else if (obj_data.transfer_state === 'completed') {
+        this.tr_state = '已完成'
+      } else {
+        this.tr_state = '支付失败'
+      }
+    }
     // 成交获得
-    if (localStorage.getItem('pair_price') === 'null') {
+    if (obj_data.pair_price === 'null') {
       this.pair_price = '- -'
     } else {
-      this.pair_price = localStorage.getItem('pair_price')
+      this.pair_price = obj_data.pair_price
     }
   }
 }
@@ -191,9 +214,6 @@ export default {
       .go{
         width: 40%;
         margin: 0 auto;
-        .active{
-          color: red;
-        }
         .van-step--vertical{
           padding: 25px 0;
           .van-step__circle-container > i{

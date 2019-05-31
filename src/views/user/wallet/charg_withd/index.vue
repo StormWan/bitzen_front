@@ -132,8 +132,8 @@ export default {
         border-bottom: 1px solid rgba(0,0,0,.05);
         div{
           width: 50%;
-          line-height: 50px;
-          height: 50px;
+          line-height: 60px;
+          height: 60px;
           a{
             font-size: 16px;
           }
