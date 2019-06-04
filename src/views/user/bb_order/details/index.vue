@@ -23,13 +23,13 @@
       <div class="go_box">
         <div class="go">
           <van-steps :active="active" direction="vertical">
-            <van-step>
+            <van-step :class="{active: title_st}">
               <h3>{{title}}</h3>
             </van-step>
-            <van-step>
+            <van-step :class="{active: ex_st}">
               <h3>{{ex_state}}</h3>
             </van-step>
-            <van-step>
+            <van-step :class="{active: tr_st}">
               <h3>{{tr_state}}</h3>
             </van-step>
           </van-steps>
@@ -60,7 +60,10 @@ export default {
       title: '支付状态',
       pair_price: '',
       ex_state: '订单处理状态',
-      tr_state: '处理结果'
+      tr_state: '处理结果',
+      title_st: false,
+      ex_st: false,
+      tr_st: false
     }
   },
   methods: {
@@ -77,6 +80,7 @@ export default {
     [Steps.name]: Steps
   },
   activated () {
+    // eslint-disable-next-line camelcase
     let obj_data = JSON.parse(localStorage.getItem('obj_data'))
     this.item_pure = obj_data.item
     this.item_pow = obj_data.item_pow
@@ -106,32 +110,44 @@ export default {
       this.active = 0
       if (obj_data.state === 'paid') {
         this.title = '已支付'
+        this.title_st = false
       } else {
         this.title = '未支付'
+        this.title_st = true
       }
     }
     if (obj_data.exchange_state) {
       this.active = 1
       if (obj_data.exchange_state === 'pending') {
         this.ex_state = '未挂单'
+        this.ex_st = false
       } else if (obj_data.exchange_state === 'open') {
         this.ex_state = '已持单'
+        this.ex_st = false
       } else if (obj_data.exchange_state === 'closed') {
         this.ex_state = '兑换完毕'
+        this.ex_st = false
       } else if (obj_data.exchange_state === 'cancled') {
         this.ex_state = '已取消'
+        this.ex_st = true
       } else {
         this.ex_state = '挂单失败'
+        this.ex_st = true
       }
     }
     if (obj_data.transfer_state) {
-      this.active = 2
       if (obj_data.transfer_state === 'pending') {
+        this.active = 1
         this.tr_state = '待转账'
+        this.tr_st = false
       } else if (obj_data.transfer_state === 'completed') {
         this.tr_state = '已完成'
+        this.active = 2
+        this.tr_st = false
       } else {
         this.tr_state = '支付失败'
+        this.active = 2
+        this.tr_st = true
       }
     }
     // 成交获得
@@ -221,6 +237,14 @@ export default {
           }
           .van-step__line{
             top: 30px;
+          }
+        }
+        .active{
+          h3{
+            color: red;
+          }
+          .van-icon-checked:before{
+            color: red;
           }
         }
         .van-step--finish{

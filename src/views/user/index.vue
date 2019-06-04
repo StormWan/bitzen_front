@@ -96,26 +96,26 @@
     <!--用户认证作用页-->
     <div class="Effect">
       <!--实名验证-->
-<!--      <router-link to="/real_name" class="Effect_box">-->
-<!--        <div class="money">-->
-<!--          <van-icon class="icon" name="youzan-shield"></van-icon>实名验证-->
-<!--        </div>-->
-<!--        <div class="Arrow">></div>-->
-<!--      </router-link>-->
-<!--      &lt;!&ndash;收款方式&ndash;&gt;-->
-<!--      <a class="Effect_box">-->
+      <router-link to="/real_name" class="Effect_box">
+        <div class="money">
+          <van-icon class="icon" name="youzan-shield"></van-icon>实名验证
+        </div>
+        <div class="Arrow">></div>
+      </router-link>
+      <!--收款方式-->
+<!--      <router-link to="/" class="Effect_box">-->
 <!--        <div class="money">-->
 <!--          <van-icon class="icon" name="youzan-shield"></van-icon>收款方式-->
 <!--        </div>-->
 <!--        <div class="Arrow">></div>-->
 <!--      </router-link>-->
       <!--账号关联-->
-      <router-link to="/account" class="Effect_box">
-        <div class="money">
-          <van-icon class="icon" name="youzan-shield"></van-icon>账号关联
-        </div>
-        <div class="Arrow">></div>
-      </router-link>
+<!--      <router-link to="/account" class="Effect_box">-->
+<!--        <div class="money">-->
+<!--          <van-icon class="icon" name="youzan-shield"></van-icon>账号关联-->
+<!--        </div>-->
+<!--        <div class="Arrow">></div>-->
+<!--      </router-link>-->
     </div>
     <!--退出-->
     <div class="Effect">

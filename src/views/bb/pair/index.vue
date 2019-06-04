@@ -70,7 +70,6 @@
                 is-amount
                 is-highlight
                 ref="input10"
-                is-virtual-keyboard
                 clearable
                 :maxlength="input_size"
               >
@@ -119,7 +118,6 @@
                 is-amount
                 is-highlight
                 ref="input10"
-                is-virtual-keyboard
                 clearable
                 :maxlength="input_size"
               >
@@ -202,6 +200,7 @@
           </div>
         </div>
       </div>
+
 <!--      验证密码-->
       <div class="pas_wo" v-if="verification" @click="pas_wor">
         <div class="top">
@@ -298,7 +297,7 @@ export default {
       quote_symbol: '',
       base_symbol: '',
       price_bg: '0',
-      price_img: require('../../../assets/cat_top.jpg'),
+      price_img: '',
       price_title: '',
       pla_money: '0',
       // 定时器
@@ -333,6 +332,7 @@ export default {
     // 买入卖出点击点击
     active_click (e) {
       this.active_index = e
+      this.price_img = ''
       // 红点提示
       if (e === 1) {
         this.brief = '最小下单 ' + (Math.floor(this.pair.sell_min * 100)) / 100 + ' ' + this.pair.base.symbol + ', 最大下单 ' + ((Math.floor(this.pair.sell_max * 100)) / 100).toFixed(this.pair.sell_decimal_digit) + ' ' + this.pair.base.symbol
@@ -340,8 +340,8 @@ export default {
         this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000
         // input框提示
         this.placeholder = '请输入兑换数量'
-        if (this.pair.quote.icon_url) {
-          this.price_img = this.pair.quote.icon_url
+        if (this.pair.bestorderbookmodel.best_sell_exchange.logo_32) {
+          this.price_img = this.pair.bestorderbookmodel.best_sell_exchange.logo_32
         }
         this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
         this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
@@ -351,8 +351,8 @@ export default {
         this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000
         // input框提示
         this.placeholder = '请输入兑换数量'
-        if (this.pair.base.icon_url) {
-          this.price_img = this.pair.base.icon_url
+        if (this.pair.bestorderbookmodel.best_buy_exchange.logo_32) {
+          this.price_img = this.pair.bestorderbookmodel.best_buy_exchange.logo_32
         }
         this.price_title = this.pair.bestorderbookmodel.best_buy_exchange.name
         this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
@@ -448,8 +448,8 @@ export default {
         this.quote_symbol = data.data.quote.symbol
         if (this.active_index === 0) {
           // 渲染
-          if (this.pair.base.icon_url) {
-            this.price_img = this.pair.base.icon_url
+          if (this.pair.bestorderbookmodel.best_buy_exchange.logo_32) {
+            this.price_img = this.pair.bestorderbookmodel.best_buy_exchange.logo_32
           }
           this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
           this.price_title = this.pair.bestorderbookmodel.best_buy_exchange.name
@@ -459,8 +459,8 @@ export default {
           this.buy = this.arr_buy.asks.slice(this.item - 10, this.time)
         } else {
           // 渲染
-          if (this.pair.quote.icon_url) {
-            this.price_img = this.pair.quote.icon_url
+          if (this.pair.bestorderbookmodel.best_sell_exchange.logo_32) {
+            this.price_img = this.pair.bestorderbookmodel.best_sell_exchange.logo_32
           }
           this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
           this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
@@ -473,6 +473,7 @@ export default {
         Toast('获取数据失败，请刷新页面')
       }
     },
+    // 提交密码
     onInput_pas (key) {
       this.value_pas = (this.value_pas + key).slice(0, 6)
       if (this.value_pas.length >= 6) {
@@ -501,6 +502,7 @@ export default {
   },
   computed: {
     // input框value值监听
+    // eslint-disable-next-line vue/return-in-computed-property
     size (e) {
       let that = this
       // 判断active_index为0时的事件

@@ -92,7 +92,7 @@ export default {
       this.active = index
       this.arr = []
       if (index === 0) {
-        this.arr = []
+        this.arr = this.list
       } else {
         for (let i = 0; i <= this.list.length - 1; i++) {
           if (this.list[i].quote.symbol.search(title) !== -1) {

@@ -11,6 +11,9 @@
       </div>
       <div class="content">
         <div class="user">
+          <div class="explanation">
+            <van-icon name="question-o" />
+          </div>
           <div class="user_box">
             <!--用户图片-->
             <div class="user_img">
@@ -64,8 +67,9 @@ export default {
         if (error) console.error(error)
       })
     },
-    copy() {
-      var clipboard = new Clipboard('.tag-read')
+    // 复制
+    copy () {
+      let clipboard = new Clipboard('.tag-read')
       clipboard.on('success', e => {
         // 释放内存
         clipboard.destroy()
@@ -113,6 +117,24 @@ export default {
         width: 100%;
         height: 100%;
         padding: 0;
+        /*疑问解答*/
+        .explanation{
+          color: #FFFAFA;
+          font-size: 25px;
+          text-align: right;
+          padding: 40px 40px 0 0;
+        }
+        animation: user 1s ease;
+        @keyframes user{
+          0%{
+            width: 0;
+            height: 0;
+          }
+          100%{
+            width: 100%;
+            height: 100%;
+          }
+        }
         .user_box{
           position: absolute;
           bottom: 16%;
@@ -166,7 +188,7 @@ export default {
             top: 50%;
             transform: translate(-50%,-50%) scale(0) rotateY(-180deg);
             animation-timing-function: cubic-bezier(0.1,-158,.5,-99);
-            animation: aa 1.3S;
+            animation: aa 2S;
           }
           @keyframes aa{
             from{
@@ -196,7 +218,7 @@ export default {
             top: 45%;
             transform: translate(-50%,-50%) scale(0) rotateX(-180deg);
             transition: all .8s cubic-bezier(.37,.59,0,1.58);
-            animation: bb 1.3s;
+            animation: bb 2s;
           }
           @keyframes bb{
             from{

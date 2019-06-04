@@ -24,6 +24,16 @@ const otc = {
   * **/
   oauth (params) {
     return axios.post(`${base.base_api}/account/oauth/`, qs.stringify(params))
+  },
+  currency (params) {
+    return axios.get(`${base.base_api}/otc/pairs/`, {
+      params: params
+    })
+  },
+  currency_id (id, params) {
+    return axios.get(`${base.base_api}/otc/pairs/${id}/`, {
+      params: params
+    })
   }
 }
 

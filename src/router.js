@@ -7,30 +7,30 @@ Vue.use(Router)
 
 const router = new Router({
   routes: [
-    {
-      path: '/',
-      name: 'home',
-      components: {
-        default: () => import('./views/home/index.vue'),
-        tabbar: () => import('./components/tabbar/index.vue')
-      },
-      meta: {
-        keepAlive: false,
-        Auth: true
-      }
-    },
     // {
-    //   path: '/otc',
-    //   name: 'otc',
+    //   path: '/',
+    //   name: 'home',
     //   components: {
-    //     default: () => import('./views/otc/index.vue'),
+    //     default: () => import('./views/home/index.vue'),
     //     tabbar: () => import('./components/tabbar/index.vue')
     //   },
     //   meta: {
-    //     keepAlive: true,
+    //     keepAlive: false,
     //     Auth: true
     //   }
     // },
+    {
+      path: '/',
+      name: 'otc',
+      components: {
+        default: () => import('./views/otc/index.vue'),
+        tabbar: () => import('./components/tabbar/index.vue')
+      },
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
     // 贷款
     // {
     //   path: '/lend',
@@ -132,9 +132,39 @@ const router = new Router({
     },
     // 法币交易
     {
-      path: '/transaction',
+      path: '/transaction/:id',
       name: 'transaction',
       component: () => import('./views/otc/transaction/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    // 付款方式
+    {
+      path: '/payment',
+      name: 'payment',
+      component: () => import('./views/otc/transaction/payment/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    // 法币订单
+    {
+      path: '/otc_order',
+      name: 'otc_order',
+      component: () => import('./views/otc/transaction/payment/otc_order/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    // 收款
+    {
+      path: '/receivables',
+      name: 'receivables',
+      component: () => import('./views/otc/transaction/payment/receivables/index.vue'),
       meta: {
         keepAlive: true,
         Auth: true
