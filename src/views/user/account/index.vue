@@ -40,9 +40,8 @@ export default {
     }
   },
   mounted () {
-    console.log(localStorage.getItem('user_ID'))
-    this.user_name = localStorage.getItem('user_name')
-    this.user_ID = localStorage.getItem('user_ID')
+    this.user_name = JSON.parse(localStorage.getItem('userInfo')).full_name
+    this.user_ID = JSON.parse(localStorage.getItem('userInfo')).identity_num
     this.user_bind = '已授权'
   },
   components: {

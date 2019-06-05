@@ -60,6 +60,7 @@
           <div class="but_no" @click="but_no">取消订单</div>
         </div>
       </div>
+      <div class="delete" v-else><span><van-icon name="close" /></span><span>已取消</span></div>
       <!--说明-->
       <div class="Tips">1.如需帮助请联系 Bit-ox 客服，Mixin ID：28749，微信：jc_castle</div>
       <!--弹出层-->
@@ -151,7 +152,7 @@ export default {
     },
     // 支付方式复制
     method_click (i) {
-      if (i === 2 || i === 3) {
+      if (i === 1 || i === 2 || i === 3) {
         let clipboard = new Clipboard('.tag-read')
         clipboard.on('success', e => {
           // 释放内存
@@ -226,7 +227,6 @@ export default {
       line-height: 30px;
       padding: 13px 0;
       color: #FA8072;
-      border-bottom: 15px solid rgba(0,0,0,.05);
       p:nth-last-child(1){
         font-size: 13px;
       }
@@ -247,6 +247,26 @@ export default {
       }
       span:nth-child(1){
         margin-right: 12px;
+      }
+    }
+    /*取消*/
+    .delete{
+      text-align: center;
+      line-height: 50px;
+      border-bottom: 15px solid rgba(0,0,0,.05);
+      border-top: 15px solid rgba(0,0,0,.05);
+      span{
+        vertical-align: middle;
+        font-size: 16px;
+      }
+      span:nth-child(1){
+        font-size: 18px;
+        margin-right: 5px;
+        i{
+          vertical-align: middle;
+          font-weight: bold;
+          color: red;
+        }
       }
     }
     /*支付方式*/

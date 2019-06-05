@@ -38,6 +38,7 @@
                 <md-field>
                   <!--金额-->
                   <md-input-item
+                    @focus="foc_CNY"
                     type="money"
                     v-model="inp_CNY"
                     :size="input_monitoring"
@@ -58,6 +59,7 @@
                     clearable
                     :size="result_monitoring"
                     :maxlength="input_res_size"
+                    @focus="foc_market"
                   ></md-input-item>
                 </md-field>
                 <!--下单提示说明-->
@@ -92,8 +94,10 @@
                     placeholder="CNY 金额"
                     is-title-latent
                     clearable
+                    @focus="foc_market"
+                    :maxlength="input_res_size"
                   ></md-input-item>
-                  <div class="CNY_money" v-if="beyond">超出下单范围</div>
+                  <div class="CNY_money" v-if="beyond">请输入有效数</div>
                   <!--预估到账-->
                   <md-input-item
                     type="money"
@@ -103,6 +107,8 @@
                     is-title-latent
                     clearable
                     :size="input_monitoring"
+                    @focus="foc_CNY"
+                    :maxlength="input_mon_size"
                   ></md-input-item>
                 </md-field>
                 <!--下单提示说明-->
@@ -191,7 +197,6 @@ export default {
       // 接收数据
       Receive: [],
       active_index: 0,
-      money: 6.8,
       least_Number: 1,
       most_Number: 5000,
       most_money: 34000.00,
@@ -242,10 +247,13 @@ export default {
       title: '',
       title_img: '',
       buy_price: '',
+      // 计算金额
+      buy_Price: '',
       sell_price: '',
       symbol_name: '',
       input_mon_size: '',
-      input_res_size: ''
+      input_res_size: '',
+      buyData: false
     }
   },
   methods: {
@@ -258,14 +266,21 @@ export default {
         this.Receive = data.data
         this.title_img = this.Receive.asset.icon_url
         this.symbol_name = this.Receive.asset.symbol
+        console.log(this.Receive)
         // 标题判断是否相同
         if (this.Receive.asset.name === this.Receive.asset.symbol) {
           this.title = this.Receive.asset.symbol
         } else {
           this.title = this.Receive.asset.name + ' ' + '(' + this.Receive.asset.symbol + ')'
         }
-        this.buy_price = (this.Receive.pair.bestorderbookmodel.best_buy_price * this.Receive.setting.usdt_buy_price).toFixed(2)
-        this.sell_price = (this.Receive.pair.bestorderbookmodel.best_sell_price * this.Receive.setting.usdt_sell_price).toFixed(2)
+        if (!this.Receive.pair) {
+          this.buy_price = this.Receive.setting.usdt_buy_price
+          this.sell_price = this.Receive.setting.usdt_sell_price
+        } else {
+          this.buy_price = (this.Receive.pair.bestorderbookmodel.best_buy_price * this.Receive.setting.usdt_buy_price).toFixed(2)
+          this.sell_price = (this.Receive.pair.bestorderbookmodel.best_sell_price * this.Receive.setting.usdt_sell_price).toFixed(2)
+          this.buy_money()
+        }
         // 买入
         if (this.active_index === 0) {
         } else {
@@ -281,7 +296,9 @@ export default {
     // 买入卖出点击
     onClick (index, title) {
       this.inp_CNY = ''
+      this.inp_market = ''
       this.active_index = index
+      this.buy_money()
     },
     // 下单按钮
     but_submit (e) {
@@ -307,6 +324,26 @@ export default {
         this.triangle_active = false
       }, 100)
       this.icon_index = e
+    },
+    // input光标
+    foc_market () {
+      this.buyData = false
+    },
+    // input光标
+    foc_CNY () {
+      this.buyData = true
+    },
+    buy_money () {
+      if (this.Receive.pair) {
+        // 判断买入卖出
+        if (this.active_index === 0) {
+          // 计算金额
+          this.buy_Price = (this.Receive.pair.bestorderbookmodel.best_buy_price * this.Receive.setting.usdt_buy_price).toFixed(2)
+        } else {
+          // 计算金额
+          this.buy_Price = (this.Receive.pair.bestorderbookmodel.best_sell_price * this.Receive.setting.usdt_sell_price).toFixed(2)
+        }
+      }
     }
   },
   // 计算
@@ -315,32 +352,101 @@ export default {
     // eslint-disable-next-line vue/return-in-computed-property
     input_monitoring (e) {
       let that = this
-      if (that.inp_CNY) {
-        if (e.inp_CNY.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.inp_CNY.length) {
-          e.input_mon_size = this.inp_CNY.length
+      if (that.buyData) {
+        if (that.inp_CNY) {
+          // 判断是否USDA
+          if (this.Receive.pair) {
+            if (e.inp_CNY.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.inp_CNY.length) {
+              e.input_mon_size = this.inp_CNY.length
+            } else {
+              e.input_mon_size = 9
+            }
+            that.inp_market = (e.inp_CNY / that.buy_Price).toFixed(4)
+            if (that.inp_market >= (Math.round(that.Receive.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.buy_max * 100) / 100)) {
+              that.Place_active = true
+              that.beyond = false
+            } else {
+              // 输入提示提示
+              that.beyond = true
+              that.Place_active = false
+            }
+          } else {
+            // USDA
+            if (that.active_index === 0) {
+              that.inp_market = (e.inp_CNY / this.Receive.setting.usdt_buy_price).toFixed(4)
+              if (that.inp_market >= (Math.round(that.Receive.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.buy_max * 100) / 100)) {
+                that.Place_active = true
+                that.beyond = false
+              } else {
+                that.Place_active = false
+                that.beyond = true
+              }
+            } else {
+              that.inp_market = (e.inp_CNY / this.Receive.setting.usdt_sell_price).toFixed(4)
+              if (that.inp_market >= (Math.round(that.Receive.sell_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.sell_max * 100) / 100)) {
+                that.Place_active = true
+              } else {
+                that.Place_active = false
+              }
+            }
+          }
         } else {
-          e.input_mon_size = 9
+          that.inp_market = ''
+          // 输入提示提示
+          that.beyond = false
         }
-        that.inp_market = (that.inp_CNY / (that.Receive.pair.bestorderbookmodel.best_buy_price * that.Receive.setting.usdt_buy_price)).toFixed(2)
-        // if (that.inp_CNY >= (that.buy_price * that.Receive.buy_min) || that.inp_CNY <= (that.buy_price * that.Receive.buy_min)) {
-        //   console.log(1)
-        // } else {
-        //
-        // }
       }
     },
     // input框价格计算结果判断监听
     // eslint-disable-next-line vue/return-in-computed-property
     result_monitoring (e) {
       let that = this
-      if (that.inp_market) {
-        if (e.inp_market.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.inp_market.length) {
-          e.input_res_size = this.inp_market.length
+      if (!that.buyData) {
+        if (that.inp_market) {
+          // 判断是否USDT
+          if (this.Receive.pair) {
+            if (e.inp_market.match(/^\d*(\.?\d{0,3})/g)[0].length + 1 === this.inp_market.length) {
+              e.input_res_size = this.inp_market.length
+            } else {
+              e.input_res_size = 9
+            }
+            that.inp_CNY = (that.buy_Price * e.inp_market).toFixed(2)
+            if (that.inp_market >= (Math.round(that.Receive.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.buy_max * 100) / 100)) {
+              that.Place_active = true
+              that.beyond = false
+            } else {
+              console.log('出')
+              // 输入提示提示
+              that.beyond = true
+              that.Place_active = false
+            }
+          } else {
+            // USDT
+            if (that.active_index === 0) {
+              that.inp_CNY = (e.inp_market * that.Receive.setting.usdt_buy_price).toFixed(2)
+              if (that.inp_market >= (Math.round(that.Receive.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.buy_max * 100) / 100)) {
+                that.Place_active = true
+                that.beyond = false
+              } else {
+                that.Place_active = false
+                that.beyond = true
+              }
+            } else {
+              that.inp_CNY = (e.inp_market * that.Receive.setting.usdt_sell_price).toFixed(2)
+              if (that.inp_market >= (Math.round(that.Receive.sell_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.sell_max * 100) / 100)) {
+                that.Place_active = true
+                that.beyond = false
+              } else {
+                that.Place_active = false
+                that.beyond = true
+              }
+            }
+          }
         } else {
-          e.input_res_size = 9
+          that.inp_CNY = ''
+          that.Place_active = false
+          that.beyond = false
         }
-        that.inp_CNY = (that.inp_market * (that.Receive.pair.bestorderbookmodel.best_buy_price * that.Receive.setting.usdt_buy_price)).toFixed(2)
-      } else {
       }
     }
   },
@@ -363,7 +469,7 @@ export default {
       } else {
         clearInterval(set)
       }
-    }, 3000)
+    }, 93000)
   },
   watch: {
     '$route' () {

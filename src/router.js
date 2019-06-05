@@ -16,7 +16,7 @@ const router = new Router({
     //   },
     //   meta: {
     //     keepAlive: false,
-    //     Auth: true
+    //     Auth: false
     //   }
     // },
     {
@@ -28,7 +28,7 @@ const router = new Router({
       },
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 贷款
@@ -41,7 +41,7 @@ const router = new Router({
     //   },
     //   meta: {
     //     keepAlive: true,
-    //     Auth: true
+    //     Auth: false
     //   }
     // },
     // 币币
@@ -54,7 +54,7 @@ const router = new Router({
       },
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 我的
@@ -67,7 +67,7 @@ const router = new Router({
       },
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 登录
@@ -77,7 +77,7 @@ const router = new Router({
       component: () => import('./views/account/login-phone.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 登录
@@ -87,7 +87,7 @@ const router = new Router({
       component: () => import('./views/account/login-verify.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 钱包
@@ -97,7 +97,7 @@ const router = new Router({
       component: () => import('./views/user/wallet/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 市名充值提现
@@ -107,7 +107,7 @@ const router = new Router({
       component: () => import('./views/user/wallet/charg_withd/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 充值
@@ -117,7 +117,7 @@ const router = new Router({
       component: () => import('./views/user/wallet/charg_withd/recharge/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 提现
@@ -127,7 +127,7 @@ const router = new Router({
       component: () => import('./views/user/wallet/charg_withd/withdrawal/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 法币交易
@@ -137,7 +137,7 @@ const router = new Router({
       component: () => import('./views/otc/transaction/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 付款方式
@@ -147,27 +147,47 @@ const router = new Router({
       component: () => import('./views/otc/transaction/payment/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
-    // 法币订单
+    // 法币买入订单详情
     {
       path: '/otc_order',
       name: 'otc_order',
       component: () => import('./views/otc/transaction/payment/otc_order/index.vue'),
       meta: {
-        keepAlive: true,
-        Auth: true
+        keepAlive: false,
+        Auth: false
+      }
+    },
+    // otc_details
+    {
+      path: '/otc_details',
+      name: 'otc_details',
+      component: () => import('./views/user/otc_details/index.vue'),
+      meta: {
+        keepAlive: false,
+        Auth: false
+      }
+    },
+    // 法币卖出订单
+    {
+      path: '/otc_out',
+      name: 'otc_out',
+      component: () => import('./views/otc/transaction/payment/otc_out/index.vue'),
+      meta: {
+        keepAlive: false,
+        Auth: false
       }
     },
     // 收款
     {
       path: '/receivables',
       name: 'receivables',
-      component: () => import('./views/otc/transaction/payment/receivables/index.vue'),
+      component: () => import('./views/user/receivables/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 币币交易
@@ -177,7 +197,7 @@ const router = new Router({
       component: () => import('./views/bb/pair/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 分享
@@ -187,7 +207,7 @@ const router = new Router({
       component: () => import('./views/user/share/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 密码
@@ -197,7 +217,7 @@ const router = new Router({
       component: () => import('./views/user/password/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 实名认证
@@ -207,7 +227,7 @@ const router = new Router({
       component: () => import('./views/user/real_name/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 注册
@@ -217,7 +237,7 @@ const router = new Router({
       component: () => import('./views/user/Sign_in/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 活动任务
@@ -227,7 +247,7 @@ const router = new Router({
       component: () => import('./views/user/task/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 关于
@@ -237,7 +257,7 @@ const router = new Router({
       component: () => import('./views/user/about/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 服务条款
@@ -247,7 +267,7 @@ const router = new Router({
       component: () => import('./views/user/about/clause/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 隐私声明
@@ -257,7 +277,7 @@ const router = new Router({
       component: () => import('./views/user/about/statement/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 率费标准
@@ -267,7 +287,7 @@ const router = new Router({
       component: () => import('./views/user/about/rate/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 关于我们
@@ -277,7 +297,7 @@ const router = new Router({
       component: () => import('./views/user/about/about_us/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 联系我们
@@ -287,7 +307,7 @@ const router = new Router({
       component: () => import('./views/user/about/contact/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 常见问题
@@ -297,7 +317,7 @@ const router = new Router({
       component: () => import('./views/user/common/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 币币订单
@@ -307,7 +327,7 @@ const router = new Router({
       component: () => import('./views/user/bb_order/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 详情
@@ -317,7 +337,7 @@ const router = new Router({
       component: () => import('./views/user/bb_order/details/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 关于放币说明
@@ -327,7 +347,7 @@ const router = new Router({
       component: () => import('./views/user/common/delay/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 关于Bit-Ox平台承兑商的说明
@@ -337,7 +357,7 @@ const router = new Router({
       component: () => import('./views/user/common/trader/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 关于 Mixin 和 Bit-Ox 的关系
@@ -347,7 +367,7 @@ const router = new Router({
       component: () => import('./views/user/common/M_and_B/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 关于 ExinPay 钱包的说明
@@ -357,7 +377,7 @@ const router = new Router({
       component: () => import('./views/user/common/qianbao/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 了解定投
@@ -367,7 +387,7 @@ const router = new Router({
       component: () => import('./views/user/common/fixed/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 什么是 C2C (场外) 交易
@@ -377,7 +397,7 @@ const router = new Router({
       component: () => import('./views/user/common/c2c/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // C2C 交易的价格是如何确定的?
@@ -387,7 +407,7 @@ const router = new Router({
       component: () => import('./views/user/common/price/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 为什么实际到手的币的数量和预估的不一样?
@@ -397,7 +417,7 @@ const router = new Router({
       component: () => import('./views/user/common/get/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // Bit-Ox 是如何收取服务费的?
@@ -407,7 +427,7 @@ const router = new Router({
       component: () => import('./views/user/common/service/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 为什么通过 C2C 买入非 USDT 数字货币的时候会收到 UDST ?
@@ -417,7 +437,7 @@ const router = new Router({
       component: () => import('./views/user/common/rule/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 为什么 Bit-Ox 的 C2C 价格与行情软件显示的价格不一致,有时候甚至相差比较大?
@@ -427,7 +447,7 @@ const router = new Router({
       component: () => import('./views/user/common/compare/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 使用 Bit-Ox 交易安全吗?会不会跑路?
@@ -437,7 +457,7 @@ const router = new Router({
       component: () => import('./views/user/common/security/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 为什么有时候 WxinOne 会资金不足?
@@ -447,7 +467,7 @@ const router = new Router({
       component: () => import('./views/user/common/capital/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 为什么限单?
@@ -457,7 +477,7 @@ const router = new Router({
       component: () => import('./views/user/common/limit/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 卖出数字货币时如何收款?
@@ -467,7 +487,7 @@ const router = new Router({
       component: () => import('./views/user/common/collect_money/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 卖出数字货币订单未收到款怎么办?
@@ -477,7 +497,7 @@ const router = new Router({
       component: () => import('./views/user/common/uncollected/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 付款了没有收到币怎么办?
@@ -487,7 +507,7 @@ const router = new Router({
       component: () => import('./views/user/common/not_received/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 各种充值一般大概多久到账
@@ -497,7 +517,7 @@ const router = new Router({
       component: () => import('./views/user/common/recharge/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 提现或充值到错误地方怎么办?
@@ -507,7 +527,7 @@ const router = new Router({
       component: () => import('./views/user/common/error/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 充值或提币未到账怎么办?
@@ -517,7 +537,7 @@ const router = new Router({
       component: () => import('./views/user/common/what/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 提币时提示区块同步异常改怎么做
@@ -527,7 +547,7 @@ const router = new Router({
       component: () => import('./views/user/common/abnormal/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 忘记了 PIN 码怎么办?
@@ -537,7 +557,7 @@ const router = new Router({
       component: () => import('./views/user/common/pin_code/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // assets
@@ -547,7 +567,7 @@ const router = new Router({
       component: () => import('./views/user/common/assets/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     },
     // 账号关联
@@ -557,7 +577,7 @@ const router = new Router({
       component: () => import('./views/user/account/index.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
       }
     }
   ]

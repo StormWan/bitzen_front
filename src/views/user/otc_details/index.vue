@@ -1,129 +1,126 @@
 <template>
-    <div class="bb_order">
-      <!--标题-->
-      <div class="head">
-        <!--箭头-->
-        <div class="left_arrow" @click="Arrow">
-          <van-icon class="icon" name="arrow-left"></van-icon>
-        </div>
-        <!--title表头-->
-        <div class="title">币币订单</div>
+  <div class="otc_details">
+    <!--标题-->
+    <div class="head">
+      <!--箭头-->
+      <div class="left_arrow" @click="Arrow">
+        <van-icon class="icon" name="arrow-left"></van-icon>
       </div>
-      <div class="BG" v-for="(item,index) in order" :key="index">
-        <!--订单详情-->
-        <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'buy'">
-          <md-bill
-            :title="item.pair.pair + ' 买入'"
-            :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
-            water-mark="Bit-OX">
-            <md-detail-item title="委托数量">
-              <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
-            </md-detail-item>
-            <md-detail-item title="平均成交价">
-              <span v-if="!item.price">- -</span><span v-else>{{(Math.floor(item.price * 100) / 100).toFixed(3)}}</span>{{item.pair.pair}}
-            </md-detail-item>
-            <md-detail-item title="服务费">
-              <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
-              <div v-else><span>{{item.exchangeinstantordermodel.fee_cost}}</span>EPC</div>
-            </md-detail-item>
-            <md-detail-item title="实际到账">
-              <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}
-            </md-detail-item>
-            <div class="footer-slot" slot="footer">
-              <!--进度条-->
-              <div class="loding" v-if="item.state && !item.transfer_state"><van-progress :percentage="0" /></div>
-              <div class="loding" v-else-if="item.transfer_state && !item.exchange_state"><van-progress :percentage="50" /></div>
-              <div class="loding" v-if="item.exchange_state"><van-progress :percentage="100" /></div>
-              <!--支付状态-->
-              <div class="state">
-                <div class="complete" :class="{active: item.transfer_state === 'fail' || item.state === 'pending'}">
-                  <!--icon-->
-                  <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">
+      <!--title表头-->
+      <div class="title">C2C 订单记录</div>
+    </div>
+    <div class="BG" v-for="(item,index) in order" :key="index">
+      <!--订单详情-->
+      <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'buy'">
+        <md-bill
+          :title="'卖出 ' + item.pair.base.symbol"
+          :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
+          water-mark="Bit-OX">
+          <md-detail-item title="数量">
+            <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
+          </md-detail-item>
+          <md-detail-item title="价格">
+            <span v-if="!item.price">- -</span><span v-else>{{(Math.floor(item.price * 100) / 100).toFixed(3)}}</span>{{item.pair.pair}}
+          </md-detail-item>
+          <md-detail-item title="总价">
+            <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
+            <div v-else><span>{{item.exchangeinstantordermodel.fee_cost}}</span>EPC</div>
+          </md-detail-item>
+          <div class="footer-slot" slot="footer">
+            <!--进度条-->
+            <div class="loding" v-if="item.state && !item.transfer_state"><van-progress :percentage="0" /></div>
+            <div class="loding" v-else-if="item.transfer_state && !item.exchange_state"><van-progress :percentage="50" /></div>
+            <div class="loding" v-if="item.exchange_state"><van-progress :percentage="100" /></div>
+            <!--支付状态-->
+            <div class="state">
+              <div class="complete" :class="{active: item.transfer_state === 'fail' || item.state === 'pending'}">
+                <!--icon-->
+                <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">
                     <van-icon class="icon" name="passed"></van-icon>
                   </span>
-                  <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">
+                <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">
                     <van-icon class="icon" name="passed"></van-icon>
                   </span>
-                  <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">
+                <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">
                     <van-icon class="icon" name="passed"></van-icon>
                   </span>
-                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">
+                <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">
                     <van-icon class="icon" name="close"></van-icon>
                   </span>
-                  <span v-else>
+                <span v-else>
                     <van-icon class="icon" name="close"></van-icon>
                   </span>
-                  <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
-                  <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
-                  <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
-                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">支付失败</span>
-                  <span v-else>交易未知</span>
-                </div>
-                <div @click="item_pass(index)">
-                  <router-link to="/details">详情</router-link>
-                </div>
+                <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
+                <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
+                <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
+                <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">支付失败</span>
+                <span v-else>交易未知</span>
+              </div>
+              <div @click="item_pass(index)">
+                <router-link to="/otc_out">详情</router-link>
               </div>
             </div>
-          </md-bill>
-        </div>
-        <!--订单详情-->
-        <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'sell'">
-          <md-bill
-            :title="item.pair.pair + ' 卖出'"
-            :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
-            water-mark="Bit-OX">
-            <md-detail-item title="委托数量">
-              <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
-            </md-detail-item>
-            <md-detail-item title="平均成交价">
-              <span v-if="!item.price">- -</span><span v-else>{{(Math.floor(item.price * 100) / 100).toFixed(3)}}</span>{{item.pair.pair}}
-            </md-detail-item>
-            <md-detail-item title="服务费">
-              <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
-              <div v-else><span>{{item.exchangeinstantordermodel.fee_cost}}</span>EPC</div>
-            </md-detail-item>
-            <md-detail-item title="实际到账">
-              <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}
-            </md-detail-item>
-            <div class="footer-slot" slot="footer">
-              <!--进度条-->
-              <div class="loding" v-if="item.state && !item.transfer_state"><van-progress :percentage="0" /></div>
-              <div class="loding" v-else-if="item.transfer_state && !item.exchange_state"><van-progress :percentage="50" /></div>
-              <div class="loding" v-if="item.exchange_state"><van-progress :percentage="100" /></div>
-              <!--支付状态-->
-              <div class="state">
-                <div class="complete" :class="{active: item.transfer_state === 'fail' || item.state === 'pending'}">
-                  <!--icon-->
-                  <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">
+          </div>
+        </md-bill>
+      </div>
+      <!--订单详情-->
+      <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'sell'">
+        <md-bill
+          :title="item.pair.pair + ' 卖出'"
+          :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
+          water-mark="Bit-OX">
+          <md-detail-item title="委托数量">
+            <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
+          </md-detail-item>
+          <md-detail-item title="平均成交价">
+            <span v-if="!item.price">- -</span><span v-else>{{(Math.floor(item.price * 100) / 100).toFixed(3)}}</span>{{item.pair.pair}}
+          </md-detail-item>
+          <md-detail-item title="服务费">
+            <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
+            <div v-else><span>{{item.exchangeinstantordermodel.fee_cost}}</span>EPC</div>
+          </md-detail-item>
+          <md-detail-item title="实际到账">
+            <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}
+          </md-detail-item>
+          <div class="footer-slot" slot="footer">
+            <!--进度条-->
+            <div class="loding" v-if="item.state && !item.transfer_state"><van-progress :percentage="0" /></div>
+            <div class="loding" v-else-if="item.transfer_state && !item.exchange_state"><van-progress :percentage="50" /></div>
+            <div class="loding" v-if="item.exchange_state"><van-progress :percentage="100" /></div>
+            <!--支付状态-->
+            <div class="state">
+              <div class="complete" :class="{active: item.transfer_state === 'fail' || item.state === 'pending'}">
+                <!--icon-->
+                <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">
                     <van-icon class="icon" name="passed"></van-icon>
                   </span>
-                  <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">
+                <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">
                     <van-icon class="icon" name="passed"></van-icon>
                   </span>
-                  <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">
+                <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">
                     <van-icon class="icon" name="passed"></van-icon>
                   </span>
-                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">
+                <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">
                     <van-icon class="icon" name="close"></van-icon>
                   </span>
-                  <span v-else>
+                <span v-else>
                     <van-icon class="icon" name="close"></van-icon>
                   </span>
-                  <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
-                  <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
-                  <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
-                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">支付失败</span>
-                  <span v-else>交易未知</span>
-                </div>
-                <div @click="item_pass(index)">
-                  <router-link to="/details">详情</router-link>
-                </div>
+                <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
+                <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
+                <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
+                <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">支付失败</span>
+                <span v-else>交易未知</span>
+              </div>
+              <div @click="item_pass(index)">
+                <router-link to="/details">详情</router-link>
               </div>
             </div>
-          </md-bill>
-        </div>
+          </div>
+        </md-bill>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
@@ -221,7 +218,7 @@ export default {
 </script>
 
 <style lang="less">
-  .bb_order{
+  .otc_details{
     font-size: 18px;
     /*标题头部*/
     .head{

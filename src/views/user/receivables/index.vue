@@ -22,19 +22,19 @@
           <div class="info">
             <!--收款名字-->
             <div class="name">
-              <input type="text" placeholder="姓名">
+              <input type="text" placeholder="姓名" v-model="user_name" @input="submit_inp">
             </div>
-            <!--收款信息-->
+            <!--收款账号-->
             <div class="account">
-              <input type="text" :placeholder="info[index].name">
+              <input type="text" :placeholder="info[index].name" v-model="user_acc" @input="submit_inp">
             </div>
             <!--银行名称-->
             <div class="bank_name" v-if="index === 2">
-              <input type="text" placeholder="银行名称">
+              <input type="text" placeholder="银行名称" v-model="user_bankname" @change="submit_inp">
             </div>
             <!--开户支行名称-->
             <div class="bank_account" v-if="index === 2">
-              <input type="text" placeholder="开户支行名称(选填)">
+              <input type="text" placeholder="开户支行名称(选填)" v-model="user_bacname" @input="submit_inp">
             </div>
           </div>
         </div>
@@ -82,7 +82,15 @@ export default {
         }
       ],
       index: 0,
-      submit: false
+      submit: false,
+      // 用户名
+      user_name: '',
+      // 用户账号
+      user_acc: '',
+      // 用户银行卡名称
+      user_bankname: '',
+      // 用户支行名称
+      user_bacname: ''
     }
   },
   methods: {
@@ -92,12 +100,94 @@ export default {
     // 切换收款方式
     account (i) {
       this.index = i
+      if (i === 0) {
+        if (localStorage.getItem('w_user_name')) {
+          this.user_name = localStorage.getItem('w_user_name')
+          this.user_acc = localStorage.getItem('w_user_acc')
+        } else {
+          this.user_name = ''
+          this.user_acc = ''
+          this.user_bankname = ''
+          this.user_bacname = ''
+        }
+      }
+      if (i === 1) {
+        if (localStorage.getItem('z_user_name')) {
+          this.user_name = localStorage.getItem('z_user_name')
+          this.user_acc = localStorage.getItem('z_user_acc')
+        } else {
+          this.user_name = ''
+          this.user_acc = ''
+          this.user_bankname = ''
+          this.user_bacname = ''
+        }
+      }
+      if (i === 2) {
+        if (localStorage.getItem('y_user_name')) {
+          this.user_name = localStorage.getItem('y_user_name')
+          this.user_acc = localStorage.getItem('y_user_acc')
+        } else {
+          this.user_name = ''
+          this.user_acc = ''
+          this.user_bankname = ''
+          this.user_bacname = ''
+        }
+      }
     },
     // 提交按钮
     but () {
-      if (this.submit) {
-        Toast('添加成功')
+      // this.submit = true
+      if (this.index !== 2) {
+        if (!this.user_acc || !this.user_name) {
+          Toast('信息不完整')
+        } else {
+          if (this.index === 0) {
+            localStorage.setItem('w_user_name', this.user_name)
+            localStorage.setItem('w_user_acc', this.user_acc)
+            Toast('添加成功')
+          } else {
+            localStorage.setItem('z_user_name', this.user_name)
+            localStorage.setItem('z_user_acc', this.user_acc)
+            Toast('添加成功')
+          }
+        }
+      } else {
+        if (!this.user_acc || !this.user_name || !this.user_bankname) {
+          Toast('信息不完整')
+        } else {
+          localStorage.setItem('y_user_name', this.user_name)
+          localStorage.setItem('y_user_acc', this.user_acc)
+          localStorage.setItem('y_user_bankname', this.user_bankname)
+          localStorage.setItem('y_user_bacname', this.user_bacname)
+          Toast('添加成功')
+        }
       }
+    },
+    // 监听输入框
+    submit_inp () {
+      if (this.index !== 2) {
+        if (this.user_name && this.user_acc) {
+          this.submit = true
+        } else {
+          this.submit = false
+        }
+      } else {
+        if (this.user_name && this.user_acc && this.user_bankname) {
+          this.submit = true
+        } else {
+          this.submit = false
+        }
+      }
+    }
+  },
+  activated () {
+    // 用户名
+    if (localStorage.getItem('w_user_name')) {
+      this.user_name = localStorage.getItem('w_user_name')
+    }
+    // 用户账号
+    if (localStorage.getItem('w_user_acc')) {
+      this.user_acc = localStorage.getItem('w_user_acc')
     }
   },
   components: {

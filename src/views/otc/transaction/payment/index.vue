@@ -25,7 +25,7 @@
             <span class="WeChat" v-if="index === 1">需 0.1 元转账手续费</span>
           </div>
           <!--付款说明-->
-          <div class="explain" v-if="index === 0">需实名验证</div>
+          <div class="explain" v-if="index === 0 && on_hook !== 0">需实名验证</div>
           <div class="hook" v-if="index === on_hook">
             <van-icon name="success" />
           </div>
@@ -58,7 +58,8 @@ export default {
         }
       ],
       on_hook: Number,
-      but: false
+      but: false,
+      index: 0
     }
   },
   methods: {
@@ -68,6 +69,7 @@ export default {
     },
     // 选择收款去向
     mode_click (i) {
+      this.index = i
       if (i !== 0) {
         this.on_hook = i
         this.but = true
@@ -78,6 +80,8 @@ export default {
         }).then(() => {
           // on confirm
           console.log('确定')
+          this.but = true
+          this.on_hook = i
         }).catch(() => {
           // on cancel
           console.log('取消')
@@ -94,9 +98,37 @@ export default {
         }
       } else {
         if (this.but) {
-          this.$router.push({
-            path: '/receivables'
-          })
+          if (this.index === 0) {
+            if (localStorage.getItem('y_user_name')) {
+              this.$router.push({
+                path: '/otc_out'
+              })
+            } else {
+              this.$router.push({
+                path: '/receivables'
+              })
+            }
+          } else if (this.index === 1) {
+            if (localStorage.getItem('w_user_name')) {
+              this.$router.push({
+                path: '/otc_out'
+              })
+            } else {
+              this.$router.push({
+                path: '/receivables'
+              })
+            }
+          } else {
+            if (localStorage.getItem('z_user_name')) {
+              this.$router.push({
+                path: '/otc_out'
+              })
+            } else {
+              this.$router.push({
+                path: '/receivables'
+              })
+            }
+          }
         }
       }
     }

@@ -79,12 +79,12 @@
     <!--币币作用页-->
     <div class="Effect">
       <!--法币订单记录-->
-<!--      <a class="Effect_box">-->
-<!--        <div class="money">-->
-<!--          <van-icon class="icon" name="youzan-shield"></van-icon>法币订单记录-->
-<!--        </div>-->
-<!--        <div class="Arrow">></div>-->
-<!--      </a>-->
+      <router-link to="/otc_details" class="Effect_box">
+        <div class="money">
+          <van-icon class="icon" name="youzan-shield"></van-icon>法币订单记录
+        </div>
+        <div class="Arrow">></div>
+      </router-link>
       <!--币币订单记录-->
       <router-link to="/bb_order" class="Effect_box">
         <div class="money">
@@ -103,19 +103,19 @@
         <div class="Arrow">></div>
       </router-link>
       <!--收款方式-->
-<!--      <router-link to="/" class="Effect_box">-->
-<!--        <div class="money">-->
-<!--          <van-icon class="icon" name="youzan-shield"></van-icon>收款方式-->
-<!--        </div>-->
-<!--        <div class="Arrow">></div>-->
-<!--      </router-link>-->
+      <router-link to="/receivables" class="Effect_box">
+        <div class="money">
+          <van-icon class="icon" name="youzan-shield"></van-icon>收款方式
+        </div>
+        <div class="Arrow">></div>
+      </router-link>
       <!--账号关联-->
-<!--      <router-link to="/account" class="Effect_box">-->
-<!--        <div class="money">-->
-<!--          <van-icon class="icon" name="youzan-shield"></van-icon>账号关联-->
-<!--        </div>-->
-<!--        <div class="Arrow">></div>-->
-<!--      </router-link>-->
+      <router-link to="/account" class="Effect_box">
+        <div class="money">
+          <van-icon class="icon" name="youzan-shield"></van-icon>账号关联
+        </div>
+        <div class="Arrow">></div>
+      </router-link>
     </div>
     <!--退出-->
     <div class="Effect">
