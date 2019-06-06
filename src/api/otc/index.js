@@ -34,6 +34,20 @@ const otc = {
     return axios.get(`${base.base_api}/otc/pairs/${id}/`, {
       params: params
     })
+  },
+  // 付款方式
+  payment_patch (params) {
+    return axios.patch(`${base.base_api}/otc/payment_method/`, qs.stringify(params))
+  },
+  // 购买金额数量
+  orders_post (params) {
+    return axios.post(`${base.base_api}/otc/orders/`, qs.stringify(params))
+  },
+  // 购买金额数量
+  orders_get (id, params) {
+    return axios.get(`${base.base_api}/otc/orders/${id}/`, {
+      params: params
+    })
   }
 }
 

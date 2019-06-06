@@ -15,7 +15,7 @@
             <div>2019/0603 15:24</div>
           </div>
           <!--购买转账人-->
-          <div class="turn_name">你向 陈大仙 购买 1.4 USDT</div>
+          <div class="turn_name">你向 {{data.merchant.alipay_name}} 购买 {{data.price}} USDT</div>
           <!--单价-->
           <div class="price">
             <div class="unit">
@@ -106,7 +106,8 @@ export default {
         }
       ],
       item: true,
-      show: false
+      show: false,
+      data: []
     }
   },
   methods: {
@@ -177,8 +178,12 @@ export default {
       Toast('取消成功')
     }
   },
-  mounted () {
+  async mounted () {
     this.StartCountDown()
+    console.log(this.$route.params.id)
+    const { data } = await this.$api.otc.orders_get(this.$route.params.id)
+    this.data = data.data
+    console.log(this.data)
   },
   components: {
     [NavBar.name]: NavBar,

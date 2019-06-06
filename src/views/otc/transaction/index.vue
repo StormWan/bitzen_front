@@ -53,8 +53,8 @@
                   <md-input-item
                     type="money"
                     v-model="inp_market"
-                    title="预估到账 BTC 数量"
-                    placeholder="预估到账 BTC 数量"
+                    :title="'预估到账' + symbol_name + '数量'"
+                    :placeholder="'预估到账' + symbol_name + '数量'"
                     is-title-latent
                     clearable
                     :size="result_monitoring"
@@ -63,7 +63,7 @@
                   ></md-input-item>
                 </md-field>
                 <!--下单提示说明-->
-                <div class="ts_text">到账<span>{{CNY}}</span>数量以<span>实际交割价</span>为准</div>
+                <div class="ts_text" v-if="Receive.pair">到账<span>{{symbol_name}}</span>数量以<span>实际交割价</span>为准</div>
               </div>
             </div>
           </van-tab>
@@ -90,8 +90,8 @@
                     type="money"
                     v-model="inp_market"
                     :size="result_monitoring"
-                    title="CNY 金额"
-                    placeholder="CNY 金额"
+                    :title="'卖出' + symbol_name + '数量'"
+                    :placeholder="'卖出' + symbol_name + '数量'"
                     is-title-latent
                     clearable
                     @focus="foc_market"
@@ -102,8 +102,8 @@
                   <md-input-item
                     type="money"
                     v-model="inp_CNY"
-                    title="预估到账 BTC 数量"
-                    placeholder="预估到账 BTC 数量"
+                    title="预估到账 CNY 金额"
+                    placeholder="预估到账 CNY 金额"
                     is-title-latent
                     clearable
                     :size="input_monitoring"
@@ -197,13 +197,8 @@ export default {
       // 接收数据
       Receive: [],
       active_index: 0,
-      least_Number: 1,
-      most_Number: 5000,
-      most_money: 34000.00,
-      CNY: 'CNY',
       inp_CNY: '',
       inp_market: '',
-      aa: [],
       Tips: '',
       beyond: false,
       Place_active: false,
@@ -266,7 +261,7 @@ export default {
         this.Receive = data.data
         this.title_img = this.Receive.asset.icon_url
         this.symbol_name = this.Receive.asset.symbol
-        console.log(this.Receive)
+        this.Tips_name = ''
         // 标题判断是否相同
         if (this.Receive.asset.name === this.Receive.asset.symbol) {
           this.title = this.Receive.asset.symbol
@@ -301,10 +296,31 @@ export default {
       this.buy_money()
     },
     // 下单按钮
-    but_submit (e) {
-      sessionStorage.setItem('page', this.active_index)
-      this.$router.push(`/payment`)
+    async but_submit (e) {
       if (this.Place_active === true) {
+        sessionStorage.setItem('page', this.active_index)
+        this.$router.push(`/payment`)
+        let side = ''
+        // eslint-disable-next-line no-unused-vars
+        let price = ''
+        if (this.active_index === 0) {
+          side = 'buy'
+        } else {
+          side = 'sell'
+        }
+        if (this.Receive.pair) {
+          price = this.buy_Price
+        } else {
+          if (this.active_index === 0) {
+            price = this.buy_price
+          } else {
+            price = this.sell_price
+          }
+        }
+        sessionStorage.setItem('otc_pair', this.Receive.id)
+        sessionStorage.setItem('side', side)
+        sessionStorage.setItem('amount', this.inp_market)
+        sessionStorage.setItem('price', price)
       }
     },
     // 钱包选择付款
@@ -415,7 +431,6 @@ export default {
               that.Place_active = true
               that.beyond = false
             } else {
-              console.log('出')
               // 输入提示提示
               that.beyond = true
               that.Place_active = false

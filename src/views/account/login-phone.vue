@@ -66,6 +66,7 @@ export default {
     async submit () {
       Toast.loading('加载中...')
       const { data } = await this.$api.account.auth({ phone: this.phone, area_code: this.areaCode })
+      console.log(data)
       Toast.hide()
       if (data.code === 200) {
         // console.log(data.data)

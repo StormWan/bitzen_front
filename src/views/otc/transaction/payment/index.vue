@@ -3,7 +3,7 @@
       <!--标题-->
       <div class="title">
         <van-nav-bar
-          title="收款方式"
+          :title="title"
           left-arrow
           @click-left="onClickLeft"
         />
@@ -59,7 +59,9 @@ export default {
       ],
       on_hook: Number,
       but: false,
-      index: 0
+      index: 0,
+      title: '',
+      data: []
     }
   },
   methods: {
@@ -80,8 +82,11 @@ export default {
         }).then(() => {
           // on confirm
           console.log('确定')
+          this.$router.push({
+            path: '/real_name'
+          })
           this.but = true
-          this.on_hook = i
+          // this.on_hook = i
         }).catch(() => {
           // on cancel
           console.log('取消')
@@ -89,19 +94,44 @@ export default {
       }
     },
     // 点击提交按钮
-    but_click () {
-      if (sessionStorage.getItem('page') === '0') {
-        if (this.but) {
-          this.$router.push({
-            path: '/otc_order'
-          })
+    async but_click () {
+      if (this.but) {
+        // eslint-disable-next-line camelcase,no-unused-vars
+        let payment_method = ''
+        if (this.index === 0) {
+          // eslint-disable-next-line camelcase
+          payment_method = 'bank'
+        } else if (this.index === 1) {
+          // eslint-disable-next-line camelcase
+          payment_method = 'wechat'
+        } else {
+          // eslint-disable-next-line camelcase
+          payment_method = 'alipay'
         }
-      } else {
-        if (this.but) {
+        // eslint-disable-next-line camelcase
+        let otc_pair = sessionStorage.getItem('otc_pair')
+        let side = sessionStorage.getItem('side')
+        let amount = sessionStorage.getItem('amount')
+        let price = sessionStorage.getItem('price')
+        const { data } = await this.$api.otc.orders_post({ otc_pair: otc_pair, side: side, amount: amount, price: price, payment_method: payment_method })
+        const id = data.data.id
+        if (sessionStorage.getItem('page') === '0') {
+          this.$router.push({
+            name: 'otc_order',
+            params: {
+              id: id
+            }
+          })
+        } else {
+          const { data } = await this.$api.otc.orders_post({ otc_pair: otc_pair, side: side, amount: amount, price: price, payment_method: payment_method })
+          const id = data.data.id
           if (this.index === 0) {
-            if (localStorage.getItem('y_user_name')) {
+            if (this.data.bank_account_name) {
               this.$router.push({
-                path: '/otc_out'
+                name: 'otc_out',
+                params: {
+                  id: id
+                }
               })
             } else {
               this.$router.push({
@@ -109,9 +139,12 @@ export default {
               })
             }
           } else if (this.index === 1) {
-            if (localStorage.getItem('w_user_name')) {
+            if (this.data.wechat_name) {
               this.$router.push({
-                path: '/otc_out'
+                name: 'otc_out',
+                params: {
+                  id: id
+                }
               })
             } else {
               this.$router.push({
@@ -119,9 +152,12 @@ export default {
               })
             }
           } else {
-            if (localStorage.getItem('z_user_name')) {
+            if (this.data.alipay_name) {
               this.$router.push({
-                path: '/otc_out'
+                name: 'otc_out',
+                params: {
+                  id: id
+                }
               })
             } else {
               this.$router.push({
@@ -137,6 +173,15 @@ export default {
     [NavBar.name]: NavBar,
     [Icon.name]: Icon,
     [Dialog.name]: Dialog
+  },
+  async activated () {
+    if (sessionStorage.getItem('page') === '0') {
+      this.title = '付款方式'
+    } else {
+      this.title = '收款方式'
+    }
+    const { data } = await this.$api.otc.payment_patch()
+    this.data = data.data
   }
 }
 </script>

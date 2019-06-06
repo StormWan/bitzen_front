@@ -153,6 +153,7 @@
         <div class="Arrow">></div>
       </a>
     </div>
+    <div class="hei"></div>
   </div>
 </template>
 
@@ -250,6 +251,9 @@ export default {
     font-size: 16px;
   }
   .user{
+    .hei{
+      height: 50px;
+    }
     font-size: 16px;
     padding-bottom: 50px;
     height: 100%;

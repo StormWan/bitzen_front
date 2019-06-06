@@ -10,7 +10,7 @@
       </div>
       <div class="content">
         <!--头部收款账号说明-->
-        <header>绑定收款账号</header>
+        <header>绑定 <span>{{info[index].name}}</span> 收款账号</header>
         <!--收款logo与信息-->
         <div class="logo_info">
           <!--收款logo-->
@@ -90,7 +90,8 @@ export default {
       // 用户银行卡名称
       user_bankname: '',
       // 用户支行名称
-      user_bacname: ''
+      user_bacname: '',
+      data: []
     }
   },
   methods: {
@@ -100,10 +101,14 @@ export default {
     // 切换收款方式
     account (i) {
       this.index = i
-      if (i === 0) {
-        if (localStorage.getItem('w_user_name')) {
-          this.user_name = localStorage.getItem('w_user_name')
-          this.user_acc = localStorage.getItem('w_user_acc')
+      this.user()
+    },
+    user () {
+      this.submit = false
+      if (this.index === 0) {
+        if (this.data.wechat_name && this.data.wechat_account) {
+          this.user_name = this.data.wechat_name
+          this.user_acc = this.data.wechat_account
         } else {
           this.user_name = ''
           this.user_acc = ''
@@ -111,10 +116,10 @@ export default {
           this.user_bacname = ''
         }
       }
-      if (i === 1) {
-        if (localStorage.getItem('z_user_name')) {
-          this.user_name = localStorage.getItem('z_user_name')
-          this.user_acc = localStorage.getItem('z_user_acc')
+      if (this.index === 1) {
+        if (this.data.alipay_name && this.data.alipay_account) {
+          this.user_name = this.data.alipay_name
+          this.user_acc = this.data.alipay_account
         } else {
           this.user_name = ''
           this.user_acc = ''
@@ -122,10 +127,14 @@ export default {
           this.user_bacname = ''
         }
       }
-      if (i === 2) {
-        if (localStorage.getItem('y_user_name')) {
-          this.user_name = localStorage.getItem('y_user_name')
-          this.user_acc = localStorage.getItem('y_user_acc')
+      if (this.index === 2) {
+        if (this.data.bank_account_name && this.data.bank_account_number && this.data.bank_branch_name) {
+          this.user_name = this.data.bank_account_name
+          this.user_acc = this.data.bank_account_number
+          this.user_bankname = this.data.bank_branch_name
+          if (this.data.bank_name) {
+            this.user_bacname = this.data.bank_name
+          }
         } else {
           this.user_name = ''
           this.user_acc = ''
@@ -135,32 +144,31 @@ export default {
       }
     },
     // 提交按钮
-    but () {
-      // this.submit = true
-      if (this.index !== 2) {
-        if (!this.user_acc || !this.user_name) {
-          Toast('信息不完整')
-        } else {
-          if (this.index === 0) {
-            localStorage.setItem('w_user_name', this.user_name)
-            localStorage.setItem('w_user_acc', this.user_acc)
-            Toast('添加成功')
+    async but () {
+      if (this.submit) {
+        if (this.index !== 2) {
+          if (!this.user_acc || !this.user_name) {
+            Toast('信息不完整')
           } else {
-            localStorage.setItem('z_user_name', this.user_name)
-            localStorage.setItem('z_user_acc', this.user_acc)
+            if (this.index === 0) {
+              await this.$api.otc.payment_patch({ wechat_name: this.user_name, wechat_account: this.user_acc })
+              Toast('添加成功')
+            } else {
+              await this.$api.otc.payment_patch({ alipay_name: this.user_name, alipay_account: this.user_acc })
+              Toast('添加成功')
+            }
+          }
+        } else {
+          if (!this.user_acc || !this.user_name || !this.user_bankname) {
+            Toast('信息不完整')
+          } else {
+            await this.$api.otc.payment_patch({ bank_account_name: this.user_name, bank_account_number: this.user_acc, bank_branch_name: this.user_bankname, bank_name: this.user_bacname })
             Toast('添加成功')
           }
         }
-      } else {
-        if (!this.user_acc || !this.user_name || !this.user_bankname) {
-          Toast('信息不完整')
-        } else {
-          localStorage.setItem('y_user_name', this.user_name)
-          localStorage.setItem('y_user_acc', this.user_acc)
-          localStorage.setItem('y_user_bankname', this.user_bankname)
-          localStorage.setItem('y_user_bacname', this.user_bacname)
-          Toast('添加成功')
-        }
+        const { data } = await this.$api.otc.payment_patch()
+        this.data = data.data
+        this.user()
       }
     },
     // 监听输入框
@@ -180,14 +188,18 @@ export default {
       }
     }
   },
-  activated () {
+  async activated () {
+    const { data } = await this.$api.otc.payment_patch()
+    if (data.code === 200) {
+      this.data = data.data
+    }
     // 用户名
-    if (localStorage.getItem('w_user_name')) {
-      this.user_name = localStorage.getItem('w_user_name')
+    if (this.data.wechat_name) {
+      this.user_name = this.data.wechat_name
     }
     // 用户账号
-    if (localStorage.getItem('w_user_acc')) {
-      this.user_acc = localStorage.getItem('w_user_acc')
+    if (this.data.wechat_account) {
+      this.user_acc = this.data.wechat_account
     }
   },
   components: {
@@ -207,6 +219,10 @@ export default {
       header{
         line-height: 60px;
         font-size: 20px;
+        span{
+          font-size: 18px;
+          color: red;
+        }
       }
       /*logo与信息*/
       .logo_info{

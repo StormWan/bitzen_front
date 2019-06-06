@@ -255,6 +255,7 @@ export default {
   },
   mounted () {
     this.StartCountDown()
+    console.log(this.$route.params.id)
   },
   components: {
     [NavBar.name]: NavBar,
