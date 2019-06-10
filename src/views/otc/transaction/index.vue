@@ -296,17 +296,29 @@ export default {
       this.buy_money()
     },
     // 下单按钮
-    async but_submit (e) {
-      if (this.Place_active === true) {
+    but_submit () {
+      // quote
+      if (this.Place_active) {
         sessionStorage.setItem('page', this.active_index)
-        this.$router.push(`/payment`)
+        this.$router.push({
+          path: '/payment'
+        })
         let side = ''
         // eslint-disable-next-line no-unused-vars
+        let symbol = ''
+        // eslint-disable-next-line no-unused-vars
         let price = ''
+        // eslint-disable-next-line camelcase
+        let inp_data = ''
         if (this.active_index === 0) {
           side = 'buy'
+          // eslint-disable-next-line camelcase
+          inp_data = this.inp_CNY
         } else {
           side = 'sell'
+          symbol = this.Receive.pair.quote.symbol
+          // eslint-disable-next-line camelcase
+          inp_data = this.inp_market
         }
         if (this.Receive.pair) {
           price = this.buy_Price
@@ -317,10 +329,14 @@ export default {
             price = this.sell_price
           }
         }
-        sessionStorage.setItem('otc_pair', this.Receive.id)
-        sessionStorage.setItem('side', side)
-        sessionStorage.setItem('amount', this.inp_market)
-        sessionStorage.setItem('price', price)
+        let Obj = {
+          otc_pair: this.Receive.id,
+          side: side,
+          amount: inp_data,
+          price: price,
+          symbol: symbol
+        }
+        sessionStorage.setItem('Obj', JSON.stringify(Obj))
       }
     },
     // 钱包选择付款

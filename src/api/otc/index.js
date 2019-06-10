@@ -48,7 +48,21 @@ const otc = {
     return axios.get(`${base.base_api}/otc/orders/${id}/`, {
       params: params
     })
+  },
+  // 列表
+  orders_lis () {
+    return axios.get(`${base.base_api}/otc/orders/`)
+  },
+  // 状态
+  orders_patch (id, params) {
+    return axios.patch(`${base.base_api}/otc/orders/${id}/`, qs.stringify(params))
   }
 }
 
 export default otc
+
+
+
+
+
+

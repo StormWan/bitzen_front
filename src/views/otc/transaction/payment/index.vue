@@ -96,7 +96,7 @@ export default {
     // 点击提交按钮
     async but_click () {
       if (this.but) {
-        // eslint-disable-next-line camelcase,no-unused-vars
+        // eslint-disable-next-line camelcase
         let payment_method = ''
         if (this.index === 0) {
           // eslint-disable-next-line camelcase
@@ -108,14 +108,12 @@ export default {
           // eslint-disable-next-line camelcase
           payment_method = 'alipay'
         }
-        // eslint-disable-next-line camelcase
-        let otc_pair = sessionStorage.getItem('otc_pair')
-        let side = sessionStorage.getItem('side')
-        let amount = sessionStorage.getItem('amount')
-        let price = sessionStorage.getItem('price')
-        const { data } = await this.$api.otc.orders_post({ otc_pair: otc_pair, side: side, amount: amount, price: price, payment_method: payment_method })
-        const id = data.data.id
+        let Obj = JSON.parse(sessionStorage.getItem('Obj'))
+        // 买入时做的事情
         if (sessionStorage.getItem('page') === '0') {
+          let { data } = await this.$api.otc.orders_post({ otc_pair: Obj.otc_pair, side: Obj.side, currency_amount: Obj.amount, price: Obj.price, symbol: Obj.symbol, payment_method: payment_method })
+          const id = data.data.id
+          // 创建订单时的事情
           this.$router.push({
             name: 'otc_order',
             params: {
@@ -123,9 +121,11 @@ export default {
             }
           })
         } else {
-          const { data } = await this.$api.otc.orders_post({ otc_pair: otc_pair, side: side, amount: amount, price: price, payment_method: payment_method })
+          let { data } = await this.$api.otc.orders_post({ otc_pair: Obj.otc_pair, side: Obj.side, asset_amount: Obj.amount, price: Obj.price, payment_method: payment_method })
           const id = data.data.id
+          // 卖出时做的事情
           if (this.index === 0) {
+            // 银行收款的时候做的事情
             if (this.data.bank_account_name) {
               this.$router.push({
                 name: 'otc_out',
@@ -134,11 +134,13 @@ export default {
                 }
               })
             } else {
+              // 如果没有收款账号，跳转填入信息页面
               this.$router.push({
                 path: '/receivables'
               })
             }
           } else if (this.index === 1) {
+            // 微信收款时做的事情
             if (this.data.wechat_name) {
               this.$router.push({
                 name: 'otc_out',
@@ -147,11 +149,13 @@ export default {
                 }
               })
             } else {
+              // 如果没有收款账号，跳转填入信息页面
               this.$router.push({
                 path: '/receivables'
               })
             }
           } else {
+            // 支付宝收款做的事情
             if (this.data.alipay_name) {
               this.$router.push({
                 name: 'otc_out',
@@ -160,6 +164,7 @@ export default {
                 }
               })
             } else {
+              // 如果没有收款账号，跳转填入信息页面
               this.$router.push({
                 path: '/receivables'
               })
@@ -180,7 +185,7 @@ export default {
     } else {
       this.title = '收款方式'
     }
-    const { data } = await this.$api.otc.payment_patch()
+    let { data } = await this.$api.otc.payment_patch()
     this.data = data.data
   }
 }

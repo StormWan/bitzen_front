@@ -137,6 +137,10 @@ export default {
     }
   },
   methods: {
+    async api () {
+      const { data } = await this.$api.otc.orders_lis()
+      console.log(data)
+    },
     // 传输
     item_pass (i) {
       // 纯时间
@@ -146,6 +150,7 @@ export default {
       month = date.getMonth() + 1
       day = date.getDate()
       result = year.toString() + (month > 9 ? month : '0' + month) + (day > 9 ? day : '0' + day)
+      console.log(result)
       // eslint-disable-next-line camelcase
       let obj_data = {
         item: result + this.order[i].created.substring(11, 13) + this.order[i].created.substring(14, 16) + this.order[i].created.substring(17, 19) + this.order[i].created.substring(20, 26),
@@ -162,40 +167,14 @@ export default {
         transfer_state: this.order[i].transfer_state
       }
       localStorage.setItem('obj_data', JSON.stringify(obj_data))
-      // let item = result + this.order[i].created.substring(11, 13) + this.order[i].created.substring(14, 16) + this.order[i].created.substring(17, 19) + this.order[i].created.substring(20, 26)
-      // localStorage.setItem('item_pure', item)
-
-      // 时间排序
-      // localStorage.setItem('item_pow', this.order[i].created.substring(0, 10) + ' ' + this.order[i].created.substring(11, 19))
-
-      // 价格
-      // localStorage.setItem('price', this.order[i].price)
-
-      // 买入卖出
-      // localStorage.setItem('side', this.order[i].side)
-      // 订单金额
-      // localStorage.setItem('pay_amount', this.order[i].pay_amount)
-
-      // 市列表
-      // localStorage.setItem('pair', this.order[i].pair.pair)
-
-      // 成交市名
-      // localStorage.setItem('symbol', this.order[i].pair.base.symbol)
-
-      // 成交USDT
-      // localStorage.setItem('pay_asset', this.order[i].pay_asset.symbol)
-
-      // 成交获得
-      // localStorage.setItem('pair_price', this.order[i].exchangeinstantordermodel.cost)
     },
     Arrow () {
       this.$router.go(-1)
     },
     // 获取数据
-    async getPair (id) {
+    async getPair () {
       const { data } = await this.$api.bb.orders()
       if (data.code === 200) {
-        // this.order.push(data.data)
         this.order = data.data
         console.log(this.order)
       } else {
@@ -212,7 +191,10 @@ export default {
     [Tag.name]: Tag
   },
   async mounted () {
-    await this.getPair(1)
+    await this.getPair()
+    await this.api()
+    // const { data } = await this.$api.otc.orders_post()
+    // console.log(data)
   }
 }
 </script>
@@ -231,9 +213,6 @@ export default {
         position: absolute;
         left: 10%;
         font-size: 20px;
-        .icon{
-          /*vertical-align: middle;*/
-        }
       }
     }
     .BG{
