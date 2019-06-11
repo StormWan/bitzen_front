@@ -60,9 +60,3 @@ const otc = {
 }
 
 export default otc
-
-
-
-
-
-

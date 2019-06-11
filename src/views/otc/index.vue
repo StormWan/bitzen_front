@@ -1,8 +1,8 @@
 <template>
   <div class="Legal_currency">
-    <div class="header"> 法 币 </div>
+<!--    <div class="header"> 法 币 </div>-->
     <div class="title_bos">
-      <div>市场 / 成交量</div>
+      <div>市场</div>
       <div>最新价</div>
       <div>涨跌幅</div>
     </div>
@@ -18,21 +18,20 @@
       <!--价格-->
       <div class="Price_icon">
         <p class="Price">
-          <span class="Price_box" v-if="item.asset.symbol.search('USDT') !== -1">{{Math.round(item.setting.usdt_buy_price * 10000000) / 10000000}}</span>
-          <span class="Price_box" v-else>{{Math.round(item.pair.bestorderbookmodel.best_buy_price * 10000000) / 10000000}}</span>
+          <span class="Price_box" v-if="item.asset.symbol.search('USDT') !== -1">{{Math.round(item.setting.usdt_buy_price * 100) / 100}}</span>
+          <span class="Price_box" v-else>{{Math.round((item.pair.bestorderbookmodel.best_buy_price * item.setting.usdt_buy_price) * 100) / 100}}</span>
           <span class="name">{{item.mode}}</span>
         </p>
         <p class="icon">
           <span class="icon_fire">
-            <van-icon name="fire" color="#00BFFF" />
+            <img :src="item.asset.icon_url" alt="">
           </span>
-<!--          <span class="name">{{item.market}}/{{item.currency}}</span>-->
           <span class="name" v-if="item.pair">{{item.pair.pair}}</span>
           <span class="name" v-else>{{item.asset.symbol}}</span>
         </p>
       </div>
       <!--按钮-->
-      <div class="Fall_rise" v-if="item.pair" :class="{active: item.pair.bestorderbookmodel.change.toString().charAt(0) === '-'}">{{Math.floor(item.pair.bestorderbookmodel.change * 1000) / 1000}}%</div>
+      <div class="Fall_rise" v-if="item.pair" :class="{active: item.pair.bestorderbookmodel.percentage.toString().charAt(0) === '-'}">{{Math.floor(item.pair.bestorderbookmodel.percentage * 1000) / 1000}}%</div>
       <div class="Fall_rise" v-else>购买</div>
     </div>
   </div>
@@ -72,6 +71,7 @@ export default {
         Toast('服务器异常,请稍后再试')
       } else {
         this.Market_label = data.data
+        console.log(data.data)
       }
     }
   },
@@ -91,7 +91,7 @@ export default {
       } else {
         clearInterval(set)
       }
-    }, 1000)
+    }, 2000)
   },
   watch: {
     '$route' () {
@@ -129,7 +129,7 @@ export default {
     }
     /*行情标签*/
     .Mala{
-      width: 90%;
+      width: 95%;
       margin: 10px auto;
       display: flex;
       align-items: center;
@@ -172,10 +172,11 @@ export default {
       /*价格*/
       .Price_icon{
         font-size: 14px;
+        width: 24%;
         /*价格详情*/
         .Price{
           margin-bottom: 5px;
-          text-align: right;
+          text-align: left;
           .Price_box{
             color: #FF4500;
             font-size: 18px;
@@ -189,9 +190,17 @@ export default {
         /*币币名称图标*/
         .icon{
           font-size: 15px;
-          text-align: right;
+          text-align: left;
           .icon_fire{
+            font-size: 0;
+            display: inline-block;
             font-size: 15px;
+            width: 15px;
+            height: 15px;
+            vertical-align: middle;
+            img{
+              width: 100%;
+            }
           }
           .name{
             font-size: 12px;

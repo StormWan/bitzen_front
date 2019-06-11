@@ -48,7 +48,7 @@
                     clearable
                     :maxlength="input_mon_size"
                   ></md-input-item>
-                  <div class="CNY_money" v-if="beyond">超出下单范围</div>
+                  <div class="CNY_money" v-if="beyond">请填入正确金额</div>
                   <!--预估到账-->
                   <md-input-item
                     type="money"
@@ -305,8 +305,6 @@ export default {
         })
         let side = ''
         // eslint-disable-next-line no-unused-vars
-        let symbol = ''
-        // eslint-disable-next-line no-unused-vars
         let price = ''
         // eslint-disable-next-line camelcase
         let inp_data = ''
@@ -316,7 +314,6 @@ export default {
           inp_data = this.inp_CNY
         } else {
           side = 'sell'
-          symbol = this.Receive.pair.quote.symbol
           // eslint-disable-next-line camelcase
           inp_data = this.inp_market
         }
@@ -333,8 +330,7 @@ export default {
           otc_pair: this.Receive.id,
           side: side,
           amount: inp_data,
-          price: price,
-          symbol: symbol
+          price: price
         }
         sessionStorage.setItem('Obj', JSON.stringify(Obj))
       }
@@ -500,11 +496,13 @@ export default {
       } else {
         clearInterval(set)
       }
-    }, 93000)
+    }, 3000)
   },
   watch: {
     '$route' () {
       this.set = false
+      this.inp_market = ''
+      this.inp_CNY = ''
     }
   }
 }

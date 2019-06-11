@@ -13,18 +13,18 @@
       <!--订单详情-->
       <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'buy'">
         <md-bill
-          :title="'卖出 ' + item.pair.base.symbol"
+          :title="'买入 ' + item.otc_pair.asset.symbol"
           :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
           water-mark="Bit-OX">
           <md-detail-item title="数量">
-            <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
+            <span>{{item.usdt_amount}} </span>{{item.otc_pair.asset.symbol}}
           </md-detail-item>
           <md-detail-item title="价格">
-            <span v-if="!item.price">- -</span><span v-else>{{(Math.floor(item.price * 100) / 100).toFixed(3)}}</span>{{item.pair.pair}}
+            <span v-if="!item.usdt_price">- -</span><span v-else>{{Math.floor(item.usdt_price * 1000) / 1000}}</span>CNY/{{item.otc_pair.asset.symbol}}
           </md-detail-item>
           <md-detail-item title="总价">
-            <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
-            <div v-else><span>{{item.exchangeinstantordermodel.fee_cost}}</span>EPC</div>
+            <div v-if="!item"><span>- -</span></div>
+            <div v-else><span>{{item.currency_amount}}</span>CNY</div>
           </md-detail-item>
           <div class="footer-slot" slot="footer">
             <!--进度条-->
@@ -35,29 +35,31 @@
             <div class="state">
               <div class="complete" :class="{active: item.transfer_state === 'fail' || item.state === 'pending'}">
                 <!--icon-->
-                <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">
-                    <van-icon class="icon" name="passed"></van-icon>
-                  </span>
-                <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">
-                    <van-icon class="icon" name="passed"></van-icon>
-                  </span>
-                <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">
-                    <van-icon class="icon" name="passed"></van-icon>
-                  </span>
-                <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">
-                    <van-icon class="icon" name="close"></van-icon>
-                  </span>
+                <span v-if="item.status === 0">
+                  <van-icon class="icon" name="clock-o"></van-icon>
+                </span>
+                <span v-else-if="item.status === 1">
+                  <van-icon class="icon" name="cash-back-record"></van-icon>
+                </span>
+                <span v-else-if="item.status === 11 || item.status === 12">
+                  <van-icon class="icon" name="exchange"></van-icon>
+                </span>
+                <span v-else-if="item.status === 2">
+                  <van-icon class="icon" name="certificate"></van-icon>
+                </span>
                 <span v-else>
-                    <van-icon class="icon" name="close"></van-icon>
-                  </span>
-                <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
-                <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
-                <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
-                <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">支付失败</span>
+                  <van-icon class="icon active" name="close"></van-icon>
+                </span>
+                <span v-if="item.status === 0">待转账</span>
+                <span v-else-if="item.status === 1">已确认转账</span>
+                <span v-else-if="item.status === 11">等待承兑商释放USDT</span>
+                <span v-else-if="item.status === 12">承兑商已经释放USDT</span>
+                <span v-else-if="item.status === 30" class="active">取消</span>
+                <span v-else-if="item.status === 2">完成</span>
                 <span v-else>交易未知</span>
               </div>
               <div @click="item_pass(index)">
-                <router-link to="/otc_out">详情</router-link>
+                <a>详情</a>
               </div>
             </div>
           </div>
@@ -66,54 +68,57 @@
       <!--订单详情-->
       <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'sell'">
         <md-bill
-          :title="item.pair.pair + ' 卖出'"
+          :title="'卖出 ' + item.otc_pair.asset.symbol"
           :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
           water-mark="Bit-OX">
-          <md-detail-item title="委托数量">
-            <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
+          <md-detail-item title="数量">
+            <span>{{item.asset_amount}} </span>{{item.otc_pair.asset.symbol}}
           </md-detail-item>
-          <md-detail-item title="平均成交价">
-            <span v-if="!item.price">- -</span><span v-else>{{(Math.floor(item.price * 100) / 100).toFixed(3)}}</span>{{item.pair.pair}}
+          <md-detail-item title="价格">
+            <span v-if="!item.usdt_price">- -</span><span v-else>{{Math.floor(item.usdt_price * 1000) / 1000}}</span>CNY/{{item.otc_pair.asset.symbol}}
           </md-detail-item>
-          <md-detail-item title="服务费">
-            <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
-            <div v-else><span>{{item.exchangeinstantordermodel.fee_cost}}</span>EPC</div>
-          </md-detail-item>
-          <md-detail-item title="实际到账">
-            <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}
+          <md-detail-item title="总价">
+            <div><span>{{Math.round(item.asset_amount * item.usdt_price * 100) / 100}}</span>CNY</div>
           </md-detail-item>
           <div class="footer-slot" slot="footer">
             <!--进度条-->
-            <div class="loding" v-if="item.state && !item.transfer_state"><van-progress :percentage="0" /></div>
-            <div class="loding" v-else-if="item.transfer_state && !item.exchange_state"><van-progress :percentage="50" /></div>
-            <div class="loding" v-if="item.exchange_state"><van-progress :percentage="100" /></div>
+            <div class="loding" v-if="item.status === 0"><van-progress :percentage="0" /></div>
+            <div class="loding" v-else-if="item.status === 1"><van-progress :percentage="25" /></div>
+            <div class="loding" v-else-if="item.status === 21 || item.status === 22"><van-progress :percentage="50" /></div>
+            <div class="loding" v-else-if="item.status === 23 || item.status === 24"><van-progress :percentage="75" /></div>
+            <div class="loding" v-else-if="item.status === 2"><van-progress :percentage="100" /></div>
+            <div class="loding" v-else><van-progress :percentage="0" /></div>
             <!--支付状态-->
             <div class="state">
               <div class="complete" :class="{active: item.transfer_state === 'fail' || item.state === 'pending'}">
                 <!--icon-->
-                <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">
-                    <van-icon class="icon" name="passed"></van-icon>
-                  </span>
-                <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">
-                    <van-icon class="icon" name="passed"></van-icon>
-                  </span>
-                <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">
-                    <van-icon class="icon" name="passed"></van-icon>
-                  </span>
-                <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">
-                    <van-icon class="icon" name="close"></van-icon>
-                  </span>
+                <span v-if="item.status === 0">
+                  <van-icon class="icon" name="clock-o"></van-icon>
+                </span>
+                <span v-else-if="item.status === 1">
+                  <van-icon class="icon" name="cash-back-record"></van-icon>
+                </span>
+                <span v-else-if="item.status === 21 || item.status === 22 || item.status === 23 || item.status === 24">
+                  <van-icon class="icon" name="exchange"></van-icon>
+                </span>
+                <span v-else-if="item.status === 2">
+                  <van-icon class="icon" name="certificate"></van-icon>
+                </span>
                 <span v-else>
-                    <van-icon class="icon" name="close"></van-icon>
-                  </span>
-                <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
-                <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
-                <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
-                <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">支付失败</span>
+                  <van-icon class="icon active" name="close"></van-icon>
+                </span>
+                <span v-if="item.status === 0">待转账</span>
+                <span v-else-if="item.status === 1">已确认转账</span>
+                <span v-else-if="item.status === 21">已托管,等待承兑商转账</span>
+                <span v-else-if="item.status === 22">承兑商已经转账</span>
+                <span v-else-if="item.status === 23">等待用户确认转账</span>
+                <span v-else-if="item.status === 24">用户已经确认转账</span>
+                <span v-else-if="item.status === 30" class="active">取消</span>
+                <span v-else-if="item.status === 2">完成</span>
                 <span v-else>交易未知</span>
               </div>
               <div @click="item_pass(index)">
-                <router-link to="/details">详情</router-link>
+                <a>详情</a>
               </div>
             </div>
           </div>
@@ -131,55 +136,82 @@ export default {
     return {
       value: 1,
       color: 'red',
-      order: [],
-      data_sta: [],
-      order_index: Number
+      order: []
     }
   },
   methods: {
-    async api () {
-      const { data } = await this.$api.otc.orders_lis()
-      console.log(data)
-    },
     // 传输
     item_pass (i) {
-      // 纯时间
-      let date = new Date(this.order[i].created)
-      let result, year, month, day
-      year = date.getYear() + 1900
-      month = date.getMonth() + 1
-      day = date.getDate()
-      result = year.toString() + (month > 9 ? month : '0' + month) + (day > 9 ? day : '0' + day)
-      console.log(result)
-      // eslint-disable-next-line camelcase
-      let obj_data = {
-        item: result + this.order[i].created.substring(11, 13) + this.order[i].created.substring(14, 16) + this.order[i].created.substring(17, 19) + this.order[i].created.substring(20, 26),
-        item_pow: this.order[i].created.substring(0, 10) + ' ' + this.order[i].created.substring(11, 19),
-        price: this.order[i].price,
-        side: this.order[i].side,
-        pay_amount: this.order[i].pay_amount,
-        pair: this.order[i].pair.pair,
-        symbol: this.order[i].pair.base.symbol,
-        pay_asset: this.order[i].pay_asset.symbol,
-        pair_price: this.order[i].exchangeinstantordermodel.cost,
-        state: this.order[i].state,
-        exchange_state: this.order[i].exchange_state,
-        transfer_state: this.order[i].transfer_state
+      if (this.order[i].side === 'buy') {
+        this.$router.push({
+          name: 'otc_order',
+          params: {
+            id: this.order[i].id
+          }
+        })
+      } else if (this.order[i].side === 'sell') {
+        this.$router.push({
+          name: 'otc_out',
+          params: {
+            id: this.order[i].id
+          }
+        })
+      } else {
+        Toast('数据不存在')
       }
-      localStorage.setItem('obj_data', JSON.stringify(obj_data))
     },
     Arrow () {
-      this.$router.go(-1)
+      this.$router.push({
+        path: '/user'
+      })
     },
     // 获取数据
     async getPair () {
-      const { data } = await this.$api.bb.orders()
+      const { data } = await this.$api.otc.orders_lis()
       if (data.code === 200) {
         this.order = data.data
+        await this.Setitem()
         console.log(this.order)
       } else {
         Toast('获取数据失败，请刷新页面')
       }
+    },
+    async Setitem () {
+      this.order.forEach((i) => {
+        // 下单时间
+        let item = new Date(i.created)
+        // 时间详细显示
+        this.set_item_M = item.getFullYear() + '' + (item.getMonth() + 1) + item.getDate() + item.getHours() + item.getMinutes() + item.getSeconds() + item.getMilliseconds()
+        // 时间下单时间
+        this.set_item_F = item.getFullYear() + '/' + (item.getMonth() + 1) + '/' + item.getDate() + ' ' + item.getHours() + ':' + item.getMinutes()
+        // 当前时间
+        // eslint-disable-next-line camelcase
+        let item_hours = item.getHours() > 9 ? item.getHours() : '0' + item.getHours()
+        // eslint-disable-next-line camelcase
+        let item_minutes = item.getMinutes() > 9 ? item.getMinutes() : '0' + item.getMinutes()
+        // eslint-disable-next-line camelcase
+        let item_date = item.getDate() > 9 ? item.getDate() : '0' + item.getDate()
+        // eslint-disable-next-line camelcase
+        let item_month = (item.getMonth() + 1) > 9 ? (item.getMonth() + 1) : '0' + (item.getMonth() + 1)
+        // eslint-disable-next-line camelcase
+        let set = item.getFullYear() + '' + item_month + item_date + item_hours + item_minutes
+        // 本地时间
+        let date = new Date()
+        // eslint-disable-next-line camelcase
+        let itemSet_hours = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+        // eslint-disable-next-line camelcase
+        let itemSet_minutes = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+        // eslint-disable-next-line camelcase
+        let itemSet_date = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
+        // eslint-disable-next-line camelcase
+        let itemSet_month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
+        // eslint-disable-next-line camelcase
+        let itemSet = date.getFullYear() + '' + itemSet_month + itemSet_date + itemSet_hours + itemSet_minutes
+        if ((itemSet - set) <= 3) {
+        } else {
+          this.$api.otc.orders_patch(i.id, { op_type: 'user_cancel_order' })
+        }
+      })
     }
   },
   components: {
@@ -192,9 +224,11 @@ export default {
   },
   async mounted () {
     await this.getPair()
-    await this.api()
-    // const { data } = await this.$api.otc.orders_post()
-    // console.log(data)
+  },
+  destroyed () {
+    this.$router.push({
+      path: '/user'
+    })
   }
 }
 </script>
@@ -299,6 +333,9 @@ export default {
             .state{
               display: flex;
               justify-content: space-between;
+              a{
+                color: #00BFFF;
+              }
               .complete{
                 color: green;
                 span{

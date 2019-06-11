@@ -62,7 +62,24 @@
           <div class="but_no" @click="but_no">取消订单</div>
         </div>
       </div>
+      <!--取消付款之后显示-->
       <div class="delete" v-if="delete_cre"><span><van-icon name="close" /></span><span>已取消</span></div>
+      <!--成功付款之后显示-->
+      <div class="delete" v-else>
+        <div class="status">
+          <van-steps direction="vertical" :active="active">
+            <van-step>
+              <h3>{{status_t}}</h3>
+            </van-step>
+            <van-step>
+              <h3>{{status_c}}</h3>
+            </van-step>
+            <van-step>
+              <h3>{{status_b}}</h3>
+            </van-step>
+          </van-steps>
+        </div>
+      </div>
       <!--说明-->
       <div class="Tips">1.如需帮助请联系 Bit-ox 客服，Mixin ID：28749，微信：jc_castle</div>
       <!--弹出层-->
@@ -77,10 +94,10 @@
 </template>
 
 <script>
-import { NavBar, Icon, Popup, Toast } from 'vant'
+import { NavBar, Icon, Popup, Toast, Step, Steps, Dialog } from 'vant'
 import Clipboard from 'clipboard'
 export default {
-  data: function () {
+  data () {
     return {
       title: '',
       keepTime: '',
@@ -111,7 +128,7 @@ export default {
           price: '点击展示'
         }
       ],
-      item: true,
+      item: false,
       item_of: true,
       show: false,
       data: [],
@@ -125,7 +142,11 @@ export default {
       currency_amount: '',
       img: '',
       off: true,
-      delete_cre: false
+      delete_cre: false,
+      active: 0,
+      status_t: '待转账',
+      status_c: '等待承兑商释放USDT',
+      status_b: '完成'
     }
   },
   methods: {
@@ -148,16 +169,7 @@ export default {
       // 姓名
       this.mode[2].price = data.data.merchant.alipay_name
       this.Setitem()
-      if (this.data.status === 0) {
-        this.StartCountDown()
-      } else if (this.data.status === 1) {
-        this.limittime = 0
-        console.log(123)
-      } else {
-        this.limittime = 0
-        this.item = false
-        this.delete_cre = true
-      }
+      this.status()
       // 付款方式图片显示说明
       let mode = this.mode[0]
       // 微信付款
@@ -181,8 +193,44 @@ export default {
         this.off = false
       }
     },
+    status () {
+      // 判断状态码
+      if (this.data.status === 0) {
+        this.item = true
+        this.StartCountDown()
+      } else if (this.data.status === 1) {
+        this.limittime = 0
+        this.item = false
+        this.status_t = '已确认转账'
+      } else if (this.data.status === 2) {
+        this.limittime = 0
+        this.item = false
+        this.status_t = '已确认转账'
+        this.status_c = '承兑商已经释放USDT'
+        this.active = 2
+      } else if (this.data.status === 11) {
+        this.limittime = 0
+        this.active = 1
+        this.item = false
+        this.status_t = '已确认转账'
+      } else if (this.data.status === 12) {
+        this.limittime = 0
+        this.item = false
+        this.active = 1
+        this.status_t = '已确认转账'
+        this.status_c = '承兑商已经释放USDT'
+      } else if (this.data.status === 30) {
+        this.limittime = 0
+        this.item = false
+        this.delete_cre = true
+      } else {
+        this.limittime = 0
+        this.item = false
+        Toast('数据错误')
+      }
+    },
     // 时间控制
-    Setitem () {
+    async Setitem () {
       // 下单时间
       let item = new Date(this.data.created)
       // 时间详细显示
@@ -216,10 +264,13 @@ export default {
         this.limittime = 15 - (itemSet - set)
       } else {
         this.limittime = 0
+        await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_cancel_order' })
       }
     },
     onClickLeft () {
-      this.$router.go(-1)
+      this.$router.push({
+        path: '/otc_details'
+      })
     },
     // 时间开始倒计时
     StartCountDown () {
@@ -281,16 +332,28 @@ export default {
     // 取消订单
     async but_no () {
       // this.item = false
+      this.delete_cre = true
       this.flag = true
       this.limittime = 0
       this.StartCountDown()
-      console.log(this.limittime)
       await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_cancel_order' })
     },
     // 确认订单
     async but_ok () {
-      Toast('确认成功')
-      await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_paid_confirm' })
+      // 支付成功提醒
+      Dialog.confirm({
+        title: '付款结果',
+        message: '是否成功支付'
+      }).then(async () => {
+        // on confirm
+        await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_paid_confirm' })
+        this.item = false
+        this.status_t = '已确认转账'
+        Toast('确认付款')
+      }).catch(() => {
+        // on cancel
+        Toast('请转账后再试')
+      })
     }
   },
   async mounted () {
@@ -300,7 +363,15 @@ export default {
     [NavBar.name]: NavBar,
     [Icon.name]: Icon,
     [Popup.name]: Popup,
-    [Toast.name]: Toast
+    [Toast.name]: Toast,
+    [Step.name]: Step,
+    [Steps.name]: Steps,
+    [Dialog.name]: Dialog
+  },
+  destroyed () {
+    this.$router.push({
+      path: '/otc_details'
+    })
   }
 }
 </script>
@@ -371,6 +442,28 @@ export default {
       line-height: 50px;
       border-bottom: 15px solid rgba(0,0,0,.05);
       border-top: 15px solid rgba(0,0,0,.05);
+      .status{
+        width: 55%;
+        margin: 0 auto;
+        padding: 15px 0;
+        text-align: left;
+        h3{
+          line-height: 25px;
+          font-size: 15px;
+          text-align: justify;
+        }
+        .van-step--vertical {
+          .van-step__circle{
+            top: 21px;
+          }
+          .van-step__line{
+            top: 21px;
+          }
+        }
+        .van-step--vertical.van-step--process .van-icon{
+          top: 16px;
+        }
+      }
       span{
         vertical-align: middle;
         font-size: 16px;

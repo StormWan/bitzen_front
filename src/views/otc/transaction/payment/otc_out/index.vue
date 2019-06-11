@@ -5,7 +5,7 @@
     <!--标题-->
     <div class="title">
       <van-nav-bar
-        title="卖出"
+        :title="title"
         left-arrow
         @click-left="onClickLeft"
       />
@@ -13,23 +13,23 @@
     <div class="top">
       <!--下单时间-->
       <div class="item">
-        <div>No:201906031524</div>
-        <div>2019/0603 15:24</div>
+        <div>No:{{set_item_M}}</div>
+        <div>{{set_item_F}}</div>
       </div>
       <!--购买转账人-->
-      <div class="turn_name">你出售 1 EOS，价值约 6.28 USDT</div>
+      <div class="turn_name">你出售 {{data.asset_amount}} {{title}}<span v-if="title !== 'USDT'">,价值约 {{Math.floor(best_sell_price * 100) / 100}} {{Fun}}</span></div>
       <!--单价-->
       <div class="price">
         <div class="unit">
           <span>单价：</span>
-          <span>7.12 CNY/USDT</span>
+          <span>{{data.usdt_price}} CNY/{{Fun}}</span>
         </div>
         <div class="total">
           <span>预估到账：</span>
           <span @click="tot_T">
             <van-icon name="question-o" />
           </span>
-          <span>10 CNY</span>
+          <span>{{price}} CNY</span>
         </div>
       </div>
     </div>
@@ -59,7 +59,24 @@
         <div class="but_ok" @click="but_no">支付 EOS</div>
       </div>
     </div>
-    <div class="delete" v-else><span><van-icon name="close" /></span><span>已取消</span></div>
+    <!--取消付款之后显示-->
+    <div class="delete" v-if="delete_cre"><span><van-icon name="close" /></span><span>已取消</span></div>
+    <!--成功付款之后显示-->
+    <div class="delete" v-else>
+      <div class="status">
+        <van-steps direction="vertical" :active="active">
+          <van-step>
+            <h3>{{status_t}}</h3>
+          </van-step>
+          <van-step>
+            <h3>{{status_c}}</h3>
+          </van-step>
+          <van-step>
+            <h3>{{status_b}}</h3>
+          </van-step>
+        </van-steps>
+      </div>
+    </div>
     <!--付款方式-->
     <div class="wallet_box" @click="wallet_box" v-if="item">
       <div class="wallet">
@@ -108,10 +125,6 @@
     </div>
     <!--说明-->
     <div class="Tips">1.如需帮助请联系 Bit-ox 客服，Mixin ID：28749，微信：jc_castle</div>
-    <!--二维码弹出层-->
-    <div>
-      <van-popup v-model="show">扫描二维码</van-popup>
-    </div>
     <!--预估到账内容-->
     <div class="tot_popup">
       <van-popup v-model="show_tot">
@@ -124,30 +137,31 @@
 </template>
 
 <script>
-import { NavBar, Icon, Popup, Toast } from 'vant'
+import { NavBar, Icon, Popup, Toast, Dialog, Step, Steps } from 'vant'
 import Clipboard from 'clipboard'
+// 付款跳转
+var msgpack = require('msgpack-lite')
+var uuidv4 = require('uuid/v4')
 export default {
   data () {
     return {
-      down: '00:14:54',
       keepTime: '',
       // 时间设定
-      limittime: 3,
+      limittime: 0,
       settime: '',
       flag: false,
       mode: [
         {
-          name: '微信支付',
+          name: '支付方式',
           price: '微信',
-          img: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAYCAYAAADpnJ2CAAABiklEQVR4AbWVAWRCURSGf8gIGQyYgUEAgyAAbCCAAAQQGBAYIGAwAAgIwAMJGIsqRTAgQPAQEsKDu//kXHLddV+v+w6f0HnvP/e8/5yLYPzgAXN0yICsSUoyZUeW+l/nlFs45miSRF9scpKRBDM0rhGqacXmRobhE8/wwsQtMZHYyjv/E2swYU9MZPZW1DVGWoLYEQt88ffR/W7DyEIHCn3ab4gVKpjhzbayHlOI9K2QHqZFNsSctKSSCEI78oE17h1PTJy8PnRwjYdNjlanpEdqsLHC04XnltA2+KuWiudoe9y7xQLvWKF6JlSVE5DjxZZf3CRs91nV3zqjXYxw55iuk9PlGQKJGaZ4hoR123lM8cqc3yu+dSqC40BS4lkSdf9zQcY4tSic2LQLQgc5K+jmrl3Wu0DiUkxy4+o72LEJnDISUrDjtKREwTHc0DkalSA2sfPqE62oKWKJDWRmgzd+BKENaUGjLMGjzmbbLoiigmvSk/tMnKa3y0DQ9vdIM9S6gKCK6FqLGX+Ik2Cgy7oRZQAAAABJRU5ErkJggg=='
+          img: ''
         },
         {
           name: '收款账号',
           price: '1452871763'
         }
       ],
-      item: true,
-      show: false,
+      item: false,
       show_tot: false,
       bank: 'Mixin',
       triangle_active: false,
@@ -162,12 +176,166 @@ export default {
         //   icon: 'youzan-shield'
         // }
       ],
-      icon_index: 0
+      icon_index: 0,
+      title: '',
+      data: [],
+      set_item_M: '',
+      set_item_F: '',
+      Fun: '',
+      best_sell_price: '',
+      price: '',
+      delete_cre: false,
+      active: 0,
+      status_t: '待转账',
+      status_c: '已托管,等待承兑商转账',
+      status_b: '完成'
     }
   },
   methods: {
+    async api () {
+      const { data } = await this.$api.otc.orders_get(this.$route.params.id)
+      this.data = data.data
+      console.log(this.data)
+      this.style()
+      // 付款方式logo图片
+      this.logo_img()
+      // 时间控制
+      this.Setitem()
+      this.status()
+    },
+    // 开始渲染数据
+    style () {
+      // 标题
+      if (this.data.otc_pair.pair) {
+        // 标题
+        this.title = this.data.otc_pair.asset.symbol
+        // 标签
+        this.Fun = this.data.otc_pair.pair.quote.symbol
+      } else {
+        this.title = this.data.otc_pair.asset.symbol
+        this.Fun = this.data.otc_pair.asset.symbol
+      }
+      // 价格大约
+      if (this.data.otc_pair.pair) {
+        this.best_sell_price = this.data.otc_pair.pair.bestorderbookmodel.best_sell_price
+        this.price = (Math.floor((this.data.usdt_price * this.best_sell_price) * 100) / 100) * this.data.asset_amount
+      } else {
+        this.price = Math.floor((this.data.usdt_price * this.data.asset_amount) * 100) / 100 * this.data.asset_amount
+      }
+    },
+    // 判断付款状态
+    status () {
+      // 判断状态码
+      if (this.data.status === 0) {
+        this.item = true
+        this.StartCountDown()
+      } else if (this.data.status === 1) {
+        this.limittime = 0
+        this.item = false
+        this.status_t = '已确认转账'
+      } else if (this.data.status === 2) {
+        this.limittime = 0
+        this.item = false
+        this.active = 2
+        this.status_t = '已确认转账'
+        this.status_c = '承兑商确认转账'
+      } else if (this.data.status === 21) {
+        this.limittime = 0
+        this.active = 1
+        this.item = false
+        this.status_t = '已确认转账'
+      } else if (this.data.status === 22) {
+        this.limittime = 0
+        this.active = 1
+        this.status_t = '已确认转账'
+        this.status_c = '承兑商已经转账'
+      } else if (this.data.status === 23) {
+        this.limittime = 0
+        this.active = 1
+        this.item = false
+        this.status_t = '已确认转账'
+        this.status_c = '等待承兑商释确认转账'
+      } else if (this.data.status === 24) {
+        this.limittime = 0
+        this.active = 1
+        this.status_t = '已确认转账'
+        this.status_c = '承兑商确认转账'
+      } else if (this.data.status === 30) {
+        this.limittime = 0
+        this.delete_cre = true
+      } else {
+        this.limittime = 0
+      }
+    },
+    // 付款logo图片
+    logo_img () {
+      // 付款方式图片显示说明
+      let mode = this.mode[0]
+      // 微信付款
+      if (this.data.payment_method === 'wechat') {
+        mode.img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAYCAYAAADpnJ2CAAABiklEQVR4AbWVAWRCURSGf8gIGQyYgUEAgyAAbCCAAAQQGBAYIGAwAAgIwAMJGIsqRTAgQPAQEsKDu//kXHLddV+v+w6f0HnvP/e8/5yLYPzgAXN0yICsSUoyZUeW+l/nlFs45miSRF9scpKRBDM0rhGqacXmRobhE8/wwsQtMZHYyjv/E2swYU9MZPZW1DVGWoLYEQt88ffR/W7DyEIHCn3ab4gVKpjhzbayHlOI9K2QHqZFNsSctKSSCEI78oE17h1PTJy8PnRwjYdNjlanpEdqsLHC04XnltA2+KuWiudoe9y7xQLvWKF6JlSVE5DjxZZf3CRs91nV3zqjXYxw55iuk9PlGQKJGaZ4hoR123lM8cqc3yu+dSqC40BS4lkSdf9zQcY4tSic2LQLQgc5K+jmrl3Wu0DiUkxy4+o72LEJnDISUrDjtKREwTHc0DkalSA2sfPqE62oKWKJDWRmgzd+BKENaUGjLMGjzmbbLoiigmvSk/tMnKa3y0DQ9vdIM9S6gKCK6FqLGX+Ik2Cgy7oRZQAAAABJRU5ErkJggg=='
+        mode.price = '微信'
+        this.mode[1].price = this.data.merchant.wechat_account
+        this.img = 'http://124.156.115.134' + this.data.merchant.wechat_qrcode
+      } else if (this.data.payment_method === 'alipay') {
+        // 支付宝付款
+        mode.img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAB7ElEQVR4Ac2WA6weQRSFb62gtuPajetGtW0FNcO6cVK7XdRu2Ia149R2Z6bP9r6T+yb5bZ7k/Bh9gzt3l1hXfzUiS+4iU36GK2AnTq6AP/PYJ/42JhZ+oPAp7CTWYDDUVHu4IDneCaD8kkTgV4r4zA5+akBuivhMI56llyLv768wXkpfYNK3NGXAaHQhpxlHY9KAlpwc6Qojt6W2urZYnYoFWA5XhWhTSaf/dmHYDqc2/v+NFPiZDLmKzv7pxAPAZIvWZPwbjrqN8B242LU6edUtgMZGGjS3XI8R6IRTj/yI2xhiPNofA7CPCyiuRAL8wM9FUy6AH8I5urwE/gwb8FSdS311+ldz1KsIgGIpmWpNGEGSQYbaC7f1gWIyPClD3uaJBgWeld3x/S3MyCwkWwz1AfqsWCzV8EIfIAeJqd6GAcuHx7oFylz4AVlqGl116gQ/c3HABTTkFH1pywPD1Esy//V0wdQMlJe6Rex3MtQ2OvO/fRgZXbziGVqqP+CmXm0m/AED2WT9G0GOU4sg/sYVCZLCyngrLTHRJ9K9Gl4jWzShYDoj+5Ih7keQiSQWcwgTHqKBPrP8wanK/D+QLzwOH4DeOgDu+maeiPwmBS9RuFNJA1pyV9JfhF33BHS9vZVxhFTWjCn2kYZVAyRlGm3AoxGeAAAAAElFTkSuQmCC'
+        this.mode[0].price = '支付宝'
+        this.mode[1].price = this.data.merchant.alipay_account
+        // this.img = data.data.merchant.alipay_qrcode
+        this.img = 'http://124.156.115.134' + this.data.merchant.alipay_qrcode
+      } else {
+        // 银行卡付款
+        mode.img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAABHklEQVR4Ae2WgUYEURSGh70oQIB6gh6gHmBsqhfqHdq2hAJTUYAACMCytqQISUDAVpsEsWi09TX/XFcxYeJ0E/vzMf4z7uc6cJMQWi6l1egU5AUYkfszXZp8TVFmBfwyWbhZU0UcXKrbdWMJ5ZLwNaIwl5CY1BPen8HgAtoT1dn6pJ/dnRoKn64p01mpztQpj1eGwsNlyuTPsDX92W/P+A70j6FQ3BxR5nI3dP4bNDPeochmYZTD+xvsz8HBvP8evWhmLvScb1Cm3/Mo6sLcXLg5BcMHQhgO1BkL+8fUjP6NLLw9MRB+R0h19h+F4x3WYSystVe/rx/zJ0+MXtxHVNstxBO6ZqKw2tiLINxJQrzULenKxjvVWV3W3GLwfAD9KR4TBA12SgAAAABJRU5ErkJggg=='
+        mode.price = '银行卡'
+        this.mode[1].price = this.data.merchant.bank_account_number
+        this.off = false
+      }
+    },
+    // 时间控制
+    async Setitem () {
+      // 下单时间
+      let item = new Date(this.data.created)
+      // 时间详细显示
+      this.set_item_M = item.getFullYear() + '' + (item.getMonth() + 1) + item.getDate() + item.getHours() + item.getMinutes() + item.getSeconds() + item.getMilliseconds()
+      // 时间下单时间
+      this.set_item_F = item.getFullYear() + '/' + (item.getMonth() + 1) + '/' + item.getDate() + ' ' + item.getHours() + ':' + item.getMinutes()
+      // 当前时间
+      // eslint-disable-next-line camelcase
+      let item_hours = item.getHours() > 9 ? item.getHours() : '0' + item.getHours()
+      // eslint-disable-next-line camelcase
+      let item_minutes = item.getMinutes() > 9 ? item.getMinutes() : '0' + item.getMinutes()
+      // eslint-disable-next-line camelcase
+      let item_date = item.getDate() > 9 ? item.getDate() : '0' + item.getDate()
+      // eslint-disable-next-line camelcase
+      let item_month = (item.getMonth() + 1) > 9 ? (item.getMonth() + 1) : '0' + (item.getMonth() + 1)
+      // eslint-disable-next-line camelcase
+      let set = item.getFullYear() + '' + item_month + item_date + item_hours + item_minutes
+      // 本地时间
+      let date = new Date()
+      // eslint-disable-next-line camelcase
+      let itemSet_hours = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+      // eslint-disable-next-line camelcase
+      let itemSet_minutes = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+      // eslint-disable-next-line camelcase
+      let itemSet_date = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
+      // eslint-disable-next-line camelcase
+      let itemSet_month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
+      // eslint-disable-next-line camelcase
+      let itemSet = date.getFullYear() + '' + itemSet_month + itemSet_date + itemSet_hours + itemSet_minutes
+      if ((itemSet - set) <= 3) {
+        this.limittime = 3 - (itemSet - set)
+        this.StartCountDown()
+      } else {
+        this.limittime = 0
+        await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_cancel_order' })
+      }
+    },
+    // title放回按钮
     onClickLeft () {
-      this.$router.go(-1)
+      this.$router.push({
+        path: '/otc_details'
+      })
     },
     // 弹窗提示
     tot_T () {
@@ -187,7 +355,7 @@ export default {
       }, 100)
     },
     // 分钟
-    timeDown () {
+    async timeDown () {
       const endTime = new Date(this.settime)
       const nowTime = new Date()
       let leftTime = parseInt((endTime.getTime() - nowTime.getTime()) / 1000)
@@ -196,8 +364,10 @@ export default {
       let m = this.formate(parseInt(leftTime / 60 % 60))
       let s = this.formate(parseInt(leftTime % 60))
       if (leftTime <= 0) {
+        await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_cancel_order' })
         this.flag = true
         this.item = false
+        this.delete_cre = true
         Toast('订单已自动取消')
       }
       this.keepTime = `${h}:${m}:${s}`
@@ -230,9 +400,41 @@ export default {
         this.show = true
       }
     },
-    // 付款成功
-    but_no () {
+    // 付款
+    async but_no () {
       Toast('付款成功')
+      await this.payment()
+    },
+    // 付款调用
+    async payment () {
+      const obj = { service: 'cc', order_id: this.data.id }
+      // buy/sell 买和卖; market/limit 市场表; mixin/blockpay 钱包;
+      const memo = msgpack.encode(obj).toString('base64')
+      const trace = uuidv4()
+      // 买入金额
+      const amount = this.data.asset_amount
+      // 买入的用户ID
+      // const asset = this.pair.base.asset_id
+      const asset = this.data.otc_pair.asset.asset_id
+      // EOS_ASSET_ID = "f8127159-e473-389d-8e0c-9ac5a4dc8cc6"
+      const recipient = '28536b52-f840-4366-8619-3872fb5b3164'
+      const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}&amount=${amount}&trace=${trace}&memo=${memo}`
+      window.location.href = payUrl
+      // 支付成功提醒
+      Dialog.confirm({
+        title: '付款结果',
+        message: '是否成功支付'
+      }).then(async () => {
+        // on confirm
+        console.log('成功')
+        this.delete_cre = false
+        this.item = false
+        this.status_t = '已确认转账'
+        await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_paid_confirm' })
+      }).catch(() => {
+        // on cancel
+        console.log('失败')
+      })
     },
     // 钱包选择付款
     wallet_box () {
@@ -253,15 +455,22 @@ export default {
       this.triangle_active = false
     }
   },
-  mounted () {
-    this.StartCountDown()
-    console.log(this.$route.params.id)
+  async mounted () {
+    await this.api()
+  },
+  destroyed () {
+    this.$router.push({
+      path: '/otc_details'
+    })
   },
   components: {
     [NavBar.name]: NavBar,
     [Icon.name]: Icon,
     [Popup.name]: Popup,
-    [Toast.name]: Toast
+    [Toast.name]: Toast,
+    [Dialog.name]: Dialog,
+    [Step.name]: Step,
+    [Steps.name]: Steps
   }
 }
 </script>
@@ -328,11 +537,34 @@ export default {
       }
     }
     /*取消*/
+    /*取消*/
     .delete{
       text-align: center;
       line-height: 50px;
       border-bottom: 15px solid rgba(0,0,0,.05);
       border-top: 15px solid rgba(0,0,0,.05);
+      .status{
+        width: 60%;
+        margin: 0 auto;
+        padding: 15px 0;
+        text-align: left;
+        h3{
+          line-height: 25px;
+          font-size: 14px;
+          text-align: justify;
+        }
+        .van-step--vertical {
+          .van-step__circle{
+            top: 21px;
+          }
+          .van-step__line{
+            top: 21px;
+          }
+        }
+        .van-step--vertical.van-step--process .van-icon{
+          top: 16px;
+        }
+      }
       span{
         vertical-align: middle;
         font-size: 16px;
@@ -362,13 +594,19 @@ export default {
           display: flex;
           align-items: center;
           color: #696969;
+          /*vertical-align: middle;*/
           span{
             color: #999;
+            /*vertical-align: middle;*/
+          }
+          i{
+            vertical-align: middle;
           }
           .img{
             width: 20px;
             margin-right: 8px;
             color: #7FFFAA;
+            padding-top: 5px;
             img{
               width: 100%;
             }

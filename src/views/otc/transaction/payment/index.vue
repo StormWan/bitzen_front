@@ -111,7 +111,7 @@ export default {
         let Obj = JSON.parse(sessionStorage.getItem('Obj'))
         // 买入时做的事情
         if (sessionStorage.getItem('page') === '0') {
-          let { data } = await this.$api.otc.orders_post({ otc_pair: Obj.otc_pair, side: Obj.side, currency_amount: Obj.amount, price: Obj.price, symbol: Obj.symbol, payment_method: payment_method })
+          let { data } = await this.$api.otc.orders_post({ otc_pair: Obj.otc_pair, side: Obj.side, currency_amount: Obj.amount, price: Obj.price, payment_method: payment_method })
           const id = data.data.id
           // 创建订单时的事情
           this.$router.push({
@@ -218,7 +218,7 @@ export default {
           }
         }
         .title{
-          width: 60%;
+          width: 70%;
           font-size: 18px;
           .Bank{
             border: 1px solid #00FA9A;

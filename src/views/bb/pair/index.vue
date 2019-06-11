@@ -237,6 +237,7 @@
 <script>
 import { Icon, Toast, Switch, Dialog, Tab, Tabs, PasswordInput, NumberKeyboard } from 'vant'
 import { InputItem, Field } from 'mand-mobile'
+// 付款跳转
 var msgpack = require('msgpack-lite')
 var uuidv4 = require('uuid/v4')
 

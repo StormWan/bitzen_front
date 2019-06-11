@@ -229,7 +229,7 @@ export default {
       // console.log(this.searchVal)
       for (let i = 0; i < this.wallet_data.length; i++) {
         // for循环数据中的每一项（根据name值）
-        if (this.wallet_data[i].symbol.search(this.searchVal) !== -1 || this.wallet_data[i].name.search(this.searchVal) !== -1) {
+        if (this.wallet_data[i].symbol.toLowerCase().search(this.searchVal.toLowerCase()) !== -1 || this.wallet_data[i].name.toLowerCase().search(this.searchVal.toLowerCase()) !== -1) {
           // 判断输入框中的值是否可以匹配到数据，如果匹配成功
           arrByZM.push(this.wallet_data[i])
           // 向空数组中添加数据
