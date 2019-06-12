@@ -4,7 +4,7 @@
     <div class="title">
       <van-nav-bar
         :title="title"
-        left-text=""
+        left-text="返回"
         left-arrow
         @click-left="onClickLeft"
       />

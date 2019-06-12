@@ -4,6 +4,7 @@
       <van-nav-bar
         :title="title"
         left-arrow
+        left-text="返回"
         @click-left="onClickLeft"
       />
     </div>

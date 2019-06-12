@@ -23,8 +23,8 @@
           <span class="name">{{item.mode}}</span>
         </p>
         <p class="icon">
-          <span class="icon_fire">
-            <img :src="item.asset.icon_url" alt="">
+          <span class="icon_fire" v-if="item.pair">
+              <img :src="item.pair.bestorderbookmodel.best_buy_exchange.logo_32" v-if="item.pair.bestorderbookmodel.best_buy_exchange.logo_32">
           </span>
           <span class="name" v-if="item.pair">{{item.pair.pair}}</span>
           <span class="name" v-else>{{item.asset.symbol}}</span>
@@ -71,7 +71,6 @@ export default {
         Toast('服务器异常,请稍后再试')
       } else {
         this.Market_label = data.data
-        console.log(data.data)
       }
     }
   },
@@ -91,7 +90,7 @@ export default {
       } else {
         clearInterval(set)
       }
-    }, 2000)
+    }, 5000)
   },
   watch: {
     '$route' () {
@@ -151,6 +150,7 @@ export default {
       .Market{
         display: flex;
         align-items: center;
+        width: 33%;
         .img{
           width: 35px;
           height: 35px;
@@ -172,7 +172,7 @@ export default {
       /*价格*/
       .Price_icon{
         font-size: 14px;
-        width: 24%;
+        width: 28%;
         /*价格详情*/
         .Price{
           margin-bottom: 5px;
@@ -193,19 +193,15 @@ export default {
           text-align: left;
           .icon_fire{
             font-size: 0;
-            display: inline-block;
-            font-size: 15px;
-            width: 15px;
-            height: 15px;
             vertical-align: middle;
             img{
-              width: 100%;
+              width: 15px;
+              height: 15px;
             }
           }
           .name{
             font-size: 12px;
             color: #ccc;
-            margin-left: 10px;
           }
         }
       }

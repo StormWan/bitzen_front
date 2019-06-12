@@ -1,191 +1,191 @@
 <template>
-    <div class="transaction">
-      <!--遮罩层-->
-      <div :class="{mask: triangle_active}" @click="mask"></div>
-      <!--头部标题-->
-      <div class="top">
-        <!--返回-->
-        <div class="Arrow" @click="Arrow">
-          <van-icon name="arrow-left"></van-icon>
-        </div>
-        <div class="title">
+  <div class="transaction">
+    <!--遮罩层-->
+    <div :class="{mask: triangle_active}" @click="mask"></div>
+    <!--头部标题-->
+    <div class="top">
+      <!--返回-->
+      <div class="Arrow" @click="Arrow">
+        <van-icon name="arrow-left"></van-icon>
+      </div>
+      <div class="title">
           <span>
             <img :src="title_img" alt="">
           </span>
-          <span>{{title}}</span>
+        <span>{{title}}</span>
+      </div>
+    </div>
+    <!--买入卖出-->
+    <div class="Business">
+      <van-tabs @click="onClick" sticky>
+
+        <!--买入-->
+        <van-tab title="买入">
+          <!--买入信息-->
+          <div v-if="active_index === 0" class="money_Calcu">
+            <!--金额-->
+            <div class="money">
+              <span>￥</span>
+              <span>{{buy_price}}</span>
+            </div>
+            <!--买入计算-->
+            <div class="Calculation">
+              <div>至少支付 ￥<span class="red">{{Math.round((buy_price * Receive.buy_min) * 100) / 100}}</span>,购买<span class="red">{{Math.round(Receive.buy_min * 100) / 100}}</span><span>{{symbol_name}}</span></div>
+              <div>至支多付 ￥<span class="red">{{Math.round((buy_price * Receive.buy_max) * 100) / 100}}</span>,购买 <span class="red">{{Math.round(Receive.buy_max * 100) / 100}}</span> 个 <span>{{symbol_name}}</span></div>
+            </div>
+            <!--金额计算-->
+            <div class="md-example-child md-example-child-input-item-1">
+              <md-field>
+                <!--金额-->
+                <md-input-item
+                  @focus="foc_CNY"
+                  type="Number"
+                  v-model="inp_CNY"
+                  :size="input_monitoring"
+                  title="CNY 金额"
+                  placeholder="CNY 金额"
+                  is-title-latent
+                  clearable
+                  :maxlength="input_mon_size"
+                ></md-input-item>
+                <div class="CNY_money" v-if="beyond">请填入正确金额</div>
+                <!--预估到账-->
+                <md-input-item
+                  type="Number"
+                  v-model="inp_market"
+                  :title="'预估到账' + symbol_name + '数量'"
+                  :placeholder="'预估到账' + symbol_name + '数量'"
+                  is-title-latent
+                  clearable
+                  :size="result_monitoring"
+                  :maxlength="input_res_size"
+                  @focus="foc_market"
+                ></md-input-item>
+              </md-field>
+              <!--下单提示说明-->
+              <div class="ts_text" v-if="Receive.pair">到账<span>{{symbol_name}}</span>数量以<span>实际交割价</span>为准</div>
+            </div>
+          </div>
+        </van-tab>
+
+        <!--卖出-->
+        <van-tab title="卖出">
+          <!--买入信息-->
+          <div v-if="active_index === 1" class="money_Calcu">
+            <!--金额-->
+            <div class="money">
+              <span>￥</span>
+              <span>{{sell_price}}</span>
+            </div>
+            <!--买入计算-->
+            <div class="Calculation">
+              <div>最小出售 ￥ <span class="red">{{Math.round(Receive.sell_min * 100) / 100}}</span> 个 <span>{{symbol_name}}</span>,约到账￥<span class="red">{{Math.round((sell_price * Receive.sell_min) * 100) / 100}}</span></div>
+              <div>最大出售 ￥ <span class="red">{{Math.round(Receive.sell_max * 100) / 100}}</span> 个 <span>{{symbol_name}}</span>,约到账 <span class="red">{{Math.round((sell_price * Receive.sell_max) * 100) / 100}}</span></div>
+            </div>
+            <!--金额计算-->
+            <div class="md-example-child md-example-child-input-item-1">
+              <md-field>
+                <!--金额-->
+                <md-input-item
+                  type="Number"
+                  v-model="inp_market"
+                  :size="result_monitoring"
+                  :title="'卖出' + symbol_name + '数量'"
+                  :placeholder="'卖出' + symbol_name + '数量'"
+                  is-title-latent
+                  clearable
+                  @focus="foc_market"
+                  :maxlength="input_res_size"
+                ></md-input-item>
+                <div class="CNY_money" v-if="beyond">请输入有效数</div>
+                <!--预估到账-->
+                <md-input-item
+                  type="Number"
+                  v-model="inp_CNY"
+                  title="预估到账 CNY 金额"
+                  placeholder="预估到账 CNY 金额"
+                  is-title-latent
+                  clearable
+                  :size="input_monitoring"
+                  @focus="foc_CNY"
+                  :maxlength="input_mon_size"
+                ></md-input-item>
+              </md-field>
+              <!--下单提示说明-->
+              <div class="ts_text">到账金额以<span>实际交割价</span>为准</div>
+            </div>
+            <!--到账 {{Receive.market_name}}-->
+          </div>
+        </van-tab>
+      </van-tabs>
+
+      <!--下单-->
+      <div class="Place">
+        <div @click="but_submit" class="Place_box" :class="{active: Place_active}">下单</div>
+      </div>
+
+      <!--Mixin 钱包-->
+      <!--付款方式-->
+      <div v-if="active_index === 0" class="wallet_box" @click="wallet_box">
+        <div class="wallet">
+          <div class="Bank">
+            <div class="left">
+              <van-icon name="youzan-shield"></van-icon>
+            </div>
+            <div class="right">{{bank}} 钱包</div>
+          </div>
+          <div class="balance">
+            <div class="left">
+              <div> 余额</div>
+              <div>0</div>
+            </div>
+            <!--三角形-->
+            <div class="right" :class="{active: triangle_active}"></div>
+          </div>
         </div>
       </div>
-      <!--买入卖出-->
-      <div class="Business">
-        <van-tabs @click="onClick" sticky>
 
-          <!--买入-->
-          <van-tab title="买入">
-            <!--买入信息-->
-            <div v-if="active_index === 0" class="money_Calcu">
-              <!--金额-->
-              <div class="money">
-                <span>￥</span>
-                <span>{{buy_price}}</span>
-              </div>
-              <!--买入计算-->
-              <div class="Calculation">
-                <div>至少支付 ￥<span class="red">{{Math.round((buy_price * Receive.buy_min) * 100) / 100}}</span>,购买<span class="red">{{Math.round(Receive.buy_min * 100) / 100}}</span><span>{{symbol_name}}</span></div>
-                <div>至支多付 ￥<span class="red">{{Math.round((buy_price * Receive.buy_max) * 100) / 100}}</span>,购买 <span class="red">{{Math.round(Receive.buy_max * 100) / 100}}</span> 个 <span>{{symbol_name}}</span></div>
-              </div>
-              <!--金额计算-->
-              <div class="md-example-child md-example-child-input-item-1">
-                <md-field>
-                  <!--金额-->
-                  <md-input-item
-                    @focus="foc_CNY"
-                    type="money"
-                    v-model="inp_CNY"
-                    :size="input_monitoring"
-                    title="CNY 金额"
-                    placeholder="CNY 金额"
-                    is-title-latent
-                    clearable
-                    :maxlength="input_mon_size"
-                  ></md-input-item>
-                  <div class="CNY_money" v-if="beyond">请填入正确金额</div>
-                  <!--预估到账-->
-                  <md-input-item
-                    type="money"
-                    v-model="inp_market"
-                    :title="'预估到账' + symbol_name + '数量'"
-                    :placeholder="'预估到账' + symbol_name + '数量'"
-                    is-title-latent
-                    clearable
-                    :size="result_monitoring"
-                    :maxlength="input_res_size"
-                    @focus="foc_market"
-                  ></md-input-item>
-                </md-field>
-                <!--下单提示说明-->
-                <div class="ts_text" v-if="Receive.pair">到账<span>{{symbol_name}}</span>数量以<span>实际交割价</span>为准</div>
-              </div>
-            </div>
-          </van-tab>
-
-          <!--卖出-->
-          <van-tab title="卖出">
-            <!--买入信息-->
-            <div v-if="active_index === 1" class="money_Calcu">
-              <!--金额-->
-              <div class="money">
-                <span>￥</span>
-                <span>{{sell_price}}</span>
-              </div>
-              <!--买入计算-->
-              <div class="Calculation">
-                <div>最小出售 ￥ <span class="red">{{Math.round(Receive.sell_min * 100) / 100}}</span> 个 <span>{{symbol_name}}</span>,约到账￥<span class="red">{{Math.round((sell_price * Receive.sell_min) * 100) / 100}}</span></div>
-                <div>最大出售 ￥ <span class="red">{{Math.round(Receive.sell_max * 100) / 100}}</span> 个 <span>{{symbol_name}}</span>,约到账 <span class="red">{{Math.round((sell_price * Receive.sell_max) * 100) / 100}}</span></div>
-              </div>
-              <!--金额计算-->
-              <div class="md-example-child md-example-child-input-item-1">
-                <md-field>
-                  <!--金额-->
-                  <md-input-item
-                    type="money"
-                    v-model="inp_market"
-                    :size="result_monitoring"
-                    :title="'卖出' + symbol_name + '数量'"
-                    :placeholder="'卖出' + symbol_name + '数量'"
-                    is-title-latent
-                    clearable
-                    @focus="foc_market"
-                    :maxlength="input_res_size"
-                  ></md-input-item>
-                  <div class="CNY_money" v-if="beyond">请输入有效数</div>
-                  <!--预估到账-->
-                  <md-input-item
-                    type="money"
-                    v-model="inp_CNY"
-                    title="预估到账 CNY 金额"
-                    placeholder="预估到账 CNY 金额"
-                    is-title-latent
-                    clearable
-                    :size="input_monitoring"
-                    @focus="foc_CNY"
-                    :maxlength="input_mon_size"
-                  ></md-input-item>
-                </md-field>
-                <!--下单提示说明-->
-                <div class="ts_text">到账金额以<span>实际交割价</span>为准</div>
-              </div>
-              <!--到账 {{Receive.market_name}}-->
-            </div>
-          </van-tab>
-        </van-tabs>
-
-        <!--下单-->
-        <div class="Place">
-          <div @click="but_submit" class="Place_box" :class="{active: Place_active}">下单</div>
-        </div>
-
-        <!--Mixin 钱包-->
-        <!--付款方式-->
-        <div v-if="active_index === 0" class="wallet_box" @click="wallet_box">
-          <div class="wallet">
-            <div class="Bank">
-              <div class="left">
-                <van-icon name="youzan-shield"></van-icon>
-              </div>
-              <div class="right">{{bank}} 钱包</div>
-            </div>
-            <div class="balance">
-              <div class="left">
-                <div> 余额</div>
-                <div>0</div>
-              </div>
-              <!--三角形-->
-              <div class="right" :class="{active: triangle_active}"></div>
-            </div>
-          </div>
-        </div>
-
-        <!--付款方式钱包-->
-        <div class="dis_but" :class="{display: triangle_active}">
-          <div class="title">请选择钱包</div>
-          <!--钱包选择-->
-          <div class="Choice">
-            <div class="wallet_box" v-for="(item,index) in wallet" :key="index" @click="wallet_click(index)">
-              <div class="wallet">
-                <div class="Bank">
-                  <div class="left">
-                    <van-icon :name="item.icon"></van-icon>
-                  </div>
-                  <div class="right">{{item.name}} 钱包</div>
+      <!--付款方式钱包-->
+      <div class="dis_but" :class="{display: triangle_active}">
+        <div class="title">请选择钱包</div>
+        <!--钱包选择-->
+        <div class="Choice">
+          <div class="wallet_box" v-for="(item,index) in wallet" :key="index" @click="wallet_click(index)">
+            <div class="wallet">
+              <div class="Bank">
+                <div class="left">
+                  <van-icon :name="item.icon"></van-icon>
                 </div>
-                <div class="balance">
-                  <div class="left">
-                    <div>BCT 余额</div>
-                    <div>0</div>
-                  </div>
-                  <!--三角形-->
-                  <div class="right" :class="{active: index === icon_index}">
-                    <van-icon name="passed"></van-icon>
-                  </div>
+                <div class="right">{{item.name}} 钱包</div>
+              </div>
+              <div class="balance">
+                <div class="left">
+                  <div>BCT 余额</div>
+                  <div>0</div>
+                </div>
+                <!--三角形-->
+                <div class="right" :class="{active: index === icon_index}">
+                  <van-icon name="passed"></van-icon>
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!--说明-->
-        <div class="Explain">
-          <div class="Explain_text">
-            <ol type="1">
-              <li v-for="(item,index) in Explain" :key="index">
-                <div>{{index + 1}}、</div>
-                <div>{{item.text}}</div>
-              </li>
-            </ol>
-          </div>
+      <!--说明-->
+      <div class="Explain">
+        <div class="Explain_text">
+          <ol type="1">
+            <li v-for="(item,index) in Explain" :key="index">
+              <div>{{index + 1}}、</div>
+              <div>{{item.text}}</div>
+            </li>
+          </ol>
         </div>
       </div>
     </div>
+  </div>
 </template>
 
 <script>
@@ -279,7 +279,7 @@ export default {
         // 买入
         if (this.active_index === 0) {
         } else {
-        // 卖出
+          // 卖出
         }
       }
     },
@@ -355,11 +355,17 @@ export default {
     },
     // input光标
     foc_market () {
+      this.cli_off = false
       this.buyData = false
+      document.body.scrollTop = 170
+      document.documentElement.scrollTop = 170
     },
     // input光标
     foc_CNY () {
+      this.cli_off = false
       this.buyData = true
+      document.body.scrollTop = 170
+      document.documentElement.scrollTop = 170
     },
     buy_money () {
       if (this.Receive.pair) {
@@ -384,10 +390,10 @@ export default {
         if (that.inp_CNY) {
           // 判断是否USDA
           if (this.Receive.pair) {
-            if (e.inp_CNY.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.inp_CNY.length) {
-              e.input_mon_size = this.inp_CNY.length
+            if (that.inp_CNY.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.inp_CNY.length) {
+              that.input_mon_size = this.inp_CNY.length
             } else {
-              e.input_mon_size = 9
+              that.input_mon_size = 9
             }
             that.inp_market = (e.inp_CNY / that.buy_Price).toFixed(4)
             if (that.inp_market >= (Math.round(that.Receive.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.buy_max * 100) / 100)) {
@@ -631,6 +637,7 @@ export default {
             min-height: 0;
             height: 50px;
             padding: 0;
+            margin-top: 10px;
           }
           .md-input-item-input{
             height: 54px;

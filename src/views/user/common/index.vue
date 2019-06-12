@@ -1,6 +1,13 @@
 <template>
     <div class="common">
-      <div class="title">常见问题</div>
+      <div class="title">
+        <van-nav-bar
+          title="常见问题"
+          left-text="返回"
+          left-arrow
+          @click-left="onClickLeft"
+        />
+      </div>
       <!--问题列表-->
       <div class="problem">
         <div v-for="(item,index) in lists" :key="index">
@@ -11,6 +18,7 @@
 </template>
 
 <script>
+import { Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -109,6 +117,15 @@ export default {
         }
       ]
     }
+  },
+  methods: {
+    onClickLeft () {
+      this.$router.go(-1)
+    }
+  },
+  components: {
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   }
 }
 </script>
@@ -116,17 +133,17 @@ export default {
 <style scoped lang="less">
   .common{
     font-size: 15px;
-    padding: 0 20px;
     /*标题*/
     .title{
       font-size: 22px;
       font-weight: bold;
-      padding-top: 40px;
+      margin-bottom: 10px;
     }
     /*问题列表*/
     .problem{
       div{
-        margin:  20px 0;
+        margin: 0 0 20px 0;
+        padding: 0 10px;
       }
     }
   }

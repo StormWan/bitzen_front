@@ -153,7 +153,6 @@ export default {
     async api () {
       const { data } = await this.$api.otc.orders_get(this.$route.params.id)
       this.data = data.data
-      console.log(data.data)
       // 标题
       this.title = data.data.otc_pair.asset.symbol
       this.alipay_name = data.data.merchant.alipay_name
@@ -168,7 +167,7 @@ export default {
       this.mode[1].price = data.data.currency_amount
       // 姓名
       this.mode[2].price = data.data.merchant.alipay_name
-      this.Setitem()
+      await this.Setitem()
       this.status()
       // 付款方式图片显示说明
       let mode = this.mode[0]

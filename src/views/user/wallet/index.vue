@@ -2,18 +2,12 @@
     <div class="wallet">
       <div class="title">
         <!--头部标题-->
-        <div class="title_box">
-          <!--钱包Icon-->
-          <div class="icon" @click="icon_arrow">
-            <van-icon name="arrow-left"></van-icon>
-          </div>
-          <!--资金标题-->
-          <div class="head_title">资金</div>
-          <!--日志Icon-->
-          <a href="" class="icon">
-            <van-icon name="orders-o"></van-icon>
-          </a>
-        </div>
+        <van-nav-bar
+          title="资金"
+          left-text="返回"
+          left-arrow
+          @click-left="icon_arrow"
+        />
       </div>
       <!--资产卡包-->
       <div class="Asset_card">
@@ -86,7 +80,7 @@
 </template>
 
 <script>
-import { Icon, Toast } from 'vant'
+import { Icon, Toast, NavBar } from 'vant'
 
 export default {
   data () {
@@ -117,7 +111,8 @@ export default {
     }
   },
   components: {
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   },
   methods: {
     // 箭头
@@ -134,24 +129,6 @@ export default {
         this.icon = 'eye-o'
         this.money = this.money_box
         this.icon_run = true
-      }
-    },
-    // 隐藏小额度
-    active_state () {
-      this.tbgcolor = false
-      this.bbgcolor = false
-      if (this.isactive === false) {
-        this.isactive = true
-        this.price = false
-        this.sales = false
-        this.price_lower = false
-        this.sales_lower = false
-      } else {
-        this.isactive = false
-        this.price = false
-        this.sales = false
-        this.price_lower = false
-        this.sales_lower = false
       }
     },
     // 搜索引擎
@@ -258,27 +235,6 @@ export default {
 <style scoped lang="less">
   .wallet{
     font-size: 16px;
-    /*头部标题*/
-    .title{
-      width: 100%;
-      color: #696969;
-      /*头部标题*/
-      .title_box{
-        padding-top: 18px;
-        padding-bottom: 25px;
-        display: flex;
-        justify-content: space-between;
-        width: 90%;
-        margin: 0 auto;
-        .icon{
-          font-size: 22px;
-          color: #00CED1;
-        }
-        .head_title{
-          font-size: 16px;
-        }
-      }
-    }
     /*资产-卡包*/
     .Asset_card{
       width: 100%;

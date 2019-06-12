@@ -9,8 +9,6 @@
                 <!--市场/成交量-->
                 <div class="market">
                   <span>市场</span>
-                  /
-                  <span>成交量</span>
                 </div>
                 <!--最新价-->
                 <div class="cent">最新价</div>
@@ -173,7 +171,7 @@ export default {
       .list{
         /*标题*/
         .title{
-          width: 97%;
+          width: 90%;
           margin: 0 auto;
           font-size: 0;
           color: #696969;
@@ -201,7 +199,7 @@ export default {
         }
         /*数据*/
         .data{
-          width: 97%;
+          width: 90%;
           margin: 0 auto;
           font-size: 0;
           border-bottom: 1px solid #ccc;
@@ -243,7 +241,7 @@ export default {
             padding-left: 13.5%;
             .green{
               display: block;
-              width: 70px;
+              width: 100%;
               -webkit-border-radius: 5px;
               -moz-border-radius: 5px;
               border-radius: 5px;
@@ -253,7 +251,7 @@ export default {
             }
             .red{
               display: block;
-              width: 70px;
+              width: 100%;
               -webkit-border-radius: 5px;
               -moz-border-radius: 5px;
               border-radius: 5px;

@@ -2,12 +2,18 @@
   <div class="otc_details">
     <!--标题-->
     <div class="head">
-      <!--箭头-->
-      <div class="left_arrow" @click="Arrow">
-        <van-icon class="icon" name="arrow-left"></van-icon>
-      </div>
-      <!--title表头-->
-      <div class="title">C2C 订单记录</div>
+      <van-nav-bar
+        title="C2C 订单记录"
+        left-text="返回"
+        left-arrow
+        @click-left="Arrow"
+      />
+<!--      &lt;!&ndash;箭头&ndash;&gt;-->
+<!--      <div class="left_arrow" @click="Arrow">-->
+<!--        <van-icon class="icon" name="arrow-left"></van-icon>-->
+<!--      </div>-->
+<!--      &lt;!&ndash;title表头&ndash;&gt;-->
+<!--      <div class="title">C2C 订单记录</div>-->
     </div>
     <div class="BG" v-for="(item,index) in order" :key="index">
       <!--订单详情-->
@@ -130,18 +136,20 @@
 
 <script>
 import { Field, DetailItem, Tag, Bill } from 'mand-mobile'
-import { Icon, Progress, Toast } from 'vant'
+import { Icon, Progress, Toast, NavBar } from 'vant'
 export default {
   data () {
     return {
       value: 1,
       color: 'red',
-      order: []
+      order: [],
+      off: true
     }
   },
   methods: {
     // 传输
     item_pass (i) {
+      this.off = false
       if (this.order[i].side === 'buy') {
         this.$router.push({
           name: 'otc_order',
@@ -171,7 +179,6 @@ export default {
       if (data.code === 200) {
         this.order = data.data
         await this.Setitem()
-        console.log(this.order)
       } else {
         Toast('获取数据失败，请刷新页面')
       }
@@ -220,15 +227,18 @@ export default {
     [Icon.name]: Icon,
     [Progress.name]: Progress,
     [Bill.name]: Bill,
-    [Tag.name]: Tag
+    [Tag.name]: Tag,
+    [NavBar.name]: NavBar
   },
   async mounted () {
     await this.getPair()
   },
   destroyed () {
-    this.$router.push({
-      path: '/user'
-    })
+    if (this.off) {
+      this.$router.push({
+        path: '/user'
+      })
+    }
   }
 }
 </script>
@@ -238,16 +248,16 @@ export default {
     font-size: 18px;
     /*标题头部*/
     .head{
-      position: relative;
-      text-align: center;
-      line-height: 80px;
-      font-size: 19px;
-      /*返回箭头*/
-      .left_arrow{
-        position: absolute;
-        left: 10%;
-        font-size: 20px;
-      }
+      /*text-align: center;*/
+      /*line-height: 80px;*/
+      /*font-size: 19px;*/
+      /*!*返回箭头*!*/
+      /*.left_arrow{*/
+      /*  position: absolute;*/
+      /*  left: 10%;*/
+      /*  font-size: 20px;*/
+      /*}*/
+      margin: 10px 0;
     }
     .BG{
       background: rgba(0,0,0,.02);

@@ -20,7 +20,7 @@
               <img src="../../../assets/cat.jpg" alt="">
             </div>
             <div class="user_name">{{user_name}}</div>
-            <div class="text">邀您体验 ExinOne</div>
+            <div class="text">邀您体验 Bit-OX</div>
             <div class="code">邀请码： {{code}}</div>
             <!--二维码分享页-->
             <div class="query">

@@ -323,8 +323,8 @@ export default {
       let itemSet_month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
       // eslint-disable-next-line camelcase
       let itemSet = date.getFullYear() + '' + itemSet_month + itemSet_date + itemSet_hours + itemSet_minutes
-      if ((itemSet - set) <= 3) {
-        this.limittime = 3 - (itemSet - set)
+      if ((itemSet - set) <= 15) {
+        this.limittime = 15 - (itemSet - set)
         this.StartCountDown()
       } else {
         this.limittime = 0
@@ -456,6 +456,7 @@ export default {
     }
   },
   async mounted () {
+    console.log(this.$route.params.id)
     await this.api()
   },
   destroyed () {

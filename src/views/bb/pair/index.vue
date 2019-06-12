@@ -71,6 +71,7 @@
                 is-highlight
                 ref="input10"
                 clearable
+                is-virtual-keyboard
                 :maxlength="input_size"
               >
                 <div class="input-operator" slot="right">
@@ -775,6 +776,16 @@ export default {
       .md-field-header{
         margin-bottom: 50px;
       }
+      .md-icon.icon-font.md{
+        font-size: 20px;
+      }
+      .md-input-item .md-field-item-control{
+        /*width: 100px;*/
+        font-size: 18px;
+        span:nth-child(1){
+          font-size: 25px;
+        }
+      }
       .md-input-item-fake-placeholder{
         font-size: 18px;
       }
@@ -783,6 +794,8 @@ export default {
         padding-top: 5px;
         .md-field-title{
           font-size: 20px;
+          width: 100%;
+          text-align: center;
         }
         .input-operator{
           font-size: 16px;

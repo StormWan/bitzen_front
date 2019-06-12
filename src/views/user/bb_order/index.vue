@@ -3,11 +3,17 @@
       <!--标题-->
       <div class="head">
         <!--箭头-->
-        <div class="left_arrow" @click="Arrow">
-          <van-icon class="icon" name="arrow-left"></van-icon>
-        </div>
-        <!--title表头-->
-        <div class="title">币币订单</div>
+<!--        <div class="left_arrow" @click="Arrow">-->
+<!--          <van-icon class="icon" name="arrow-left"></van-icon>-->
+<!--        </div>-->
+<!--        &lt;!&ndash;title表头&ndash;&gt;-->
+<!--        <div class="title">币币订单</div>-->
+        <van-nav-bar
+          title="币币订单"
+          left-text="返回"
+          left-arrow
+          @click-left="onClickLeft"
+        />
       </div>
       <div class="BG" v-for="(item,index) in order" :key="index">
         <!--订单详情-->
@@ -128,7 +134,7 @@
 
 <script>
 import { Field, DetailItem, Tag, Bill } from 'mand-mobile'
-import { Icon, Progress, Toast } from 'vant'
+import { Icon, Progress, Toast, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -169,7 +175,7 @@ export default {
         path: '/details'
       })
     },
-    Arrow () {
+    onClickLeft () {
       this.$router.go(-1)
     },
     // 获取数据
@@ -188,7 +194,8 @@ export default {
     [Icon.name]: Icon,
     [Progress.name]: Progress,
     [Bill.name]: Bill,
-    [Tag.name]: Tag
+    [Tag.name]: Tag,
+    [NavBar.name]: NavBar
   },
   async mounted () {
     await this.getPair(1)
@@ -201,19 +208,20 @@ export default {
     font-size: 18px;
     /*标题头部*/
     .head{
-      position: relative;
-      text-align: center;
-      line-height: 80px;
-      font-size: 19px;
-      /*返回箭头*/
-      .left_arrow{
-        position: absolute;
-        left: 10%;
-        font-size: 20px;
-        .icon{
-          /*vertical-align: middle;*/
-        }
-      }
+      margin: 10px 0;
+      /*position: relative;*/
+      /*text-align: center;*/
+      /*line-height: 80px;*/
+      /*font-size: 19px;*/
+      /*!*返回箭头*!*/
+      /*.left_arrow{*/
+      /*  position: absolute;*/
+      /*  left: 10%;*/
+      /*  font-size: 20px;*/
+      /*  .icon{*/
+      /*    !*vertical-align: middle;*!*/
+      /*  }*/
+      /*}*/
     }
     .BG{
       background: rgba(0,0,0,.02);

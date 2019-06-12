@@ -2,12 +2,12 @@
   <div class="about">
     <!--标题-->
     <div class="head">
-      <!--箭头-->
-      <div class="left_arrow" @click="Arrow">
-        <van-icon class="icon" name="arrow-left"></van-icon>
-      </div>
-      <!--title表头-->
-      <div class="title">关于</div>
+      <van-nav-bar
+        title="关于"
+        left-text="返回"
+        left-arrow
+        @click-left="onClickLeft"
+      />
     </div>
     <!--服务内容-->
     <div class="content" v-for="(item,index) in content" :key="index" >
@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -51,12 +51,13 @@ export default {
     }
   },
   methods: {
-    Arrow () {
+    onClickLeft () {
       this.$router.go(-1)
     }
   },
   components: {
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   }
 }
 </script>
@@ -68,21 +69,7 @@ export default {
     font-size: 17px;
     /*标题头部*/
     .head{
-      background-color: rgba(0,0,0,.02);
-      position: relative;
-      text-align: center;
-      line-height: 80px;
       margin-bottom: 20px;
-      font-size: 19px;
-      /*返回箭头*/
-      .left_arrow{
-      position: absolute;
-      left: 10%;
-      font-size: 20px;
-        .icon{
-          /*vertical-align: middle;*/
-          }
-      }
     }
     /*服务内容*/
     .content{
