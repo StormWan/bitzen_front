@@ -195,7 +195,6 @@ export default {
     async api () {
       const { data } = await this.$api.otc.orders_get(this.$route.params.id)
       this.data = data.data
-      console.log(this.data)
       this.style()
       // 付款方式logo图片
       this.logo_img()
@@ -334,7 +333,7 @@ export default {
     // title放回按钮
     onClickLeft () {
       this.$router.push({
-        path: '/otc_details'
+        path: '/lend'
       })
     },
     // 弹窗提示
@@ -456,12 +455,11 @@ export default {
     }
   },
   async mounted () {
-    console.log(this.$route.params.id)
     await this.api()
   },
   destroyed () {
     this.$router.push({
-      path: '/otc_details'
+      path: '/lend'
     })
   },
   components: {

@@ -1,14 +1,37 @@
 <template>
-  <div>
-    <h1>tab reward</h1>
+  <div class="lend">
+    <van-tabs v-model="active" sticky>
+      <van-tab v-for="(item,index) in title" :title="item.title" :key="index">
+        <div v-if="index === 0" class="bb_otc">
+          <bb_order></bb_order>
+        </div>
+        <div v-else class="bb_otc">
+          <otc_details></otc_details>
+        </div>
+      </van-tab>
+    </van-tabs>
   </div>
 </template>
 
 <script>
 import { mapMutations } from 'vuex'
-
+import { Tab, Tabs } from 'vant'
+import bb from '../user/bb_order'
+import otc from '../user/otc_details'
 export default {
-  name: 'user',
+  data () {
+    return {
+      active: 0,
+      title: [
+        {
+          title: '币币'
+        },
+        {
+          title: '法币'
+        }
+      ]
+    }
+  },
   async mounted () {
     document.body.scrollTop = 0
     document.documentElement.scrollTop = 0
@@ -18,11 +41,25 @@ export default {
     ...mapMutations({
       setActiveTab: 'tabbar/setActiveTab'
     })
+  },
+  components: {
+    [Tab.name]: Tab,
+    [Tabs.name]: Tabs,
+    'bb_order': bb,
+    'otc_details': otc
   }
 }
 </script>
 
-<style>
+<style lang="less">
+  .lend{
+    height: 92.3%;
+    overflow: auto;
+    .bb_otc{
+      height: 100%;
+      width: 100%;
+    }
+  }
   /*底部改变*/
   .md-icon.icon-font.md{
     font-size: 16px;

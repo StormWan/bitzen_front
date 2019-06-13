@@ -2,12 +2,12 @@
   <div class="bb_order">
     <!--标题-->
     <div class="head">
-      <!--箭头-->
-      <div @click="Arrow" class="left_arrow">
-        <van-icon class="icon" name="arrow-left"></van-icon>
-      </div>
-      <!--title表头-->
-      <div class="title">{{pair}} <span>{{side}}</span></div>
+      <van-nav-bar
+        title="标题"
+        left-text="返回"
+        left-arrow
+        @click-left="Arrow"
+      />
     </div>
     <div class="BG">
       <!--订单详情-->
@@ -44,7 +44,7 @@
 
 <script>
 import { Field, DetailItem } from 'mand-mobile'
-import { Icon, Progress, Step, Steps } from 'vant'
+import { Icon, Progress, Step, Steps, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -77,7 +77,8 @@ export default {
     [Icon.name]: Icon,
     [Progress.name]: Progress,
     [Step.name]: Step,
-    [Steps.name]: Steps
+    [Steps.name]: Steps,
+    [NavBar.name]: NavBar
   },
   activated () {
     // eslint-disable-next-line camelcase
@@ -163,22 +164,6 @@ export default {
 <style lang="less">
   .bb_order{
     font-size: 18px;
-    /*标题头部*/
-    .head{
-      position: relative;
-      text-align: center;
-      line-height: 80px;
-      font-size: 19px;
-      /*返回箭头*/
-      .left_arrow{
-        position: absolute;
-        left: 10%;
-        font-size: 20px;
-        .icon{
-          /*vertical-align: middle;*/
-        }
-      }
-    }
     /*用户购买信息*/
     .BG{
       background: rgba(0,0,0,.02);

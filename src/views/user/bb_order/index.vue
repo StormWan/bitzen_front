@@ -1,21 +1,9 @@
 <template>
     <div class="bb_order">
-      <!--标题-->
-      <div class="head">
-        <!--箭头-->
-<!--        <div class="left_arrow" @click="Arrow">-->
-<!--          <van-icon class="icon" name="arrow-left"></van-icon>-->
-<!--        </div>-->
-<!--        &lt;!&ndash;title表头&ndash;&gt;-->
-<!--        <div class="title">币币订单</div>-->
-        <van-nav-bar
-          title="币币订单"
-          left-text="返回"
-          left-arrow
-          @click-left="onClickLeft"
-        />
+      <div class="title">
+        <div v-for="(item,index) in title" :key="index" @click="title_data(index)">{{item.title}}</div>
       </div>
-      <div class="BG" v-for="(item,index) in order" :key="index">
+      <div class="BG" v-for="(item,index) in lists" :key="index">
         <!--订单详情-->
         <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'buy'">
           <md-bill
@@ -36,10 +24,6 @@
               <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
-              <!--进度条-->
-              <div class="loding" v-if="item.state && !item.transfer_state"><van-progress :percentage="0" /></div>
-              <div class="loding" v-else-if="item.transfer_state && !item.exchange_state"><van-progress :percentage="50" /></div>
-              <div class="loding" v-if="item.exchange_state"><van-progress :percentage="100" /></div>
               <!--支付状态-->
               <div class="state">
                 <div class="complete" :class="{active: item.transfer_state === 'fail' || item.state === 'pending'}">
@@ -92,10 +76,6 @@
               <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
-              <!--进度条-->
-              <div class="loding" v-if="item.state && !item.transfer_state"><van-progress :percentage="0" /></div>
-              <div class="loding" v-else-if="item.transfer_state && !item.exchange_state"><van-progress :percentage="50" /></div>
-              <div class="loding" v-if="item.exchange_state"><van-progress :percentage="100" /></div>
               <!--支付状态-->
               <div class="state">
                 <div class="complete" :class="{active: item.transfer_state === 'fail' || item.state === 'pending'}">
@@ -142,7 +122,19 @@ export default {
       color: 'red',
       order: [],
       data_sta: [],
-      order_index: Number
+      order_index: Number,
+      title: [
+        {
+          title: '交易完成'
+        },
+        {
+          title: '进行中'
+        },
+        {
+          title: '交易失败'
+        }
+      ],
+      title_suo: ''
     }
   },
   methods: {
@@ -186,6 +178,30 @@ export default {
       } else {
         Toast('获取数据失败，请刷新页面')
       }
+    },
+    title_data (e) {
+      if (e === 0) {
+        // 已完成
+        this.title_suo = 'completed'
+      } else if (e === 1) {
+        // 进行中
+        this.title_suo = 'closed'
+      } else {
+        // 失败
+        this.title_suo = 'fail'
+      }
+    }
+  },
+  computed: {
+    lists: function () {
+      let that = this
+      let arrByZM = []
+      for (let i = 0; i < that.order.length; i++) {
+        if (that.order[i].transfer_state.search(that.title_suo) !== -1 || that.order[i].state.search(that.title_suo) !== -1) {
+          arrByZM.push(that.order[i])
+        }
+      }
+      return arrByZM
     }
   },
   components: {
@@ -206,22 +222,12 @@ export default {
 <style lang="less">
   .bb_order{
     font-size: 18px;
-    /*标题头部*/
-    .head{
-      margin: 10px 0;
-      /*position: relative;*/
-      /*text-align: center;*/
-      /*line-height: 80px;*/
-      /*font-size: 19px;*/
-      /*!*返回箭头*!*/
-      /*.left_arrow{*/
-      /*  position: absolute;*/
-      /*  left: 10%;*/
-      /*  font-size: 20px;*/
-      /*  .icon{*/
-      /*    !*vertical-align: middle;*!*/
-      /*  }*/
-      /*}*/
+    .title{
+      display: flex;
+      justify-content: space-around;
+      margin: 20px 0;
+      font-size: 16px;
+      color: green;
     }
     .BG{
       background: rgba(0,0,0,.02);
@@ -295,15 +301,11 @@ export default {
             }
           }
           .footer-slot{
-            padding: 12px 0;
+            padding: 5px 0;
             color: #858B9C;
             font-size: 16px;
             line-height: 1.5;
             border-top: solid 1px #E1E4EB;
-            /*进度条*/
-            .loding{
-              padding-bottom: 12px;
-            }
             .state{
               display: flex;
               justify-content: space-between;

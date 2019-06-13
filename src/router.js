@@ -31,19 +31,19 @@ const router = new Router({
         Auth: true
       }
     },
-    // 贷款
-    // {
-    //   path: '/lend',
-    //   name: 'lend',
-    //   components: {
-    //     default: () => import('./views/lend/index.vue'),
-    //     tabbar: () => import('./components/tabbar/index.vue')
-    //   },
-    //   meta: {
-    //     keepAlive: true,
-    //     Auth: true
-    //   }
-    // },
+    // 订单
+    {
+      path: '/lend',
+      name: 'lend',
+      components: {
+        default: () => import('./views/lend/index.vue'),
+        tabbar: () => import('./components/tabbar/index.vue')
+      },
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
     // 币币
     {
       path: '/bb',
@@ -161,15 +161,15 @@ const router = new Router({
       }
     },
     // otc_details
-    {
-      path: '/otc_details',
-      name: 'otc_details',
-      component: () => import('./views/user/otc_details/index.vue'),
-      meta: {
-        keepAlive: false,
-        Auth: true
-      }
-    },
+    // {
+    //   path: '/otc_details',
+    //   name: 'otc_details',
+    //   component: () => import('./views/user/otc_details/index.vue'),
+    //   meta: {
+    //     keepAlive: true,
+    //     Auth: true
+    //   }
+    // },
     // 法币卖出订单
     {
       path: '/otc_out/:id',
@@ -321,15 +321,15 @@ const router = new Router({
       }
     },
     // 币币订单
-    {
-      path: '/bb_order',
-      name: 'bb_order',
-      component: () => import('./views/user/bb_order/index.vue'),
-      meta: {
-        keepAlive: true,
-        Auth: true
-      }
-    },
+    // {
+    //   path: '/bb_order',
+    //   name: 'bb_order',
+    //   component: () => import('./views/user/bb_order/index.vue'),
+    //   meta: {
+    //     keepAlive: true,
+    //     Auth: true
+    //   }
+    // },
     // 详情
     {
       path: '/details',

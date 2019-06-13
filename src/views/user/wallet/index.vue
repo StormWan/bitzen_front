@@ -203,7 +203,6 @@ export default {
     lists: function () {
       let _this = this
       let arrByZM = []
-      // console.log(this.searchVal)
       for (let i = 0; i < this.wallet_data.length; i++) {
         // for循环数据中的每一项（根据name值）
         if (this.wallet_data[i].symbol.toLowerCase().search(this.searchVal.toLowerCase()) !== -1 || this.wallet_data[i].name.toLowerCase().search(this.searchVal.toLowerCase()) !== -1) {
@@ -214,7 +213,6 @@ export default {
       }
       // 判断，如果要letter不为空，说明要进行排序
       if (this.letter !== '') {
-        console.log(arrByZM)
         arrByZM.sort(function (a, b) {
           if (_this.original) {
             return b[_this.letter] - a[_this.letter]

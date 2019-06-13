@@ -34,7 +34,7 @@ export default {
         // { name: 1, label: '首页', icon: 'home', path: '/' },
         { name: 2, label: '法币', icon: 'user', path: '/' },
         { name: 3, label: '币币', icon: 'motor-vehicle', path: '/bb' },
-        // { name: 4, label: '借贷', icon: 'rmb', path: '/lend' },
+        { name: 4, label: '订单', icon: 'rmb', path: '/lend' },
         { name: 5, label: '我的', icon: 'setting', path: '/user' }
       ]
     }

@@ -268,7 +268,7 @@ export default {
     },
     onClickLeft () {
       this.$router.push({
-        path: '/otc_details'
+        path: '/lend'
       })
     },
     // 时间开始倒计时
@@ -369,7 +369,7 @@ export default {
   },
   destroyed () {
     this.$router.push({
-      path: '/otc_details'
+      path: '/lend'
     })
   }
 }
