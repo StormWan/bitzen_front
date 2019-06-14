@@ -67,10 +67,6 @@ export default {
     height: 100%;
     width: 100%;
     font-size: 17px;
-    /*标题头部*/
-    .head{
-      margin-bottom: 20px;
-    }
     /*服务内容*/
     .content{
       background-color: rgba(0,0,0,.02);

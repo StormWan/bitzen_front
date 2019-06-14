@@ -42,17 +42,6 @@
         <van-cell title="修改 BlockPay 钱包密码" icon="goods-collect-o" is-link />
       </router-link>
     </div>
-    <!--币币作用页-->
-    <div class="Effect">
-      <!--法币订单记录-->
-      <router-link to="/otc_details">
-        <van-cell title="法币订单记录" icon="discount" is-link />
-      </router-link>
-      <!--币币订单记录-->
-      <router-link to="/bb_order">
-        <van-cell title="币币订单记录" icon="points" is-link />
-      </router-link>
-    </div>
     <!--用户认证作用页-->
     <div class="Effect">
       <!--实名验证-->

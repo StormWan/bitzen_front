@@ -2,10 +2,12 @@
   <div class="not_received">
     <!--头部标题-->
     <div class="head">
-      <div class="Arrow" @click="Arrow">
-        <van-icon name="arrow-left"></van-icon>
-      </div>
-      <div class="title">付款了没有收到币怎么办?</div>
+      <van-nav-bar
+        title="付款了没有收到币怎么办?"
+        left-text="返回"
+        left-arrow
+        @click-left="Arrow"
+      />
     </div>
     <div class="content">
       <p>ExinOne 平台 C2C 买入订单，需要用户手动线下完成转账付款，完成之后切记要点一下：【我已付款】按钮；</p>
@@ -18,7 +20,7 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -31,7 +33,8 @@ export default {
     }
   },
   components: {
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   }
 }
 </script>
@@ -39,18 +42,6 @@ export default {
 <style scoped lang="less">
   .not_received{
     font-size: 17px;
-    /*头部标题*/
-    .head{
-      position: relative;
-      text-align: center;
-      line-height: 80px;
-      font-size: 18px;
-      .Arrow{
-        position: absolute;
-        left: 10%;
-        font-size: 20px;
-      }
-    }
     /*内容*/
     .content{
       width: 92%;

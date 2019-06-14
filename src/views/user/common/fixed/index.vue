@@ -2,14 +2,15 @@
     <div class="fixed">
       <!--头部标题-->
       <div class="head">
-        <div class="Arrow" @click="Arrow">
-          <van-icon name="arrow-left"></van-icon>
-        </div>
-        <div class="title">关于 BlockPay 钱包的说明</div>
+        <van-nav-bar
+          title="关于 BlockPay 钱包的说明"
+          left-text="返回"
+          left-arrow
+          @click-left="Arrow"
+        />
       </div>
       <!--内容-->
       <div class="content">
-
         <div>
           <h5>一、首先，要明白定投的概念是什么？</h5>
           <p>定投：“定期定额投资”的简称，即指在固定的时间以固定的金额分批次购买指定的币种。</p>
@@ -54,7 +55,7 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -67,7 +68,8 @@ export default {
     }
   },
   components: {
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   }
 }
 </script>
@@ -75,21 +77,6 @@ export default {
 <style scoped lang="less">
   .fixed{
     font-size: 17px;
-    /*头部标题*/
-    .head{
-      position: relative;
-      text-align: center;
-      line-height: 80px;
-      font-size: 18px;
-      .Arrow{
-        position: absolute;
-        left: 10%;
-        font-size: 20px;
-        .icon{
-          /*vertical-align: middle;*/
-        }
-      }
-    }
     .content{
       width: 92%;
       margin: 0 auto;

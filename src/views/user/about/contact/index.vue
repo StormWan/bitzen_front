@@ -1,6 +1,13 @@
 <template>
     <div class="contact">
-      <div class="title">联系我们</div>
+      <div class="title">
+        <van-nav-bar
+          title="联系我们"
+          left-text="返回"
+          left-arrow
+          @click-left="Arrow"
+        />
+      </div>
       <div class="text">
         <h5>亲爱的用户：</h5>
         <p class="tow">如您遇到问题，请先查看 <a href="">Bit-OX 常见问题</a>，看看您的问题是否已经得到了解答，若还是找不到你想要的，<a href="">请提交工单</a>。</p>
@@ -17,19 +24,23 @@
 </template>
 
 <script>
+import { NavBar } from 'vant'
 export default {
-  name: 'index'
+  name: 'index',
+  methods: {
+    Arrow () {
+      this.$router.go(-1)
+    }
+  },
+  components: {
+    [NavBar.name]: NavBar
+  }
 }
 </script>
 
 <style scoped lang="less">
   .contact{
     font-size: 15px;
-    .title{
-      font-size: 22px;
-      text-align: center;
-      line-height: 80px;
-    }
     .text{
       padding: 0 20px;
       p{

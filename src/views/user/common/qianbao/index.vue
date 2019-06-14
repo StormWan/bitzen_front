@@ -2,10 +2,12 @@
     <div class="qianbao">
       <!--头部标题-->
       <div class="head">
-        <div class="Arrow" @click="Arrow">
-          <van-icon name="arrow-left"></van-icon>
-        </div>
-        <div class="title">关于 BlockPay 钱包的说明</div>
+        <van-nav-bar
+          title="关于 BlockPay 钱包的说明"
+          left-text="返回"
+          left-arrow
+          @click-left="Arrow"
+        />
       </div>
       <div class="content">
         <p>首先声明，Bit-OX 是去中心化的投资平台，不托管用户资产，本身没有钱包。</p>
@@ -21,7 +23,7 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -34,7 +36,8 @@ export default {
     }
   },
   components: {
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   }
 }
 </script>

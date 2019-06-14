@@ -2,10 +2,12 @@
   <div class="Price">
     <!--头部标题-->
     <div class="head">
-      <div class="Arrow" @click="Arrow">
-        <van-icon name="arrow-left"></van-icon>
-      </div>
-      <div class="title">实际到手的币的数量和预估的不一样?</div>
+      <van-nav-bar
+        title="实际到手的币的数量和预估的不一样?"
+        left-text="返回"
+        left-arrow
+        @click-left="Arrow"
+      />
     </div>
     <div class="content">
       <p>ExinOne 是数字币投资工具，本身并非交易所，用户在 ExinOne 下单并支付后，ExinOne 将用户的订单提交到相应交易所以市价单成交，以下三个原因可能导致实际成交数量与预估值不一致：</p>
@@ -19,7 +21,7 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -32,7 +34,8 @@ export default {
     }
   },
   components: {
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   }
 }
 </script>
@@ -40,21 +43,6 @@ export default {
 <style scoped lang="less">
   .Price{
     font-size: 17px;
-    /*头部标题*/
-    .head{
-      position: relative;
-      text-align: center;
-      line-height: 80px;
-      font-size: 15px;
-      .Arrow{
-        position: absolute;
-        left: 10%;
-        font-size: 17px;
-        .icon{
-          /*vertical-align: middle;*/
-        }
-      }
-    }
     /*内容*/
     .content{
       width: 92%;

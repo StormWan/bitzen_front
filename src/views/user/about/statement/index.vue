@@ -1,6 +1,13 @@
 <template>
     <div class="statement">
-      <div class="title">隐私条款</div>
+      <div class="title">
+        <van-nav-bar
+          title="隐私条款"
+          left-text="返回"
+          left-arrow
+          @click-left="Arrow"
+        />
+      </div>
       <div class="text">
         <p>本隐私声明解释了Bit-OX如何收集、使用、共享及保护通过https://Bit-OX.com网站所获得的用户信息。在收集用户指定的个人相关信息时，我们均出于合理的法律及相关特定需求。对于非必要信息，用户有权决定是否提供。必要信息的缺失，可能会导致您无法使用某些特定权限。</p>
         <p>使用Bit-OX平台及其服务，表示您已经同意本文中的所有条例。我们会根据法律及个人数据收集，使用方式的变动，来不断调整和完善本隐私政策。修改后的公告会在官网发布，若您的信息被用于本文未提及的其他用途，我们将提前通知并征得您的同意。</p>
@@ -38,18 +45,22 @@
 </template>
 
 <script>
+import { NavBar } from 'vant'
 export default {
+  methods: {
+    Arrow () {
+      this.$router.go(-1)
+    }
+  },
+  components: {
+    [NavBar.name]: NavBar
+  }
 }
 </script>
 
 <style scoped lang="less">
   .statement{
     font-size: 16px;
-    .title{
-      font-size: 22px;
-      text-align: center;
-      line-height: 80px;
-    }
     .text{
       padding: 0 20px;
       p{

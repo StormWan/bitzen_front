@@ -2,10 +2,12 @@
   <div class="not_received">
     <!--头部标题-->
     <div class="head">
-      <div class="Arrow" @click="Arrow">
-        <van-icon name="arrow-left"></van-icon>
-      </div>
-      <div class="title">各种充值一般大概多久到账</div>
+      <van-nav-bar
+        title="各种充值一般大概多久到账"
+        left-text="返回"
+        left-arrow
+        @click-left="Arrow"
+      />
     </div>
     <div class="content">
       <p>区块链资产转账分为三个步骤：提出-区块确认-入账；第一步：转账成功代表提币的平台或钱包进行了转账操作；第二步：完成对应的区块确认，区块链拥堵、延迟等情况会导致您的数字货币迟迟没有完成全部确认;第三步，完成确认到平台后，会尽快完成上帐；您可以向平台方索要 TXID 自助查看具体转账进度。以下是我们提供的一些主流币种的区块确认数查询地址，大家有需要可以自主查询。</p>
@@ -98,7 +100,7 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -111,7 +113,8 @@ export default {
     }
   },
   components: {
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   }
 }
 </script>
@@ -119,18 +122,6 @@ export default {
 <style scoped lang="less">
   .not_received{
     font-size: 17px;
-    /*头部标题*/
-    .head{
-      position: relative;
-      text-align: center;
-      line-height: 80px;
-      font-size: 18px;
-      .Arrow{
-        position: absolute;
-        left: 10%;
-        font-size: 20px;
-      }
-    }
     /*内容*/
     .content{
       width: 92%;

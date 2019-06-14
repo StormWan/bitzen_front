@@ -2,10 +2,12 @@
   <div class="service">
     <!--头部标题-->
     <div class="head">
-      <div class="Arrow" @click="Arrow">
-        <van-icon name="arrow-left"></van-icon>
-      </div>
-      <div class="title">为什么 Bit-Ox 的 C2C 价格与行情软件显示的价格不一致,有时候甚至相差比较大?</div>
+      <van-nav-bar
+        title="为什么 Bit-Ox 的 C2C 价格与行情软件显示的价格不一致,有时候甚至相差比较大?"
+        left-text="返回"
+        left-arrow
+        @click-left="Arrow"
+      />
     </div>
     <div class="content">
       <h5>有两个原因：</h5>
@@ -16,7 +18,7 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -29,7 +31,8 @@ export default {
     }
   },
   components: {
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   }
 }
 </script>

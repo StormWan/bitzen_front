@@ -1,6 +1,13 @@
 <template>
     <div class="About_us">
-      <div class="title">关于我们</div>
+      <div class="title">
+        <van-nav-bar
+          title="关于我们"
+          left-text="返回"
+          left-arrow
+          @click-left="Arrow"
+        />
+      </div>
       <div class="img_top">
         <img src="../../../../assets/about_left.jpg" alt="">
       </div>
@@ -11,19 +18,23 @@
 </template>
 
 <script>
+import { NavBar } from 'vant'
 export default {
-  name: 'index'
+  name: 'index',
+  methods: {
+    Arrow () {
+      this.$router.go(-1)
+    }
+  },
+  components: {
+    [NavBar.name]: NavBar
+  }
 }
 </script>
 
 <style scoped lang="less">
   .About_us{
     font-size: 15px;
-    .title{
-      font-size: 22px;
-      text-align: center;
-      line-height: 80px;
-    }
     .img_top{
       padding: 0 18px;
       img{

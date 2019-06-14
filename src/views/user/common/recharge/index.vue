@@ -2,10 +2,12 @@
   <div class="not_received">
     <!--头部标题-->
     <div class="head">
-      <div class="Arrow" @click="Arrow">
-        <van-icon name="arrow-left"></van-icon>
-      </div>
-      <div class="title">各种充值一般大概多久到账</div>
+      <van-nav-bar
+        title="各种充值一般大概多久到账"
+        left-text="返回"
+        left-arrow
+        @click-left="Arrow"
+      />
     </div>
     <div class="content">
       <p>不同币种到账时间都不一样，需要的确认数也不一样，并且不能以确认数的数量来简单判断到账时间，比如 ETH 虽然需要 100 个确认数，但是每个确认都很快，实际到账时间比只需要 12 个确认数的 BTC 快多了。以下是我们提供的一些主流币种的区块确认数查询地址，大家有需要可以自主查询。</p>
@@ -98,7 +100,7 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -111,7 +113,8 @@ export default {
     }
   },
   components: {
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   }
 }
 </script>
@@ -119,18 +122,6 @@ export default {
 <style scoped lang="less">
   .not_received{
     font-size: 17px;
-    /*头部标题*/
-    .head{
-      position: relative;
-      text-align: center;
-      line-height: 80px;
-      font-size: 18px;
-      .Arrow{
-        position: absolute;
-        left: 10%;
-        font-size: 20px;
-      }
-    }
     /*内容*/
     .content{
       width: 92%;

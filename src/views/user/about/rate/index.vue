@@ -1,9 +1,16 @@
 <template>
     <div class="rate">
-      <div class="title">费率标准</div>
+      <div class="title">
+        <van-nav-bar
+          title="费率标准"
+          left-text="返回"
+          left-arrow
+          @click-left="Arrow"
+        />
+      </div>
       <div class="text">
         <h4>亲爱的用户：</h4>
-        <p> 关于 Bit-OX 的相关费率标准，说明如下：</p>
+        <p>关于 Bit-OX 的相关费率标准，说明如下：</p>
         <h4>1、Bit-OX 的平台手续费</h4>
         <ul>
           <li>Bit-OX 平台手续费统一为 0.2%，服务费将从您的成交总额中扣除。若成交后获得比特币资产，则支付比特币交易手续费。</li>
@@ -25,19 +32,23 @@
 </template>
 
 <script>
+import { NavBar } from 'vant'
 export default {
-  name: 'index'
+  name: 'index',
+  methods: {
+    Arrow () {
+      this.$router.go(-1)
+    }
+  },
+  components: {
+    [NavBar.name]: NavBar
+  }
 }
 </script>
 
 <style scoped lang="less">
   .rate{
     font-size: 15px;
-    .title{
-      font-size: 22px;
-      text-align: center;
-      line-height: 80px;
-    }
     .text{
       padding: 0 20px;
       p{

@@ -2,10 +2,12 @@
   <div class="service">
     <!--头部标题-->
     <div class="head">
-      <div class="Arrow" @click="Arrow">
-        <van-icon name="arrow-left"></van-icon>
-      </div>
-      <div class="title">卖出数字货币时如何收款?</div>
+      <van-nav-bar
+        title="卖出数字货币时如何收款?"
+        left-text="返回"
+        left-arrow
+        @click-left="Arrow"
+      />
     </div>
     <div class="content">
       <p>Bit-OX 服务最后一页【我的】，有一个【收款账户】，用户下卖单必须先绑定至少一种收款方式才可以下单，目前平台支持三种收款方式：微信、支付宝和银行卡。比如是用户的实名收款账户。</p>
@@ -15,7 +17,7 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -28,7 +30,8 @@ export default {
     }
   },
   components: {
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   }
 }
 </script>
@@ -36,18 +39,6 @@ export default {
 <style scoped lang="less">
   .service{
     font-size: 17px;
-    /*头部标题*/
-    .head{
-      position: relative;
-      text-align: center;
-      line-height: 80px;
-      font-size: 18px;
-      .Arrow{
-        position: absolute;
-        left: 10%;
-        font-size: 20px;
-      }
-    }
     /*内容*/
     .content{
       width: 92%;

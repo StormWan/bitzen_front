@@ -16,7 +16,7 @@
         <van-collapse-item title="Lv 1 认证" name="1">
           <!--姓名-->
           <div>
-            <van-cell-group>
+            <van-cell-group name="group">
               <van-field
                 v-model="username"
                 required
@@ -33,7 +33,7 @@
               <span>*</span>
               <span>上传身份证正面</span>
               <span>
-                <img class="head-img" src="../../../assets/ID_just.jpg" ref="onRead_just"/>
+                <img class="head-img" src="../../../assets/shenfenzhenegzheng.jpg" ref="onRead_just"/>
               </span>
             </van-uploader>
           </div>
@@ -43,7 +43,8 @@
               <span>*</span>
               <span>上传身份证反面</span>
               <span>
-                <img class="head-img" src="../../../assets/ID_back.jpg" ref="onRead_back"/>
+<!--                <img class="head-img" src="../../../assets/ID_back.jpg" ref="onRead_back"/>-->
+                <img class="head-img" src="../../../assets/shenfenzhenegbei.jpg" ref="onRead_back"/>
               </span>
             </van-uploader>
           </div>
@@ -149,7 +150,6 @@ export default {
     },
     // 选择图片后执行
     onRead_just (file) {
-      console.log(file)
       this.img_b = true
       if (file) {
         if (this.username && this.img_b && this.img_t) {
@@ -162,7 +162,6 @@ export default {
       this.$refs.onRead_just.src = file.content
     },
     onRead_back (file) {
-      console.log(file)
       // 将原图片显示为选择的图片
       this.img_t = true
       this.$refs.onRead_back.src = file.content
