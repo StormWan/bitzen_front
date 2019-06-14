@@ -53,9 +53,6 @@ export default {
 <style scoped lang="less">
   .account{
     font-size: 16px;
-    .van-nav-bar__arrow + .van-nav-bar__text ,.van-nav-bar .van-icon{
-      color: #696969;
-    }
     .content{
       padding: 15px 15px;
       background: rgba(0,0,0,.02);

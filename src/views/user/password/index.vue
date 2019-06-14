@@ -2,12 +2,12 @@
     <div class="password">
       <!--标题-->
       <div class="head">
-        <!--箭头-->
-        <div class="Arrow" @click="Arrow">
-          <van-icon class="icon" name="arrow-left"></van-icon>
-        </div>
-        <!--title表头-->
-        <div class="title">{{title}}</div>
+        <van-nav-bar
+          :title="title"
+          left-text="返回"
+          left-arrow
+          @click-left="Arrow"
+        />
       </div>
       <!--输入密码-->
       <div class="enter">
@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import { PasswordInput, NumberKeyboard, Icon } from 'vant'
+import { PasswordInput, NumberKeyboard, Icon, NavBar } from 'vant'
 export default {
   data () {
     return {
@@ -134,7 +134,8 @@ export default {
   components: {
     [PasswordInput.name]: PasswordInput,
     [NumberKeyboard.name]: NumberKeyboard,
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
   },
   activated () {
     if (localStorage.getItem('user_pas')) {
@@ -151,20 +152,6 @@ export default {
 <style scoped lang="less">
   .password{
     font-size: 18px;
-    /*头部标题*/
-    .head{
-      position: relative;
-      text-align: center;
-      line-height: 80px;
-      .Arrow{
-        position: absolute;
-        left: 10%;
-        font-size: 20px;
-        .icon{
-          /*vertical-align: middle;*/
-        }
-      }
-    }
     /*密码输入框*/
     .enter{
       padding-top: 30px;
