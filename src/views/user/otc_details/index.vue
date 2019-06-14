@@ -1,7 +1,7 @@
 <template>
   <div class="otc_details">
     <div class="title">
-      <div v-for="(item,index) in title" :key="index" @click="title_data(index)">{{item.title}}</div>
+      <div v-for="(item,index) in title" :key="index" @click="title_data(index)" :class="{active: index === act_index}">{{item.title}}</div>
     </div>
     <div class="BG" v-for="(item,index) in lists" :key="index">
       <!--订单详情-->
@@ -133,7 +133,8 @@ export default {
         }
       ],
       title_suo: '',
-      price: ''
+      price: '',
+      act_index: Number
     }
   },
   methods: {
@@ -211,6 +212,7 @@ export default {
       })
     },
     title_data (e) {
+      this.act_index = e
       if (e === 0) {
         // 已完成
         this.title_suo = '2'
@@ -265,6 +267,9 @@ export default {
       justify-content: space-around;
       margin: 20px 0;
       font-size: 16px;
+      color: #999;
+    }
+    .active{
       color: green;
     }
     .BG{
