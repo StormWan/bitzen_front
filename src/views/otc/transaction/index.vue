@@ -114,7 +114,6 @@
               <!--下单提示说明-->
               <div class="ts_text">到账金额以<span>实际交割价</span>为准</div>
             </div>
-            <!--到账 {{Receive.market_name}}-->
           </div>
         </van-tab>
       </van-tabs>
@@ -219,7 +218,7 @@ export default {
       // 说明
       Explain: [
         {
-          text: 'Bit-OXC2C交易除了USDT为直接交易，其它均为币币交易多步并一步，比如购买XIN，实际为先兑换为USDT，再兑换为BTC，再兑换为XIN，当前价格仅供参考，以实际交割价为准。'
+          text: 'Bit-OX C2C交易除了USDT为直接交易，其它均为币币交易多步并一步，比如购买XIN，实际为先兑换为USDT，再兑换为BTC，再兑换为XIN，当前价格仅供参考，以实际交割价为准。'
         },
         {
           text: 'C2C总交易额超过 1000 USDT必须先进行实名认证。'
@@ -228,7 +227,7 @@ export default {
           text: '如有大额交易需求可直接联系 ExinOne 客服如果您不能完全理解 ExinOne 提供的服务，建议下小订单尝试。'
         },
         {
-          text: 'C2C交易服务时间为早上7点到晚上12点如需帮助请联系 Bit-ox 客服，Mixin ID：28749，微信：jc_castle'
+          text: 'C2C交易服务时间为早上7点到晚上12点如需帮助请联系 Bit-OX 客服，Mixin ID：28749，微信：jc_castle'
         },
         {
           text: '所有承兑商均已通过 Bit-ox 认证，您每次兑换会冻结承兑商资产，承兑商无法在资产不够时接单，请放心兑换。'
@@ -355,14 +354,12 @@ export default {
     },
     // input光标
     foc_market () {
-      this.cli_off = false
       this.buyData = false
       document.body.scrollTop = 170
       document.documentElement.scrollTop = 170
     },
     // input光标
     foc_CNY () {
-      this.cli_off = false
       this.buyData = true
       document.body.scrollTop = 170
       document.documentElement.scrollTop = 170

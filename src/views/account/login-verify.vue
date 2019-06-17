@@ -43,7 +43,7 @@ export default {
         this.$store.commit({ type: 'account/auth', areaCode: this.areaCode, phone: this.phone, key: data.data.key })
         Toast.succeed('验证码已发送')
       } else {
-        console.log(data)
+        // console.log(data)
         Toast.failed('请输入验证码')
       }
     },
@@ -52,18 +52,20 @@ export default {
       this.verifyCode = code
     },
     async login () {
-      console.log({ key: this.key, verify_code: this.verifyCode })
+      // console.log({ key: this.key, verify_code: this.verifyCode })
       const { data } = await this.$api.account.verify({ key: this.key, verify_code: this.verifyCode })
-      console.log(data)
+      // console.log(data)
       if (data.code === 200) {
-        console.log(data)
+        // console.log(data)
         localStorage.setItem('token', data.data.token)
         localStorage.setItem('userInfo', JSON.stringify(data.data))
-        this.$router.go(-2)
+        this.$router.push({
+          path: '/lend'
+        })
         // const userInfo = JSON.parse(localStorage.getItem('userInfo'))
       } else {
         Toast.failed(data.desc)
-        console.log(data)
+        // console.log(data)
       }
     }
   },

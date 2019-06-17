@@ -32,7 +32,7 @@ export default {
       ]
     }
   },
-  async mounted () {
+  async activated () {
     document.body.scrollTop = 0
     document.documentElement.scrollTop = 0
     this.setActiveTab(4)

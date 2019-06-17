@@ -123,10 +123,10 @@ export default {
       off: true,
       title: [
         {
-          title: '交易完成'
+          title: '进行中'
         },
         {
-          title: '进行中'
+          title: '交易完成'
         },
         {
           title: '交易失败'
@@ -215,9 +215,9 @@ export default {
       this.act_index = e
       if (e === 0) {
         // 已完成
-        this.title_suo = '2'
-      } else if (e === 1) {
         this.title_suo = '1'
+      } else if (e === 1) {
+        this.title_suo = '2'
         this.price = '0'
       } else {
         // 失败
@@ -248,13 +248,6 @@ export default {
   },
   async mounted () {
     await this.getPair()
-  },
-  destroyed () {
-    if (this.off) {
-      this.$router.push({
-        path: '/lend'
-      })
-    }
   }
 }
 </script>

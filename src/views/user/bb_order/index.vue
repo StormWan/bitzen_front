@@ -125,10 +125,10 @@ export default {
       order_index: Number,
       title: [
         {
-          title: '交易完成'
+          title: '进行中'
         },
         {
-          title: '进行中'
+          title: '交易完成'
         },
         {
           title: '交易失败'
@@ -184,10 +184,10 @@ export default {
       this.act_index = e
       if (e === 0) {
         // 已完成
-        this.title_suo = 'completed'
+        this.title_suo = 'closed'
       } else if (e === 1) {
         // 进行中
-        this.title_suo = 'closed'
+        this.title_suo = 'completed'
       } else {
         // 失败
         this.title_suo = 'fail'

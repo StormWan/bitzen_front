@@ -17,7 +17,7 @@
           <van-cell :value="user_name" />
         </div>
       </div>
-    <div class="Tips"><van-icon name="info-o" /> 请不要透露密码、短信和谷歌验证码给任何人，包括币安的工作人员</div>
+    <div class="Tips"><van-icon name="info-o" /> 请不要透露密码、短信和谷歌验证码给任何人</div>
 
     <!--分享页面-->
     <div class="Effect">
