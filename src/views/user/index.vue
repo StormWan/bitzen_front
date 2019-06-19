@@ -199,6 +199,9 @@ export default {
     /*作用页*/
     .Effect{
       border-bottom: 8px solid rgba(0,0,0,.04);
+      .van-cell{
+        padding: 12px 15px;
+      }
     }
     /*底部*/
     .hei{

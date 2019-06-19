@@ -18,7 +18,7 @@
             </md-detail-item>
             <md-detail-item title="服务费">
               <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
-              <div v-else><span>{{item.exchangeinstantordermodel.fee_cost}}</span>EPC</div>
+              <div v-else><span>{{Math.round(item.exchangeinstantordermodel.fee_cost * 10000000) / 10000000}}</span>EPC</div>
             </md-detail-item>
             <md-detail-item title="实际到账">
               <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}

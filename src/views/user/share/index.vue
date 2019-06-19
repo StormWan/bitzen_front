@@ -105,12 +105,12 @@ export default {
     /*用户分享信息*/
     .content{
       position: relative;
-      margin-bottom: 50px;
       height: 100%;
       width: 100%;
       background: url("../../../assets/share_bg.jpg");
       -webkit-background-size: 100%;
       background-size: 100%;
+      background-repeat: no-repeat;
       .user{
         position: absolute;
         color: white;

@@ -3,7 +3,7 @@
     <!--标题-->
     <div class="head">
       <van-nav-bar
-        title="标题"
+        :title="symbol"
         left-text="返回"
         left-arrow
         @click-left="Arrow"

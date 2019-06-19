@@ -62,9 +62,6 @@ export default {
         {
           tiele_name: 'EOS'
         }
-        // {
-        //   tiele_name: 'USD'
-        // }
       ],
       // 数据
       list: [],

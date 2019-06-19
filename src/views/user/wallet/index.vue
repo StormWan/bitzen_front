@@ -16,7 +16,7 @@
           <div class="Asset">
             <!--资产估计-->
             <div class="estimate">
-              <span class="Es_assets">资产估计(BTC)</span>
+              <span class="Es_assets">资产估计({{surface}})</span>
               <span class="icon_box">
                 <van-icon class="icon" :name="icon" @click="icon_click"></van-icon>
               </span>
@@ -31,15 +31,6 @@
               <span>≈</span>
               <span>{{money}}</span>
             </div>
-            <!--充值提现-->
-<!--            <div class="Chg_and_wir">-->
-<!--              <router-link to="/wallet_recharge"><span>-->
-<!--                <van-icon class="icon" name="balance-list"></van-icon>-->
-<!--              </span>充值</router-link>-->
-<!--              <router-link to="/withdrawal"><span>-->
-<!--                <van-icon class="icon" name="card"></van-icon>-->
-<!--              </span>提现</router-link>-->
-<!--            </div>-->
           </div>
           <!--卡包-->
           <div class="card">
@@ -297,27 +288,6 @@ export default {
             }
             span:nth-child(1){
               margin-right: 3px;
-            }
-          }
-          /*充值提现*/
-          .Chg_and_wir{
-            font-size: 0;
-            margin-top: 3px;
-            a{
-              font-size: 13px;
-              display: inline-block;
-              padding: 5px 30px;
-              border: 1px solid #ccc;
-              color: green;
-              /*充值提现icon*/
-              span{
-                padding-right: 3px;
-                color: red;
-                vertical-align: middle;
-                .icon{
-                  font-size: 13px;
-                }
-              }
             }
           }
         }

@@ -141,18 +141,18 @@ export default {
     // 传输
     item_pass (i) {
       this.off = false
-      if (this.order[i].side === 'buy') {
+      if (this.lists[i].side === 'buy') {
         this.$router.push({
           name: 'otc_order',
           params: {
-            id: this.order[i].id
+            id: this.lists[i].id
           }
         })
-      } else if (this.order[i].side === 'sell') {
+      } else if (this.lists[i].side === 'sell') {
         this.$router.push({
           name: 'otc_out',
           params: {
-            id: this.order[i].id
+            id: this.lists[i].id
           }
         })
       } else {
@@ -215,10 +215,10 @@ export default {
       this.act_index = e
       if (e === 0) {
         // 已完成
-        this.title_suo = '1'
+        this.title_suo = '10'
       } else if (e === 1) {
-        this.title_suo = '2'
-        this.price = '0'
+        this.title_suo = '20'
+        this.price = '00'
       } else {
         // 失败
         this.title_suo = '30'
@@ -230,7 +230,7 @@ export default {
       let that = this
       let arrByZM = []
       for (let i = 0; i < that.order.length; i++) {
-        if (that.order[i].status.toString().search(that.title_suo) !== -1) {
+        if ((that.order[i].status.toString().length >= 2 ? that.order[i].status.toString() : that.order[i].status.toString() + '0').search(that.title_suo) !== -1) {
           arrByZM.push(that.order[i])
         }
       }
