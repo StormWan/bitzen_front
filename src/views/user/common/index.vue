@@ -135,15 +135,13 @@ export default {
     font-size: 15px;
     /*标题*/
     .title{
-      font-size: 22px;
-      font-weight: bold;
       margin-bottom: 10px;
     }
     /*问题列表*/
     .problem{
       div{
         margin: 0 0 20px 0;
-        padding: 0 10px;
+        padding: 0 28px;
       }
     }
   }

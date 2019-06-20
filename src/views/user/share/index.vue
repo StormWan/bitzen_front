@@ -11,7 +11,7 @@
       </div>
       <div class="content">
         <div class="user">
-          <div class="explanation">
+          <div class="explanation" @click="explanation">
             <van-icon name="question-o" />
           </div>
           <div class="user_box">
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import { NavBar, Icon } from 'vant'
+import { NavBar, Icon, Dialog, Toast } from 'vant'
 import QRCode from 'qrcode'
 import Clipboard from 'clipboard'
 export default {
@@ -57,6 +57,16 @@ export default {
   methods: {
     onClickLeft () {
       this.$router.go(-1)
+    },
+    // 疑问
+    explanation () {
+      console.log(123)
+      Dialog.alert({
+        title: '邀请好友',
+        message: '长按图片保存二维码，或者点击复制按钮，即可复制分享'
+      }).then(() => {
+        // on close
+      })
     },
     // 动态生成二维码
     useqrcode () {
@@ -73,10 +83,11 @@ export default {
       clipboard.on('success', e => {
         // 释放内存
         clipboard.destroy()
+        Toast('复制成功')
       })
       clipboard.on('error', e => {
         // 不支持复制
-        console.log('该浏览器不支持自动复制')
+        Toast('该浏览器不支持自动复制')
         // 释放内存
         clipboard.destroy()
       })
@@ -84,7 +95,9 @@ export default {
   },
   components: {
     [NavBar.name]: NavBar,
-    [Icon.name]: Icon
+    [Icon.name]: Icon,
+    [Dialog.name]: Dialog,
+    [Toast.name]: Toast
   },
   activated () {
     this.user_name = JSON.parse(localStorage.getItem('userInfo')).full_name
@@ -99,11 +112,9 @@ export default {
     width: 100%;
     height: 100%;
     font-size: 16px;
-    .title{
-
-    }
     /*用户分享信息*/
     .content{
+      margin-bottom: 11%;
       position: relative;
       height: 100%;
       width: 100%;

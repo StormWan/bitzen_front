@@ -53,15 +53,13 @@ export default {
 
 <style lang="less">
   .lend{
-    height: 92.3%;
-    overflow: auto;
-    .bb_otc{
-      height: 100%;
-      width: 100%;
-    }
+    margin-bottom: 30px;
   }
   /*底部改变*/
   .md-icon.icon-font.md{
     font-size: 16px;
+  }
+  .custom-tab-bar{
+    z-index: 999;
   }
 </style>

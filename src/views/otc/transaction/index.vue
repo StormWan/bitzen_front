@@ -1,20 +1,7 @@
 <template>
   <div class="transaction">
-    <!--遮罩层-->
-    <div :class="{mask: triangle_active}" @click="mask"></div>
     <!--头部标题-->
-    <div class="top">
-      <!--返回-->
-      <div class="Arrow" @click="Arrow">
-        <van-icon name="arrow-left"></van-icon>
-      </div>
-      <div class="title">
-          <span>
-            <img :src="title_img" alt="">
-          </span>
-        <span>{{title}}</span>
-      </div>
-    </div>
+    <otctitle :title="title" :title_img="title_img"></otctitle>
     <!--买入卖出-->
     <div class="Business">
       <van-tabs @click="onClick" sticky>
@@ -124,72 +111,23 @@
       </div>
 
       <!--Mixin 钱包-->
-      <!--付款方式-->
-      <div v-if="active_index === 0" class="wallet_box" @click="wallet_box">
-        <div class="wallet">
-          <div class="Bank">
-            <div class="left">
-              <van-icon name="youzan-shield"></van-icon>
-            </div>
-            <div class="right">{{bank}} 钱包</div>
-          </div>
-          <div class="balance">
-            <div class="left">
-              <div> 余额</div>
-              <div>0</div>
-            </div>
-            <!--三角形-->
-            <div class="right" :class="{active: triangle_active}"></div>
-          </div>
-        </div>
-      </div>
-
-      <!--付款方式钱包-->
-      <div class="dis_but" :class="{display: triangle_active}">
-        <div class="title">请选择钱包</div>
-        <!--钱包选择-->
-        <div class="Choice">
-          <div class="wallet_box" v-for="(item,index) in wallet" :key="index" @click="wallet_click(index)">
-            <div class="wallet">
-              <div class="Bank">
-                <div class="left">
-                  <van-icon :name="item.icon"></van-icon>
-                </div>
-                <div class="right">{{item.name}} 钱包</div>
-              </div>
-              <div class="balance">
-                <div class="left">
-                  <div>BCT 余额</div>
-                  <div>0</div>
-                </div>
-                <!--三角形-->
-                <div class="right" :class="{active: index === icon_index}">
-                  <van-icon name="passed"></van-icon>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div v-if="active_index === 0">
+        <otc_wallet :symbol="symbol_name"></otc_wallet>
       </div>
 
       <!--说明-->
-      <div class="Explain">
-        <div class="Explain_text">
-          <ol type="1">
-            <li v-for="(item,index) in Explain" :key="index">
-              <div>{{index + 1}}、</div>
-              <div>{{item.text}}</div>
-            </li>
-          </ol>
-        </div>
-      </div>
+      <Tisp></Tisp>
     </div>
   </div>
 </template>
 
 <script>
-import { Icon, NumberKeyboard, Tab, Tabs, Toast } from 'vant'
+import { NumberKeyboard, Tab, Tabs, Toast } from 'vant'
 import { InputItem, Field } from 'mand-mobile'
+import Tisp from './Tisp'
+import otctitle from '../../../components/otc_title'
+// eslint-disable-next-line camelcase
+import otc_wallet from '../../../components/otc_wallet'
 export default {
   data () {
     return {
@@ -198,44 +136,8 @@ export default {
       active_index: 0,
       inp_CNY: '',
       inp_market: '',
-      Tips: '',
       beyond: false,
       Place_active: false,
-      triangle_active: false,
-      // 钱包数据
-      wallet: [
-        {
-          name: 'Mixin',
-          icon: 'youzan-shield'
-        }
-        // {
-        //   name: 'BlockPay',
-        //   icon: 'youzan-shield'
-        // }
-      ],
-      bank: 'Mixin',
-      icon_index: 0,
-      // 说明
-      Explain: [
-        {
-          text: 'Bit-OX C2C交易除了USDT为直接交易，其它均为币币交易多步并一步，比如购买XIN，实际为先兑换为USDT，再兑换为BTC，再兑换为XIN，当前价格仅供参考，以实际交割价为准。'
-        },
-        {
-          text: 'C2C总交易额超过 1000 USDT必须先进行实名认证。'
-        },
-        {
-          text: '如有大额交易需求可直接联系 ExinOne 客服如果您不能完全理解 ExinOne 提供的服务，建议下小订单尝试。'
-        },
-        {
-          text: 'C2C交易服务时间为早上7点到晚上12点如需帮助请联系 Bit-OX 客服，Mixin ID：28749，微信：jc_castle'
-        },
-        {
-          text: '所有承兑商均已通过 Bit-ox 认证，您每次兑换会冻结承兑商资产，承兑商无法在资产不够时接单，请放心兑换。'
-        },
-        {
-          text: '所有承兑商均需提供保证金并已实名认证，请放心兑换'
-        }
-      ],
       set: false,
       // 获取到数据
       title: '',
@@ -260,7 +162,6 @@ export default {
         this.Receive = data.data
         this.title_img = this.Receive.asset.icon_url
         this.symbol_name = this.Receive.asset.symbol
-        this.Tips_name = ''
         // 标题判断是否相同
         if (this.Receive.asset.name === this.Receive.asset.symbol) {
           this.title = this.Receive.asset.symbol
@@ -281,11 +182,6 @@ export default {
           // 卖出
         }
       }
-    },
-    // 箭头点击回退一页
-    Arrow () {
-      this.$router.go(-1)
-      localStorage.removeItem('Send_out')
     },
     // 买入卖出点击
     onClick (index, title) {
@@ -333,24 +229,6 @@ export default {
         }
         sessionStorage.setItem('Obj', JSON.stringify(Obj))
       }
-    },
-    // 钱包选择付款
-    wallet_box () {
-      if (!this.triangle_active) {
-        this.triangle_active = true
-      }
-    },
-    // 遮罩层
-    mask () {
-      this.triangle_active = false
-    },
-    // 钱包选择点击添加动画手
-    wallet_click (e) {
-      this.bank = this.wallet[e].name
-      setTimeout(() => {
-        this.triangle_active = false
-      }, 100)
-      this.icon_index = e
     },
     // input光标
     foc_market () {
@@ -481,13 +359,15 @@ export default {
     }
   },
   components: {
-    [Icon.name]: Icon,
     [NumberKeyboard.name]: NumberKeyboard,
     [Tab.name]: Tab,
     [Tabs.name]: Tabs,
     [InputItem.name]: InputItem,
     [Field.name]: Field,
-    [Toast.name]: Toast
+    [Toast.name]: Toast,
+    'Tisp': Tisp,
+    'otc_wallet': otc_wallet,
+    'otctitle': otctitle
   },
   // keep-alive 组件激活时调用
   async activated () {
@@ -514,40 +394,6 @@ export default {
 <style lang="less">
   .transaction{
     font-size: 16px;
-    /*头部标题*/
-    .top{
-      position: relative;
-      text-align: center;
-      /*箭头*/
-      .Arrow{
-        position: absolute;
-        left: 7%;
-        color: #696969;
-        font-size: 20px;
-        top: 50%;
-        transform: translate(0,-50%);
-      }
-      /*产品标题*/
-      .title{
-        color: #999;
-        font-size: 16px;
-        padding: 13px 0;
-        span{
-          vertical-align: middle;
-        }
-        span:nth-child(1){
-          display: inline-block;
-          width: 20px;
-          img{
-            width: 100%;
-          }
-        }
-        span:nth-child(2){
-          margin: 0 4px;
-          font-size: 15px;
-        }
-      }
-    }
     /*买入卖出*/
     .Business{
       padding-bottom: 30px;
@@ -655,193 +501,6 @@ export default {
           span{
             color: red;
             margin: 0 5px;
-          }
-        }
-      }
-    }
-    /*付款方式*/
-    .wallet_box{
-      padding: 15px 0 0 0;
-      margin-top: 15px;
-      font-size: 15px;
-      .wallet{
-        width: 90%;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 20px 0 20px;
-        /*全局*/
-        .Bank,.balance{
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        /*银行*/
-        .Bank{
-          color: #696969;
-          .left{
-            font-size: 20px;
-            color: #00BFFF;
-          }
-          .right{
-            font-size: 15px;
-            padding-left: 5px;
-          }
-        }
-        /*余额*/
-        .balance{
-          .left{
-            font-size: 13px;
-            color: #999;
-            text-align: right;
-            div:nth-last-child(1){
-              padding-top: 5px;
-            }
-          }
-          .right{
-            border: 10px solid transparent;
-            border-top-color: black;
-            margin-left: 10px;
-            -webkit-transition: .1s;
-            -moz-transition: .1s;
-            -ms-transition: .1s;
-            -o-transition: .1s;
-            transition: .1s;
-          }
-          .active{
-            border: 10px solid transparent;
-            border-bottom-color: black;
-          }
-        }
-      }
-    }
-    /*付款方式钱包*/
-    .dis_but{
-      position: fixed;
-      z-index: 1001;
-      bottom: 0;
-      background-color: white;
-      width: 100%;
-      text-align: center;
-      -webkit-transition: .3s;
-      -moz-transition: .3s;
-      -ms-transition: .3s;
-      -o-transition: .3s;
-      transition: .3s;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      height: 0;
-      .title{
-        text-align: center;
-        line-height: 50px;
-        font-size: 18px;
-        border-bottom: 1px solid rgba(0,0,0,.05);
-      }
-      /*隐藏滚轮条*/
-      .Choice::-webkit-scrollbar {
-        display: none;
-      }
-      /*钱包列表*/
-      .Choice{
-        height: 100%;
-        overflow: auto;
-        .wallet_box{
-          font-size: 15px;
-          margin: 0;
-          padding: 6px 0;
-          /*padding: 0;*/
-          .wallet{
-            width: 90%;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 20px;
-            /*全局*/
-            .Bank,.balance{
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              color: #696969;
-            }
-            /*付款*/
-            .Bank{
-              .left{
-                font-size: 20px;
-                color: #00BFFF;
-              }
-              .right{
-                font-size: 15px;
-                padding-left: 5px;
-              }
-            }
-            /*余额*/
-            .balance{
-              .left{
-                font-size: 13px;
-                color: #999;
-                text-align: right;
-                div:nth-last-child(1){
-                  padding-top: 5px;
-                }
-              }
-              .right{
-                border: none;
-                margin-left: 5px;
-                -webkit-transition: .1s;
-                -moz-transition: .1s;
-                -ms-transition: .1s;
-                -o-transition: .1s;
-                transition: .1s;
-                width: 30px;
-                font-size: 0px;
-                color: #32CD32;
-              }
-              .active{
-                font-size: 20px;
-              }
-            }
-          }
-        }
-      }
-    }
-    /*弹出钱包选择框*/
-    .display{
-      height: 40%;
-    }
-    /*遮罩层*/
-    .mask{
-      left: 0;
-      top: 0;
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,.3);
-      z-index: 1000;
-    }
-    /*说明*/
-    .Explain{
-      width: 100%;
-      padding: 20px 0;
-      margin-top: 20px;
-      border-top: 10px solid rgba(0,0,0,.05);
-      text-align: left;
-      .Explain_text{
-        width: 85%;
-        margin: 0 auto;
-        ol{
-          li{
-            display: flex;
-            font-size: 12px;
-            margin: 5px 0px;
-            div:nth-child(1){
-              /*padding-right: 3px;*/
-              color: #A9A9A9;
-            }
-            div:nth-child(2){
-              color: #808080;
-            }
           }
         }
       }

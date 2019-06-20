@@ -123,7 +123,7 @@
       <!--按钮-->
       <but :index="active_index" :Place="Place_active" :symbol="symbol" :wallet="wallet_data" :id="pair.id" :asset_id="asset_id" :value="value"></but>
       <!--钱包-->
-        <bb_wallet :pair="pair" @wallet="wallet" :index="active_index"></bb_wallet>
+      <bb_wallet :pair="pair" @wallet="wallet" :index="active_index"></bb_wallet>
       <!--说明-->
       <Tips></Tips>
     </div>

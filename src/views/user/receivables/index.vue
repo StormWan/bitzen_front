@@ -4,6 +4,7 @@
       <div class="title">
         <van-nav-bar
           title="收款方式"
+          left-text="返回"
           left-arrow
           @click-left="onClickLeft"
         />
