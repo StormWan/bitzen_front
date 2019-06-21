@@ -158,7 +158,7 @@ export default {
         },
         {
           name: '收款账号',
-          price: '1452871763'
+          price: ''
         }
       ],
       item: false,

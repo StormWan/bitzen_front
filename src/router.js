@@ -310,7 +310,7 @@ const router = new Router({
         Auth: true
       }
     },
-    // 详情
+    // bb详情
     {
       path: '/details',
       name: 'details',

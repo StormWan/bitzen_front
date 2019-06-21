@@ -16,7 +16,7 @@
         <div class="logo_info">
           <!--收款logo-->
           <div class="logo">
-            <div class="img" v-for="(item,index) in info" :key="index" @click="account(index)">
+            <div class="img" :class="{active: index === act_index}" v-for="(item,index) in info" :key="index" @click="account(index)">
               <img :src="item.img" alt="">
             </div>
           </div>
@@ -92,7 +92,8 @@ export default {
       user_bankname: '',
       // 用户支行名称
       user_bacname: '',
-      data: []
+      data: [],
+      act_index: 0
     }
   },
   methods: {
@@ -102,6 +103,7 @@ export default {
     // 切换收款方式
     account (i) {
       this.index = i
+      this.act_index = i
       this.user()
     },
     user () {
@@ -238,6 +240,12 @@ export default {
             img{
               width: 100%;
             }
+          }
+          .active{
+            border: 1px solid rgba(0,0,0,.07);
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
           }
         }
         /*信息*/
