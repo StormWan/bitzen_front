@@ -6,10 +6,11 @@ const poststylus = require('poststylus')
 const resolve = file => path.resolve(__dirname, file)
 
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? '/static/' : '/',
+  // publicPath: process.env.NODE_ENV === 'production' ? '/static/' : '/',
+  publicPath: './',
   outputDir: 'static',
   assetsDir: '',
-  indexPath: '../templates/front/index.html',
+  indexPath: './index.html',
   css: {
     loaderOptions: {
       postcss: {

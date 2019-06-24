@@ -180,7 +180,6 @@ export default {
     },
     // 钱包跳转
     onlists (i) {
-      // console.log(this.lists[i])
       this.$router.push({
         name: 'charg_withd',
         params: {

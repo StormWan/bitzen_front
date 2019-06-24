@@ -116,19 +116,6 @@ export default {
       localStorage.clear()
       alert('退出成功')
       this.Sing = true
-    },
-    Onlogin () {
-      let user = JSON.parse(localStorage.getItem('userInfo'))
-      if (JSON.parse(localStorage.getItem('userInfo'))) {
-        this.Sing = false
-        this.user_name = user.full_name
-        this.user_ID = user.identity_num
-        this.Exse_none = true
-      } else {
-        this.$router.push({
-          path: '/login'
-        })
-      }
     }
   },
   components: {

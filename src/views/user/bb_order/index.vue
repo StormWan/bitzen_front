@@ -176,7 +176,6 @@ export default {
       const { data } = await this.$api.bb.orders()
       if (data.code === 200) {
         this.order = data.data
-        console.log(this.order)
       } else {
         Toast('获取数据失败，请刷新页面')
       }

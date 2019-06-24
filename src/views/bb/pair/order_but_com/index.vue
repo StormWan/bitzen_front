@@ -35,11 +35,9 @@ export default {
           }
         } else {
           if (this.index === 0) {
-            console.log(0)
             this.side = 'buy'
             this.type = 'market'
           } else {
-            console.log(1)
             this.side = 'sell'
             this.type = 'limit'
           }

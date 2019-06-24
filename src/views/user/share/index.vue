@@ -38,8 +38,6 @@
           <button class="tag-read" data-clipboard-text="https://bit-ox.com" @click="copy">复制链接</button>
         </div>
       </div>
-      <!--弹窗-->
-      <div></div>
     </div>
 </template>
 

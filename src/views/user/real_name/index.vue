@@ -131,14 +131,13 @@ export default {
           forbidClick: true,
           // 禁用背景点击
           loadingType: 'spinner',
-          message: '身份验证倒计时 3 秒'
+          message: '倒计时 3 秒'
         })
-
         let second = 3
         const timer = setInterval(() => {
           second--
           if (second) {
-            toast.message = `身份验证倒计时 ${second} 秒`
+            toast.message = `倒计时 ${second} 秒`
           } else {
             clearInterval(timer)
             Toast.clear()
@@ -199,7 +198,6 @@ export default {
   computed: {
     // eslint-disable-next-line vue/return-in-computed-property
     name () {
-      console.log(this.username)
       if (this.username && this.img_t && this.img_b) {
         // eslint-disable-next-line vue/no-side-effects-in-computed-properties
         this.plain = false
