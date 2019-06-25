@@ -80,7 +80,7 @@ export default {
   },
   props: [
     'Place',
-    'index',
+    'index.js',
     'symbol',
     'wallet',
     'id',

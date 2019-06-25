@@ -185,7 +185,7 @@ export default {
     } else {
       this.title = '收款方式'
     }
-    let { data } = await this.$api.otc.payment_patch()
+    const { data } = await this.$api.otc.payment_patch()
     this.data = data.data
   }
 }

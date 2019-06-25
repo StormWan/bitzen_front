@@ -111,7 +111,7 @@ export default {
   },
   props: [
     'pair',
-    'index'
+    'index.js'
   ]
 }
 </script>
