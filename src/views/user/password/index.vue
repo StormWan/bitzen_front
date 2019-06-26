@@ -54,81 +54,88 @@ export default {
     // 密码输入
     onInput (key) {
       this.value = (this.value + key).slice(0, 6)
-      if (!localStorage.getItem('user_pas')) {
-        // 没有设置密码
-        if (this.value.length >= 6) {
-          if (localStorage.getItem('New_password')) {
-            if (this.value !== localStorage.getItem('New_password')) {
-              this.Tips = true
-              this.Tips_title = '请重新输入新密码'
-              this.info = '重新输入新密码'
-              localStorage.removeItem('New_password')
-              console.log(123)
-              setTimeout(() => {
-                this.value = ''
-                this.Tips = false
-              }, 800)
-            } else {
-              localStorage.setItem('user_pas', this.value)
-              localStorage.removeItem('New_password')
-              setTimeout(() => {
-                setTimeout(() => {
-                  this.$router.go(-1)
-                  this.value = ''
-                }, 800)
-              })
-            }
-          } else {
-            localStorage.setItem('New_password', this.value)
-            setTimeout(() => {
-              this.value = ''
-              this.info = '确认新密码'
-            }, 800)
-          }
-        }
+      if (!JSON.parse(localStorage.getItem('userInfo')).is_setup_pin) {
+        this.x_pas()
       } else {
-        // 修改密码
-        if (this.value.length >= 6) {
-          // 旧密码
-          if (this.value === localStorage.getItem('user_pas') && this.New_password === false) {
-            setTimeout(() => {
-              this.value = ''
-              this.New_password = true
-              this.again_password = false
-              this.info = '输入新的密码'
-            }, 500)
-          } else if (this.again_password === false && this.New_password === true && localStorage.getItem('user_pas') !== this.value) {
-            // 新密码
-            this.info = '请再次输入'
-            localStorage.setItem('New_password', this.value)
-            setTimeout(() => {
-              this.value = ''
-              this.again_password = true
-            }, 500)
-          } else if (this.again_password === true && this.value === localStorage.getItem('New_password')) {
-            // 再次输入
-            this.info = '修改成功'
-            localStorage.setItem('user_pas', this.value)
-            localStorage.removeItem('New_password')
-            setTimeout(() => {
-              this.value = ''
-              this.$router.go(-1)
-            }, 1500)
-          } else {
-            this.Tips = true
-            this.Tips_title = '请重新输入原密码'
-            this.New_password = false
-            this.again_password = false
-            setTimeout(() => {
-              this.value = ''
-              this.Tips = false
-            }, 1000)
-          }
-        }
+        this.j_pas()
       }
     },
     onDelete () {
       this.value = this.value.slice(0, this.value.length - 1)
+    },
+    // 创建新密码
+    async x_pas () {
+      // 没有设置密码(新建密码)
+      if (this.value.length >= 6) {
+        if (localStorage.getItem('New_password')) {
+          if (this.value !== localStorage.getItem('New_password')) {
+            this.Tips = true
+            this.Tips_title = '请重新输入新密码'
+            this.info = '重新输入新密码'
+            localStorage.removeItem('New_password')
+            setTimeout(() => {
+              this.value = ''
+              this.Tips = false
+            }, 800)
+          } else {
+            await this.$api.pass.setup_pin({ 'pin': this.value })
+            localStorage.removeItem('New_password')
+            setTimeout(async () => {
+              this.$router.go(-1)
+              this.value = ''
+            }, 800)
+          }
+        } else {
+          localStorage.setItem('New_password', this.value)
+          setTimeout(() => {
+            this.value = ''
+            this.info = '确认新密码'
+          }, 800)
+        }
+      }
+    },
+    // 修改旧密码
+    async j_pas () {
+      // 修改密码
+      if (this.value.length >= 6) {
+        const { data } = await this.$api.pass.update_pin()
+        console.log(data)
+        // 旧密码
+        if (this.value === localStorage.getItem('user_pas') && this.New_password === false) {
+          setTimeout(() => {
+            this.value = ''
+            this.New_password = true
+            this.again_password = false
+            this.info = '输入新的密码'
+          }, 500)
+        } else if (this.again_password === false && this.New_password === true && localStorage.getItem('user_pas') !== this.value) {
+          // 新密码
+          this.info = '请再次输入'
+          localStorage.setItem('New_password', this.value)
+          setTimeout(() => {
+            this.value = ''
+            this.again_password = true
+          }, 500)
+        } else if (this.again_password === true && this.value === localStorage.getItem('New_password')) {
+          // 再次输入
+          this.info = '修改成功'
+          localStorage.setItem('user_pas', this.value)
+          localStorage.removeItem('New_password')
+          setTimeout(() => {
+            this.value = ''
+            this.$router.go(-1)
+          }, 1500)
+        } else {
+          this.Tips = true
+          this.Tips_title = '请重新输入原密码'
+          this.New_password = false
+          this.again_password = false
+          setTimeout(() => {
+            this.value = ''
+            this.Tips = false
+          }, 1000)
+        }
+      }
     }
   },
   components: {
@@ -137,12 +144,12 @@ export default {
     [Icon.name]: Icon,
     [NavBar.name]: NavBar
   },
-  activated () {
-    if (localStorage.getItem('user_pas')) {
+  async activated () {
+    if (JSON.parse(localStorage.getItem('userInfo')).is_setup_pin) {
       this.info = '请输入原密码'
       this.title = '修改 BlockPay 密码'
     } else {
-      this.info = '新密码'
+      this.info = '创建新密码'
       this.title = '创建 BlockPay 新密码'
     }
   }

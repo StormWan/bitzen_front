@@ -80,17 +80,23 @@ export default {
   },
   // router-link触发
   async activated () {
-    document.body.scrollTop = 0
-    document.documentElement.scrollTop = 0
-    this.set = true
-    await this.api()
-    let set = await setInterval(() => {
-      if (this.set) {
-        this.api()
-      } else {
-        clearInterval(set)
-      }
-    }, 5000)
+    if (JSON.parse(localStorage.getItem('userInfo')).is_setup_pin) {
+      document.body.scrollTop = 0
+      document.documentElement.scrollTop = 0
+      this.set = true
+      await this.api()
+      let set = await setInterval(() => {
+        if (this.set) {
+          this.api()
+        } else {
+          clearInterval(set)
+        }
+      }, 5000)
+    } else {
+      this.$router.push({
+        path: './password'
+      })
+    }
   },
   watch: {
     '$route' () {

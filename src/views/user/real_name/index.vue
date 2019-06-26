@@ -16,7 +16,7 @@
         <van-collapse-item title="Lv 1 认证" name="1">
           <!--开始认证-->
           <div v-if="Lv_off">
-
+            <div class="content_Tips" :class="{out: Tips_title}" v-if="Tips_title">{{Tips_title}}</div>
             <!--姓名-->
             <div class="name">
               <van-cell-group name="group">
@@ -56,7 +56,6 @@
               </span>
               </van-uploader>
             </div>
-
             <!--上传身份证反面图片-->
             <div class="ID_just">
               <van-uploader :after-read="onRead_back" accept="image/*" :max-count="1" multiple capture>
@@ -94,7 +93,7 @@
 
           </div>
           <!--认证成功-->
-          <div v-else>认证提交成功，将会在工作日3天之内返回认证结果</div>
+          <div v-else class="content_Tips" :class="{ok: cla}">{{ok_Tips}}</div>
         </van-collapse-item>
         <!--高级认证-->
         <van-collapse-item title="Lv 2 认证" name="2">
@@ -152,10 +151,16 @@ export default {
       img_c: false,
       ID_off: false,
       // 提交后改变
-      Lv_off: true,
+      Lv_off: false,
       // 按钮颜色
       plain: true,
-      ID: ''
+      ID: '',
+      ID_z: '',
+      ID_f: '',
+      ID_s: '',
+      ok_Tips: '',
+      cla: false,
+      Tips_title: ''
     }
   },
   methods: {
@@ -189,6 +194,9 @@ export default {
     // 身份证正面
     onRead_just (file) {
       this.img_b = true
+      // 将原图片显示为选择的图片
+      this.$refs.onRead_just.src = file.content
+      this.ID_z = file.file
       if (file) {
         if (this.username && this.ID_off && this.img_b && this.img_t && this.img_c) {
           this.plain = false
@@ -196,14 +204,13 @@ export default {
           this.plain = true
         }
       }
-      // 将原图片显示为选择的图片
-      this.$refs.onRead_just.src = file.file.name
     },
     // 身份证正反面
     onRead_back (file) {
       // 将原图片显示为选择的图片
       this.img_t = true
-      this.$refs.onRead_back.src = file.file.name
+      this.$refs.onRead_back.src = file.content
+      this.ID_f = file.file
       if (file) {
         if (this.username && this.ID_off && this.img_b && this.img_t && this.img_c) {
           this.plain = false
@@ -213,10 +220,11 @@ export default {
       }
     },
     // 手持照片
-    async onRead_hand (file) {
+    onRead_hand (file) {
       // 将原图片显示为选择的图片
       this.img_c = true
-      this.$refs.onRead_hand.src = file.file.name
+      this.$refs.onRead_hand.src = file.content
+      this.ID_s = file.file
       if (file) {
         if (this.username && this.ID_off && this.img_b && this.img_t && this.img_c) {
           this.plain = false
@@ -227,27 +235,13 @@ export default {
     },
     // 点击开始验证按钮
     async primary_but () {
-      console.log(this.username)
-      console.log(this.ID)
-      console.log(this.$refs.onRead_just.src)
-      console.log(this.$refs.onRead_back.src)
-      console.log(this.$refs.onRead_hand.src)
-      let Formdata = new FormData()
-      Formdata.append('id_in_hand', this.$refs.onRead_just.src)
-      Formdata.append('id_Number', this.ID)
-      Formdata.append('id_photo_back', this.$refs.onRead_back.src)
-      Formdata.append('id_photo_front', this.$refs.onRead_hand.src)
-      Formdata.append('name', this.username)
-      const option = {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      }
       if (!this.plain) {
-        // 数据传输
-        console.log(Formdata.getAll('id_in_hand')[0], Formdata.getAll('id_Number')[0], Formdata.getAll('id_photo_back')[0], Formdata.getAll('id_photo_front')[0], Formdata.getAll('name')[0])
-        const { data } = await this.$api.kyc.kyc_list({ id_in_hand: Formdata.getAll('id_in_hand') }, option.headers)
-        console.log(data.data)
+        let Formdata = new FormData()
+        Formdata.append('id_in_hand', this.ID_s)
+        Formdata.append('id_number', this.ID)
+        Formdata.append('id_photo_back', this.ID_f)
+        Formdata.append('id_photo_front', this.ID_z)
+        Formdata.append('name', this.username)
         // lodin
         const toast = Toast.loading({
           duration: 0,
@@ -255,19 +249,28 @@ export default {
           forbidClick: true,
           // 禁用背景点击
           loadingType: 'spinner',
-          message: '倒计时 3 秒'
+          message: '倒计时 5 秒'
         })
-        let second = 3
-        const timer = setInterval(() => {
+        let second = 5
+        const timer = setInterval(async () => {
           second--
           if (second) {
             toast.message = `倒计时 ${second} 秒`
           } else {
-            clearInterval(timer)
-            // this.Lv_off = false
-            Toast.clear()
+            const { data } = await this.$api.kyc.kyc_get()
+            if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
+              clearInterval(timer)
+              this.Lv_off = false
+              Toast('提交成功')
+            } else {
+              clearInterval(timer)
+              Toast('提交失败')
+              this.Tips_title = '请检查网络信息'
+            }
           }
         }, 1000)
+        // 数据传输
+        await this.$api.kyc.kyc_list(Formdata)
       } else {
         Toast('请填入完整信息后再验证')
       }
@@ -280,7 +283,6 @@ export default {
       }, 300)
       let clipboard = new Clipboard('.click')
       clipboard.on('success', e => {
-        console.log('复制成功')
         clipboard.destroy()
       })
       clipboard.on('error', e => {
@@ -294,7 +296,29 @@ export default {
         mask: true,
         message: '处理中...'
       })
-    },
+    }
+  },
+  async mounted () {
+    const { data } = await this.$api.kyc.kyc_get()
+    if (data.code === 200) {
+      if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
+        this.Lv_off = true
+        this.ok_Tips = '认证提交成功，将会在工作日3天之内返回认证结果'
+        if (data.data.verified_state === 1) {
+          // 成功
+          this.ok_Tips = '您已经成功实名认证'
+          this.cla = true
+        } else if (data.data.verified_state === 2) {
+          // 不成功
+          this.Lv_off = true
+          this.Tips_title = '历史提交' + data.data.verified_feedback + '不正确'
+        }
+      } else {
+        this.Lv_off = true
+      }
+    } else {
+      Toast('发生错误啦，请稍后重试')
+    }
   },
   components: {
     [Icon.name]: Icon,
@@ -327,6 +351,16 @@ export default {
       width: 93%;
       margin: 0 auto;
       font-size: 18px;
+    }
+    .content_Tips{
+      text-align: center;
+    }
+    .ok{
+      color: green;
+      font-size: 16px;
+    }
+    .out{
+      color: #FF6347;
     }
     .but{
       margin-top: 20px;
