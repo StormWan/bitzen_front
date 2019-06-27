@@ -77,7 +77,7 @@ export default {
         display: flex;
         width: 100%;
         div:nth-child(2){
-          color: #40E0D0;
+          color: #228B22;
         }
       }
     }

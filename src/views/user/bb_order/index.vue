@@ -14,14 +14,17 @@
               <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
             </md-detail-item>
             <md-detail-item title="平均成交价">
-              <span v-if="!item.price">- -</span><span v-else>{{(Math.floor(item.price * 100) / 100).toFixed(3)}}</span>{{item.pair.pair}}
+              <span v-if="!item.exchangeinstantordermodel.average_price">- -</span><span v-else>{{item.exchangeinstantordermodel.average_price}}</span>{{item.pair.pair}}
             </md-detail-item>
             <md-detail-item title="服务费">
-              <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
-              <div v-else><span>{{Math.round(item.exchangeinstantordermodel.fee_cost * 10000000) / 10000000}}</span>EPC</div>
+              <div v-if="!item.exchangeinstantordermodel.price && item.exchangeinstantordermodel.price !== 0"><span>- -</span></div>
+              <div v-else><span>{{Math.round((item.pair.fee * (item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost)) * 1000000) / 1000000}}</span>{{item.pair.base.symbol}}</div>
             </md-detail-item>
             <md-detail-item title="实际到账">
-              <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}
+              <span v-if="!item.exchangeinstantordermodel.filled">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost))) * 1000000) / 1000000}} </span> {{item.pair.base.symbol}}
+            </md-detail-item>
+            <md-detail-item title="交易所手续费">
+              <span v-if="!item.exchangeinstantordermodel.fee_cost">--</span><span v-else>{{Math.floor(item.exchangeinstantordermodel.fee_cost * 1000000) / 1000000}} </span> {{item.pair.base.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
               <!--支付状态-->
@@ -66,14 +69,17 @@
               <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
             </md-detail-item>
             <md-detail-item title="平均成交价">
-              <span v-if="!item.price">- -</span><span v-else>{{(Math.floor(item.price * 100) / 100).toFixed(3)}}</span>{{item.pair.pair}}
+              <span v-if="!item.exchangeinstantordermodel.average_price">- -</span><span v-else>{{item.exchangeinstantordermodel.average_price}}</span>{{item.pair.pair}}
             </md-detail-item>
             <md-detail-item title="服务费">
-              <div v-if="!item.exchangeinstantordermodel.fee_cost"><span>- -</span></div>
-              <div v-else><span>{{item.exchangeinstantordermodel.fee_cost}}</span>EPC</div>
+              <div v-if="!item.exchangeinstantordermodel.price && item.exchangeinstantordermodel.price !== 0"><span>- -</span></div>
+              <div v-else><span>{{Math.round((item.pair.fee * (item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost)) * 10000000) / 10000000}}</span>{{item.pair.quote.symbol}}</div>
             </md-detail-item>
             <md-detail-item title="实际到账">
-              <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{item.exchangeinstantordermodel.cost}} </span> {{item.pair.base.symbol}}
+              <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost))) * 100000) / 100000}} </span> {{item.pair.quote.symbol}}
+            </md-detail-item>
+            <md-detail-item title="交易所手续费">
+              <span v-if="!item.exchangeinstantordermodel.fee_cost">--</span><span v-else>{{Math.floor(item.exchangeinstantordermodel.fee_cost * 1000000) / 1000000}} </span> {{item.pair.quote.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
               <!--支付状态-->
@@ -121,7 +127,6 @@ export default {
       value: 1,
       color: 'red',
       order: [],
-      data_sta: [],
       order_index: Number,
       title: [
         {
@@ -134,15 +139,15 @@ export default {
           title: '交易失败'
         }
       ],
-      title_suo: '',
-      act_index: Number
+      title_suo: 'paid',
+      act_index: 0
     }
   },
   methods: {
     // 传输
     item_pass (i) {
       // 纯时间
-      let date = new Date(this.order[i].created)
+      let date = new Date(this.lists[i].created)
       let result, year, month, day
       year = date.getYear() + 1900
       month = date.getMonth() + 1
@@ -150,18 +155,18 @@ export default {
       result = year.toString() + (month > 9 ? month : '0' + month) + (day > 9 ? day : '0' + day)
       // eslint-disable-next-line camelcase
       let obj_data = {
-        item: result + this.order[i].created.substring(11, 13) + this.order[i].created.substring(14, 16) + this.order[i].created.substring(17, 19) + this.order[i].created.substring(20, 26),
-        item_pow: this.order[i].created.substring(0, 10) + ' ' + this.order[i].created.substring(11, 19),
-        price: this.order[i].price,
-        side: this.order[i].side,
-        pay_amount: this.order[i].pay_amount,
-        pair: this.order[i].pair.pair,
-        symbol: this.order[i].pair.base.symbol,
-        pay_asset: this.order[i].pay_asset.symbol,
-        pair_price: this.order[i].exchangeinstantordermodel.cost,
-        state: this.order[i].state,
-        exchange_state: this.order[i].exchange_state,
-        transfer_state: this.order[i].transfer_state
+        item: result + this.lists[i].created.substring(11, 13) + this.lists[i].created.substring(14, 16) + this.lists[i].created.substring(17, 19) + this.lists[i].created.substring(20, 26),
+        item_pow: this.lists[i].created.substring(0, 10) + ' ' + this.lists[i].created.substring(11, 19),
+        price: this.lists[i].exchangeinstantordermodel.average_price,
+        side: this.lists[i].side,
+        pay_amount: this.lists[i].pay_amount,
+        pair: this.lists[i].pair.pair,
+        symbol: this.lists[i].pair.base.symbol,
+        pay_asset: this.lists[i].pay_asset.symbol,
+        pair_price: Math.floor((this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost - this.lists[i].exchangeinstantordermodel.price) * 100000) / 100000,
+        state: this.lists[i].state,
+        exchange_state: this.lists[i].exchange_state,
+        transfer_state: this.lists[i].transfer_state
       }
       localStorage.setItem('obj_data', JSON.stringify(obj_data))
       this.$router.push({
@@ -183,10 +188,10 @@ export default {
     title_data (e) {
       this.act_index = e
       if (e === 0) {
-        // 已完成
-        this.title_suo = 'closed'
-      } else if (e === 1) {
         // 进行中
+        this.title_suo = 'paid'
+      } else if (e === 1) {
+        // 已完成
         this.title_suo = 'completed'
       } else {
         // 失败
@@ -199,11 +204,11 @@ export default {
       let that = this
       let arrByZM = []
       for (let i = 0; i < that.order.length; i++) {
-        if (that.order[i].transfer_state.search(that.title_suo) !== -1 || that.order[i].state.search(that.title_suo) !== -1) {
+        if (that.order[i].transfer_state.search(that.title_suo) !== -1 || (that.order[i].state.search(that.title_suo) !== -1 && that.order[i].transfer_state !== 'fail')) {
           arrByZM.push(that.order[i])
         }
       }
-      return arrByZM
+      return arrByZM.reverse()
     }
   },
   components: {
@@ -281,7 +286,7 @@ export default {
           .md-bill-detail{
             padding: 5px 0;
             .md-detail-item{
-              padding: 5px 0;
+              padding: 3px 0;
               .md-detail-title{
                 font-size: 16px;
               }
@@ -294,12 +299,12 @@ export default {
                   font-weight: bold;
                 }
               }
-            }.md-detail-item:nth-last-child(2){
+            }.md-detail-item:nth-last-child(3){
                span{
                  color: #CD5C5C;
                }
              }
-            .md-detail-item:nth-last-child(1){
+            .md-detail-item:nth-last-child(2){
               span{
                 color: #40E0D0;
               }

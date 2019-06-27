@@ -98,7 +98,7 @@ export default {
     async j_pas () {
       // 修改密码
       if (this.value.length >= 6) {
-        const { data } = await this.$api.pass.update_pin()
+        const { data } = await this.$api.pass.update_pin({ 'pin': this.value })
         console.log(data)
         // 旧密码
         if (this.value === localStorage.getItem('user_pas') && this.New_password === false) {

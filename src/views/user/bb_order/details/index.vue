@@ -98,7 +98,7 @@ export default {
     if (!obj_data.price) {
       this.price = '- -'
     } else {
-      this.price = Math.round(obj_data.price * 100) / 100
+      this.price = Math.round(obj_data.price * 10000) / 10000
     }
     // 兑换数量
     if (!obj_data.pay_amount) {

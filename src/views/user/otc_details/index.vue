@@ -132,9 +132,9 @@ export default {
           title: '交易失败'
         }
       ],
-      title_suo: '',
+      title_suo: '10',
       price: '',
-      act_index: Number
+      act_index: 0
     }
   },
   methods: {

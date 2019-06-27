@@ -256,21 +256,35 @@ export default {
           second--
           if (second) {
             toast.message = `倒计时 ${second} 秒`
+            if (data) {
+              if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
+                clearInterval(timer)
+                this.Lv_off = false
+                Toast('身份信息上传成功')
+              }
+            }
           } else {
-            const { data } = await this.$api.kyc.kyc_get()
-            if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
-              clearInterval(timer)
-              this.Lv_off = false
-              Toast('提交成功')
+            // 检测是否上传成功
+            if (data) {
+              // 检测上传数据完全性质
+              if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
+                clearInterval(timer)
+                this.Lv_off = false
+                Toast('身份信息提交成功')
+              } else {
+                clearInterval(timer)
+                Toast('请您填写正确信息')
+                this.Tips_title = '填写信息格式不正确'
+              }
             } else {
               clearInterval(timer)
               Toast('提交失败')
-              this.Tips_title = '请检查网络信息'
+              this.Tips_title = '请检查网络和上传文件大小'
             }
           }
         }, 1000)
         // 数据传输
-        await this.$api.kyc.kyc_list(Formdata)
+        const { data } = await this.$api.kyc.kyc_list(Formdata)
       } else {
         Toast('请填入完整信息后再验证')
       }
@@ -302,7 +316,7 @@ export default {
     const { data } = await this.$api.kyc.kyc_get()
     if (data.code === 200) {
       if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
-        this.Lv_off = true
+        this.Lv_off = false
         this.ok_Tips = '认证提交成功，将会在工作日3天之内返回认证结果'
         if (data.data.verified_state === 1) {
           // 成功

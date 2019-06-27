@@ -25,7 +25,7 @@
               </div>
               <div class="price_title">{{price_title}}</div>
             </div>
-            <div>{{price_bg}}</div>
+            <div class="price_bg" :class="{active: active_index === 1}">{{price_bg}}</div>
           </div>
         </div>
 <!--        买入-->
@@ -79,7 +79,7 @@
       <!--按钮-->
       <but :index="active_index" @value_but="value_but" :Place="Place_active" :symbol="symbol" :wallet="wallet_data" :id="pair.id" :asset_id="asset_id" :value="value"></but>
       <!--钱包-->
-      <bb_wallet :pair="pair" @wallet="wallet" :index="active_index"></bb_wallet>
+      <bb_wallet :pair="pair" @wallet="wallet" :index="active_index" :symbol="symbol"></bb_wallet>
       <!--说明-->
       <Tips></Tips>
     </div>
@@ -403,9 +403,12 @@ export default {
             color: #4682B4;
           }
         }
-        div:nth-child(2){
+        .price_bg{
           margin: 5px 0;
-          color: #FFD700;
+          color: #228B22;
+        }
+        .active{
+          color: #FF6347;
         }
       }
     }

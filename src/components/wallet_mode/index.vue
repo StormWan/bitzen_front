@@ -72,7 +72,7 @@ export default {
         // }
       ],
       icon_index: 0,
-      symbol: ''
+      // symbol: ''
     }
   },
   methods: {
@@ -96,13 +96,8 @@ export default {
       this.icon_index = e
     }
   },
-  async updated () {
+  async created () {
     this.bank = this.wallet[0].name
-    if (this.index === 0) {
-      this.symbol = this.pair.base.symbol
-    } else {
-      this.symbol = this.pair.quote.symbol
-    }
     this.$emit('wallet', this.bank)
   },
   components: {
@@ -110,7 +105,8 @@ export default {
   },
   props: [
     'pair',
-    'index'
+    'index',
+    'symbol'
   ]
 }
 </script>

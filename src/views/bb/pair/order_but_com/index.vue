@@ -24,10 +24,10 @@ export default {
   methods: {
     // 下单按钮
     but_submit () {
+      console.log(JSON.parse(localStorage.getItem('userInfo')).is_setup_pin)
       if (this.Place === true) {
         if (this.wallet.search('BlockPay') !== -1) {
-          if (localStorage.getItem('user_pas')) {
-          } else {
+          if (!JSON.parse(localStorage.getItem('userInfo')).is_setup_pin) {
             this.$router.push({
               path: '/password'
             })

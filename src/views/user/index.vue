@@ -17,7 +17,7 @@
           <van-cell :value="user_name" />
         </div>
       </div>
-    <div class="Tips"><van-icon name="info-o" /> 请不要透露密码、短信和谷歌验证码给任何人</div>
+    <div class="Tips"><van-icon name="info-o" /> 请不要透露密码、短信验证码给任何人</div>
 
     <!--分享页面-->
     <div class="Effect">
@@ -85,7 +85,7 @@
 <script>
 import { mapMutations } from 'vuex'
 import { Field, CellItem, Switch } from 'mand-mobile'
-import { Icon, Cell, CellGroup, NavBar } from 'vant'
+import { Icon, Cell, CellGroup, NavBar, Toast } from 'vant'
 export default {
   data () {
     return {
@@ -114,7 +114,7 @@ export default {
     // 退出
     Exse () {
       localStorage.clear()
-      alert('退出成功')
+      Toast('退出成功')
       this.Sing = true
     }
   },
