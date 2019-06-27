@@ -97,7 +97,6 @@ export default {
     }
   },
   async updated () {
-    console.log(this.index)
     this.bank = this.wallet[0].name
     if (this.index === 0) {
       this.symbol = this.pair.base.symbol
@@ -111,7 +110,7 @@ export default {
   },
   props: [
     'pair',
-    'index.js'
+    'index'
   ]
 }
 </script>

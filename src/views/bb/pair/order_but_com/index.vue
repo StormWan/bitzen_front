@@ -6,7 +6,7 @@
 
 <script>
 // 付款跳转
-import { Dialog } from 'vant'
+import { Dialog, Toast } from 'vant'
 
 var msgpack = require('msgpack-lite')
 var uuidv4 = require('uuid/v4')
@@ -15,11 +15,11 @@ export default {
   data () {
     return {
       title: '',
-      side: '',
-      type: ''
+      side: ''
+      // type: ''
     }
   },
-  updated () {
+  beforeUpdate () {
   },
   methods: {
     // 下单按钮
@@ -27,7 +27,6 @@ export default {
       if (this.Place === true) {
         if (this.wallet.search('BlockPay') !== -1) {
           if (localStorage.getItem('user_pas')) {
-            this.verification = true
           } else {
             this.$router.push({
               path: '/password'
@@ -39,7 +38,8 @@ export default {
             this.type = 'market'
           } else {
             this.side = 'sell'
-            this.type = 'limit'
+            // this.type = 'limit'
+            this.type = 'market'
           }
           this.payment()
         }
@@ -49,6 +49,7 @@ export default {
     payment () {
       const obj = { service: 'bb', side: this.side, type: this.type, pair_id: this.id, wallet: this.wallet }
       // buy/sell 买和卖; market/limit 市场表; mixin/blockpay 钱包;
+      // ,
       const memo = msgpack.encode(obj).toString('base64')
       const trace = uuidv4()
       // 买入金额
@@ -67,11 +68,12 @@ export default {
       }).then(() => {
         // on confirm
         console.log('成功')
-        this.value = ''
-        this.Place = false
+        Toast('付款成功')
+        this.$emit('value_but', this.value)
       }).catch(() => {
         // on cancel
         console.log('失败')
+        Toast('付款取消')
       })
     }
   },
@@ -80,7 +82,7 @@ export default {
   },
   props: [
     'Place',
-    'index.js',
+    'index',
     'symbol',
     'wallet',
     'id',

@@ -47,30 +47,8 @@
                 :maxlength="input_size"
                 @focus="foc_market"
               >
-                <div class="input-operator" slot="right">
-                  <div class="title">
-                    <span :class="{active_false: checked === false}" v-if="checked === false">市价单</span><span :class="{active_true: checked === true}" v-if="checked === true">限价单</span>
-                  </div>
-                  <div>
-                    <van-switch
-                      v-model="checked"
-                      size="24px"
-                      @input="onInput"
-                    />
-                  </div>
-                </div>
               </md-input-item>
             </md-field>
-            <!--定点买入金额-->
-            <div class="fixed">
-              <md-input-item
-                type="Number"
-                v-model="money"
-                :placeholder="pla_money"
-                v-if="checked"
-                :size="fixed"
-              ></md-input-item>
-            </div>
           </div>
         </van-tab>
 
@@ -93,35 +71,13 @@
                 :maxlength="input_size"
                 @focus="foc_market"
               >
-                <div class="input-operator" slot="right">
-                  <div class="title">
-                    <span :class="{active_false: checked === false}" v-if="checked === false">市价单</span><span :class="{active_true: checked === true}" v-if="checked === true">限价单</span>
-                  </div>
-                  <div>
-                    <van-switch
-                      v-model="checked"
-                      size="24px"
-                      @input="onInput"
-                    />
-                  </div>
-                </div>
               </md-input-item>
             </md-field>
-            <!--买入金额-->
-            <div class="fixed">
-              <md-input-item
-                type="Number"
-                v-model="money"
-                :placeholder="pla_money"
-                v-if="checked"
-                :size="fixed"
-              ></md-input-item>
-            </div>
           </div>
         </van-tab>
       </van-tabs>
       <!--按钮-->
-      <but :index="active_index" :Place="Place_active" :symbol="symbol" :wallet="wallet_data" :id="pair.id" :asset_id="asset_id" :value="value"></but>
+      <but :index="active_index" @value_but="value_but" :Place="Place_active" :symbol="symbol" :wallet="wallet_data" :id="pair.id" :asset_id="asset_id" :value="value"></but>
       <!--钱包-->
       <bb_wallet :pair="pair" @wallet="wallet" :index="active_index"></bb_wallet>
       <!--说明-->
@@ -130,7 +86,7 @@
 </template>
 
 <script>
-import { Icon, Toast, Switch, Dialog, Tab, Tabs } from 'vant'
+import { Icon, Toast, Switch, Tab, Tabs } from 'vant'
 import { InputItem, Field } from 'mand-mobile'
 // eslint-disable-next-line camelcase
 import bb_wallet from '../../../components/wallet_mode'
@@ -155,7 +111,6 @@ export default {
       md_title: '',
       input_size: 9,
       buy_price: '',
-      checked: false,
       money: '',
       price_bg: '0',
       price_img: '',
@@ -179,16 +134,6 @@ export default {
     wallet (msg) {
       this.wallet_data = msg
     },
-    async onInput (checked) {
-      if (checked) {
-        const { data } = await this.$api.bb.pairDetail(this.$route.params.id)
-        if (this.active_index === 0) {
-          this.money = data.data.bestorderbookmodel.best_buy_price
-        } else {
-          this.money = data.data.bestorderbookmodel.best_sell_price
-        }
-      }
-    },
     // 箭头
     Arrow () {
       this.$router.go(-1)
@@ -200,8 +145,8 @@ export default {
       this.price_img = ''
       // 红点提示
       if (e === 1) {
-        this.symbol = this.pair.quote.symbol
-        this.asset_id = this.pair.quote.asset_id
+        this.symbol = this.pair.base.symbol
+        this.asset_id = this.pair.base.asset_id
         this.brief = '最小下单 ' + (Math.floor(this.pair.sell_min * 100)) / 100 + ' ' + this.pair.base.symbol + ', 最大下单 ' + ((Math.floor(this.pair.sell_max * 100)) / 100).toFixed(this.pair.sell_decimal_digit) + ' ' + this.pair.base.symbol
         this.value = ''
         this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000
@@ -213,8 +158,8 @@ export default {
         this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
         this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
       } else {
-        this.symbol = this.pair.base.symbol
-        this.asset_id = this.pair.base.asset_id
+        this.symbol = this.pair.quote.symbol
+        this.asset_id = this.pair.quote.asset_id
         this.brief = '最小下单 ' + (Math.floor(this.pair.buy_min * 100)) / 100 + ' ' + this.pair.quote.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
         this.value = ''
         this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000
@@ -238,8 +183,8 @@ export default {
       if (data.code === 200) {
         this.pair = data.data
         if (this.active_index === 0) {
-          this.symbol = data.data.base.symbol
-          this.asset_id = this.pair.base.asset_id
+          this.symbol = data.data.quote.symbol
+          this.asset_id = this.pair.quote.asset_id
           // 渲染
           if (this.pair.bestorderbookmodel.best_buy_exchange.logo_32) {
             this.price_img = this.pair.bestorderbookmodel.best_buy_exchange.logo_32
@@ -251,8 +196,8 @@ export default {
           this.sell = this.arr_buy.bids.slice(this.item - 10, this.time)
           this.buy = this.arr_buy.asks.slice(this.item - 10, this.time)
         } else {
-          this.asset_id = this.pair.quote.asset_id
-          this.symbol = data.data.quote.symbol
+          this.asset_id = this.pair.base.asset_id
+          this.symbol = data.data.base.symbol
           // 渲染
           if (this.pair.bestorderbookmodel.best_sell_exchange.logo_32) {
             this.price_img = this.pair.bestorderbookmodel.best_sell_exchange.logo_32
@@ -267,6 +212,9 @@ export default {
       } else {
         Toast('获取数据失败，请刷新页面')
       }
+    },
+    value_but (msg) {
+      this.value = ''
     }
   },
   computed: {
@@ -343,10 +291,6 @@ export default {
         }
       }
       return that.md_title
-    },
-    // 付款方式
-    cashier () {
-      return this.$refs.cashier
     }
   },
   // keep-alive 组件激活时调用
@@ -377,7 +321,6 @@ export default {
     [InputItem.name]: InputItem,
     [Field.name]: Field,
     [Switch.name]: Switch,
-    [Dialog.name]: Dialog,
     [Tab.name]: Tab,
     [Tabs.name]: Tabs,
     // 钱包
@@ -527,23 +470,6 @@ export default {
           font-size: 20px;
           width: 100%;
           text-align: center;
-        }
-        .input-operator{
-          font-size: 16px;
-          color: #5878B4;
-          display: flex;
-          align-items: center;
-          .title{
-            color: #000;
-            font-size: 14px;
-            margin-left: 8px;
-            .active_false{
-              color: red;
-            }
-            .active_true{
-              color: green;
-            }
-          }
         }
         .md-field-item-content::before{
           background-color: #C5CAD5;
