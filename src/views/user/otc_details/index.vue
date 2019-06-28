@@ -216,9 +216,9 @@ export default {
       if (e === 0) {
         // 已完成
         this.title_suo = '10'
+        this.price = '00'
       } else if (e === 1) {
         this.title_suo = '20'
-        this.price = '00'
       } else {
         // 失败
         this.title_suo = '30'
@@ -230,11 +230,12 @@ export default {
       let that = this
       let arrByZM = []
       for (let i = 0; i < that.order.length; i++) {
-        if ((that.order[i].status.toString().length >= 2 ? that.order[i].status.toString() : that.order[i].status.toString() + '0').search(that.title_suo) !== -1) {
+        let pan = that.order[i].status.toString().length >= 2 ? that.order[i].status.toString() : that.order[i].status.toString() + '0'
+        if (pan.search(that.title_suo) !== -1) {
           arrByZM.push(that.order[i])
         }
       }
-      return arrByZM
+      return arrByZM.reverse()
     }
   },
   components: {

@@ -16,15 +16,8 @@
             <md-detail-item title="平均成交价">
               <span v-if="!item.exchangeinstantordermodel.average_price">- -</span><span v-else>{{item.exchangeinstantordermodel.average_price}}</span>{{item.pair.pair}}
             </md-detail-item>
-            <md-detail-item title="服务费">
-              <div v-if="!item.exchangeinstantordermodel.price && item.exchangeinstantordermodel.price !== 0"><span>- -</span></div>
-              <div v-else><span>{{Math.round((item.pair.fee * (item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost)) * 1000000) / 1000000}}</span>{{item.pair.base.symbol}}</div>
-            </md-detail-item>
             <md-detail-item title="实际到账">
               <span v-if="!item.exchangeinstantordermodel.filled">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost))) * 1000000) / 1000000}} </span> {{item.pair.base.symbol}}
-            </md-detail-item>
-            <md-detail-item title="交易所手续费">
-              <span v-if="!item.exchangeinstantordermodel.fee_cost">--</span><span v-else>{{Math.floor(item.exchangeinstantordermodel.fee_cost * 1000000) / 1000000}} </span> {{item.pair.base.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
               <!--支付状态-->
@@ -49,7 +42,7 @@
                   <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
                   <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
                   <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
-                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">支付失败</span>
+                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">挂单失败</span>
                   <span v-else>交易未知</span>
                 </div>
                 <div @click="item_pass(index)">
@@ -71,15 +64,8 @@
             <md-detail-item title="平均成交价">
               <span v-if="!item.exchangeinstantordermodel.average_price">- -</span><span v-else>{{item.exchangeinstantordermodel.average_price}}</span>{{item.pair.pair}}
             </md-detail-item>
-            <md-detail-item title="服务费">
-              <div v-if="!item.exchangeinstantordermodel.price && item.exchangeinstantordermodel.price !== 0"><span>- -</span></div>
-              <div v-else><span>{{Math.round((item.pair.fee * (item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost)) * 10000000) / 10000000}}</span>{{item.pair.quote.symbol}}</div>
-            </md-detail-item>
             <md-detail-item title="实际到账">
               <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost))) * 100000) / 100000}} </span> {{item.pair.quote.symbol}}
-            </md-detail-item>
-            <md-detail-item title="交易所手续费">
-              <span v-if="!item.exchangeinstantordermodel.fee_cost">--</span><span v-else>{{Math.floor(item.exchangeinstantordermodel.fee_cost * 1000000) / 1000000}} </span> {{item.pair.quote.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
               <!--支付状态-->
@@ -104,7 +90,7 @@
                   <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
                   <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
                   <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
-                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">支付失败</span>
+                  <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">挂单失败</span>
                   <span v-else>交易未知</span>
                 </div>
                 <div @click="item_pass(index)">
@@ -115,12 +101,14 @@
           </md-bill>
         </div>
       </div>
+      <div class="load" v-if="lod"><van-loading type="spinner" /></div>
+      <div class="bottom" v-else>{{bot}}</div>
     </div>
 </template>
 
 <script>
 import { Field, DetailItem, Tag, Bill } from 'mand-mobile'
-import { Icon, Progress, Toast, NavBar } from 'vant'
+import { Icon, Progress, Toast, NavBar, Loading } from 'vant'
 export default {
   data () {
     return {
@@ -140,7 +128,14 @@ export default {
         }
       ],
       title_suo: 'paid',
-      act_index: 0
+      act_index: 0,
+      limit: 10,
+      offset: 0,
+      state: '=paid',
+      transfer_state: '!=completed',
+      scr_off: true,
+      bot: '',
+      lod: true
     }
   },
   methods: {
@@ -166,7 +161,10 @@ export default {
         pair_price: Math.floor((this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost - this.lists[i].exchangeinstantordermodel.price) * 100000) / 100000,
         state: this.lists[i].state,
         exchange_state: this.lists[i].exchange_state,
-        transfer_state: this.lists[i].transfer_state
+        transfer_state: this.lists[i].transfer_state,
+        filled: Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost)) * 1000000) / 1000000,
+        fee_cost: Math.round(this.lists[i].exchangeinstantordermodel.fee_cost * 1000000) / 1000000,
+        cost: Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost)) * 10000000) / 10000000
       }
       localStorage.setItem('obj_data', JSON.stringify(obj_data))
       this.$router.push({
@@ -178,11 +176,48 @@ export default {
     },
     // 获取数据
     async getPair (id) {
-      const { data } = await this.$api.bb.orders()
-      if (data.code === 200) {
-        this.order = data.data
+      this.lod = true
+      const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=${this.limit}&offset=${this.offset}`)
+      if (data) {
+        this.bot = '- - - - - - - 到底了 - - - - - - -'
+        if (data.code === 200) {
+          this.order = data.data
+          this.me_ge()
+        } else {
+          Toast('获取数据失败，请刷新页面')
+        }
       } else {
-        Toast('获取数据失败，请刷新页面')
+        this.bot = '- - - - - - - 请检查网络 - - - - - - -'
+        Toast('网络链接失败')
+      }
+    },
+    // 数据相同
+    me_ge () {
+      if (this.limit > this.order.length) {
+        this.scr_off = false
+        this.lod = false
+        this.bot = '- - - - - - - 到底了 - - - - - - -'
+      } else {
+        this.scr_off = true
+        this.lod = false
+      }
+    },
+    // 数据追加
+    async meet (id) {
+      const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=${this.limit}&offset=${this.offset}`)
+      if (data) {
+        this.bot = '- - - - - - - 到底了 - - - - - - -'
+        if (data.code === 200) {
+          data.data.forEach((res) => {
+            this.order.push(res)
+          })
+          this.me_ge()
+        } else {
+          Toast('获取数据失败，请刷新页面')
+        }
+      } else {
+        this.bot = '- - - - - - - 请检查网络 - - - - - - -'
+        Toast('网络链接失败')
       }
     },
     title_data (e) {
@@ -190,12 +225,36 @@ export default {
       if (e === 0) {
         // 进行中
         this.title_suo = 'paid'
+        this.transfer_state = '!=completed'
+        this.limit = 10
+        this.offset = 0
+        this.getPair()
       } else if (e === 1) {
         // 已完成
         this.title_suo = 'completed'
+        this.transfer_state = '=completed'
+        this.limit = 10
+        this.offset = 0
+        this.getPair()
       } else {
         // 失败
         this.title_suo = 'fail'
+        this.transfer_state = '=fail'
+        this.limit = 10
+        this.offset = 0
+        this.getPair()
+      }
+    },
+    handleScroll () {
+      let scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+      let windowHeight = document.documentElement.clientHeight || document.body.clientHeight
+      let scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
+      if ((scrollHeight - (scrollTop + windowHeight)) <= 20 && this.scr_off) {
+        this.scr_off = false
+        this.lod = true
+        this.offset = this.limit + 1
+        this.limit += 10
+        this.meet()
       }
     }
   },
@@ -204,7 +263,7 @@ export default {
       let that = this
       let arrByZM = []
       for (let i = 0; i < that.order.length; i++) {
-        if (that.order[i].transfer_state.search(that.title_suo) !== -1 || (that.order[i].state.search(that.title_suo) !== -1 && that.order[i].transfer_state !== 'fail')) {
+        if (that.order[i].transfer_state.search(that.title_suo) !== -1 || (that.order[i].state.search(that.title_suo) !== -1 && that.order[i].transfer_state !== 'completed' && that.order[i].transfer_state !== 'fail')) {
           arrByZM.push(that.order[i])
         }
       }
@@ -218,10 +277,12 @@ export default {
     [Progress.name]: Progress,
     [Bill.name]: Bill,
     [Tag.name]: Tag,
-    [NavBar.name]: NavBar
+    [NavBar.name]: NavBar,
+    [Loading.name]: Loading
   },
   async mounted () {
     await this.getPair(1)
+    window.addEventListener('scroll', this.handleScroll, true)
   }
 }
 </script>
@@ -339,6 +400,19 @@ export default {
           }
         }
       }
+    }
+    .load{
+      margin-bottom: 70px;
+      .van-loading{
+        left: 50%;
+        transform: translate(-50%,0);
+      }
+    }
+    .bottom{
+      margin-bottom: 70px;
+      color: #999;
+      text-align: center;
+      font-size: 15px;
     }
   }
 </style>

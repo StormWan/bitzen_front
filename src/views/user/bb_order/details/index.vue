@@ -3,7 +3,7 @@
     <!--标题-->
     <div class="head">
       <van-nav-bar
-        :title="symbol"
+        :title="symbol + side"
         left-text="返回"
         left-arrow
         @click-left="Arrow"
@@ -17,6 +17,8 @@
           <md-detail-item :content="price + ' ' + pair" title="兑换价格" />
           <md-detail-item :content="pay_amount + ' ' + pay_asset" title="兑换数量" />
           <md-detail-item :content="pair_price + ' ' + symbol" title="成交获得" />
+          <md-detail-item :content="fee_cost + ' ' + symbol" title="交易所手续费" />
+          <md-detail-item :content="filled_cost + ' ' + symbol" title="服务费" />
         </md-field>
       </div>
       <!--进度条-->
@@ -63,7 +65,11 @@ export default {
       tr_state: '处理结果',
       title_st: false,
       ex_st: false,
-      tr_st: false
+      tr_st: false,
+      // 买入 卖出
+      filled_cost: '',
+      // 手续费
+      fee_cost: ''
     }
   },
   methods: {
@@ -88,11 +94,14 @@ export default {
     this.pair = obj_data.pair
     this.pay_asset = obj_data.pay_asset
     this.symbol = obj_data.symbol
+    this.fee_cost = obj_data.fee_cost
     // 成交方式
     if (obj_data.side === 'buy') {
       this.side = '买入'
+      this.filled_cost = obj_data.filled
     } else if (obj_data.side === 'sell') {
       this.side = '卖出'
+      this.filled_cost = obj_data.cost
     }
     // 兑换价格
     if (!obj_data.price) {
@@ -123,7 +132,7 @@ export default {
         this.ex_state = '未挂单'
         this.ex_st = false
       } else if (obj_data.exchange_state === 'open') {
-        this.ex_state = '已持单'
+        this.ex_state = '已挂单'
         this.ex_st = false
       } else if (obj_data.exchange_state === 'closed') {
         this.ex_state = '兑换完毕'

@@ -40,7 +40,7 @@ const router = new Router({
         tabbar: () => import('./components/tabbar/index.vue')
       },
       meta: {
-        keepAlive: true,
+        keepAlive: false,
         Auth: true
       }
     },
@@ -582,6 +582,7 @@ router.beforeEach(async (to, from, next) => {
     const code = getUrlKey('code')
     console.log('code=' + code)
     if (code === null) {
+      console.log(oauthUrl)
       window.location.href = oauthUrl
     } else {
       let { data } = await api.account.oauth({ code: code })
