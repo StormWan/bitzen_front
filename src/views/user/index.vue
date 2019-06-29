@@ -17,7 +17,6 @@
           <van-cell :value="user_name" />
         </div>
       </div>
-    <div class="Tips"><van-icon name="info-o" /> 请不要透露密码、短信验证码给任何人</div>
 
     <!--分享页面-->
     <div class="Effect">
@@ -178,16 +177,6 @@ export default {
         color: #FFD700;
         font-weight: bold;
         font-size: 20px;
-      }
-    }
-    /*提示*/
-    .Tips{
-      font-size: 10px;
-      color: #999;
-      padding: 5px 0 0 20px;
-      i{
-        font-size: 15px;
-        vertical-align: middle;
       }
     }
     /*作用页*/

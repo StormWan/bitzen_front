@@ -9,7 +9,7 @@
         <md-bill
           :title="'买入 ' + item.otc_pair.asset.symbol"
           :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
-          water-mark="Bit-OX">
+          water-mark="BlockPay">
           <md-detail-item title="数量">
             <span>{{item.usdt_amount}} </span>{{item.otc_pair.asset.symbol}}
           </md-detail-item>
@@ -60,7 +60,7 @@
         <md-bill
           :title="'卖出 ' + item.otc_pair.asset.symbol"
           :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
-          water-mark="Bit-OX">
+          water-mark="BlockPay">
           <md-detail-item title="数量">
             <span>{{item.asset_amount}} </span>{{item.otc_pair.asset.symbol}}
           </md-detail-item>

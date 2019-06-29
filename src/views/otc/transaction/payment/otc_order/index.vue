@@ -81,7 +81,7 @@
         </div>
       </div>
       <!--说明-->
-      <div class="Tips">1.如需帮助请联系 Bit-ox 客服，Mixin ID：28749，微信：jc_castle</div>
+      <div class="Tips">1.如需帮助请联系 BlockPay 客服，Mixin ID：28749，微信：jc_castle</div>
       <!--弹出层-->
       <div class="Tip">
         <van-popup v-model="show">

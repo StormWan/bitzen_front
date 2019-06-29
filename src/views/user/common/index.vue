@@ -28,11 +28,11 @@ export default {
           path: '/delay'
         },
         {
-          text: '关于 Bit-Ox 平台承兑商的说明',
+          text: '关于 BlockPay 平台承兑商的说明',
           path: '/trader'
         },
         {
-          text: '关于 Mixin 和 Bit-Ox 的关系',
+          text: '关于 Mixin 和 BlockPay 的关系',
           path: '/M_and_B'
         },
         {
@@ -56,7 +56,7 @@ export default {
           path: '/get'
         },
         {
-          text: 'Bit-Ox 是如何收取服务费的?',
+          text: 'BlockPay 是如何收取服务费的?',
           path: '/service'
         },
         {
@@ -64,11 +64,11 @@ export default {
           path: '/rule'
         },
         {
-          text: '为什么 Bit-Ox 的 C2C 价格与行情软件显示的价格不一致,有时候甚至相差比较大?',
+          text: '为什么 BlockPay 的 C2C 价格与行情软件显示的价格不一致,有时候甚至相差比较大?',
           path: '/compare'
         },
         {
-          text: '使用 Bit-Ox 交易安全吗?会不会跑路?',
+          text: '使用 BlockPay 交易安全吗?会不会跑路?',
           path: '/security'
         },
         {

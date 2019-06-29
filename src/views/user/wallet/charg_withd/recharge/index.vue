@@ -16,7 +16,7 @@
         </div>
         <div class="user_naID">
           <p>{{user_name}}</p>
-          <p>Bit-OX ID: {{user_ID}}</p>
+          <p>BlockPay ID: {{user_ID}}</p>
         </div>
       </div>
       <!--二维码-->

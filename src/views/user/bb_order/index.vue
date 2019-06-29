@@ -9,7 +9,7 @@
           <md-bill
             :title="item.pair.pair + ' 买入'"
             :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
-            water-mark="Bit-OX">
+            water-mark="BlockPay">
             <md-detail-item title="委托数量">
               <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
             </md-detail-item>
@@ -57,7 +57,7 @@
           <md-bill
             :title="item.pair.pair + ' 卖出'"
             :no="item.created.substring(0, 10) + ' ' + item.created.substring(11, 19)"
-            water-mark="Bit-OX">
+            water-mark="BlockPay">
             <md-detail-item title="委托数量">
               <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
             </md-detail-item>
@@ -135,7 +135,8 @@ export default {
       transfer_state: '!=completed',
       scr_off: true,
       bot: '',
-      lod: true
+      lod: true,
+      set_off: true
     }
   },
   methods: {
@@ -199,7 +200,7 @@ export default {
       this.$router.go(-1)
     },
     // 获取数据
-    async getPair (id) {
+    async getPair () {
       this.lod = true
       const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=${this.limit}&offset=${this.offset}`)
       if (data) {
@@ -227,7 +228,7 @@ export default {
       }
     },
     // 数据追加
-    async meet (id) {
+    async meet () {
       const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=${this.limit}&offset=${this.offset}`)
       if (data) {
         this.bot = '- - - - - - - 到底了 - - - - - - -'
@@ -304,8 +305,8 @@ export default {
     [NavBar.name]: NavBar,
     [Loading.name]: Loading
   },
-  async mounted () {
-    await this.getPair(1)
+  mounted () {
+    this.getPair()
     window.addEventListener('scroll', this.handleScroll, true)
   }
 }

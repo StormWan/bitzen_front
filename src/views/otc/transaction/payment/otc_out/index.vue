@@ -124,7 +124,7 @@
       </div>
     </div>
     <!--说明-->
-    <div class="Tips">1.如需帮助请联系 Bit-ox 客服，Mixin ID：28749，微信：jc_castle</div>
+    <div class="Tips">1.如需帮助请联系 BlockPay 客服，Mixin ID：28749，微信：jc_castle</div>
     <!--预估到账内容-->
     <div class="tot_popup">
       <van-popup v-model="show_tot">

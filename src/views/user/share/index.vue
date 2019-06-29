@@ -20,7 +20,7 @@
               <img src="../../../assets/cat.jpg" alt="">
             </div>
             <div class="user_name">{{user_name}}</div>
-            <div class="text">邀您体验 Bit-OX</div>
+            <div class="text">邀您体验 BlockPay</div>
             <div class="code">邀请码： {{code}}</div>
             <!--二维码分享页-->
             <div class="query">
@@ -35,7 +35,7 @@
           <van-icon name="cluster" />
         </div>
         <div>
-          <button class="tag-read" data-clipboard-text="https://bit-ox.com" @click="copy">复制链接</button>
+          <button class="tag-read" data-clipboard-text="https://BlockPay.com" @click="copy">复制链接</button>
         </div>
       </div>
     </div>
@@ -69,7 +69,7 @@ export default {
     // 动态生成二维码
     useqrcode () {
       // 生成的二维码内容，可以添加变量
-      this.QueryDetail = 'https://bit-ox.com' + this.QueryDetail
+      this.QueryDetail = 'https://BlockPay.com' + this.QueryDetail
       let canvas = this.$refs.canvas
       QRCode.toCanvas(canvas, this.QueryDetail, function (error) {
         if (error) console.error(error)

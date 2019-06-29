@@ -3,7 +3,7 @@
     <!--头部标题-->
     <div class="head">
       <van-nav-bar
-        title="Bit-Ox 是如何收取服务费的?"
+        title="BlockPay 是如何收取服务费的?"
         left-text="返回"
         left-arrow
         @click-left="Arrow"

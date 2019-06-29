@@ -14,7 +14,7 @@
       <div class="md-example-child md-example-child-detail-item md-example-child-detail-item-0">
         <md-field>
           <md-detail-item :content="item_pow" :title="'No.' + item_pure" bold class="title" />
-          <md-detail-item :content="price + ' ' + pair" title="兑换价格" />
+          <md-detail-item :content="price + ' ' + pair" title="成交均价" />
           <md-detail-item :content="pay_amount + ' ' + pay_asset" title="兑换数量" />
           <md-detail-item :content="all_price + ' ' + symbol" title="兑换所得" />
           <md-detail-item :content="fee_cost + ' ' + symbol" title="交易所手续费" />
@@ -40,7 +40,7 @@
       </div>
 
       <!--说明-->
-      <div class="Explain">如需帮助请联系Bit-OX客服，Mixin ID：28749，微信：jc_castle</div>
+      <div class="Explain">如需帮助请联系BlockPay客服，Mixin ID：28749，微信：jc_castle</div>
     </div>
   </div>
 </template>

@@ -3,7 +3,7 @@
     <!--头部标题-->
     <div class="head">
       <van-nav-bar
-        title="为什么 Bit-Ox 的 C2C 价格与行情软件显示的价格不一致,有时候甚至相差比较大?"
+        title="为什么 BlockPay 的 C2C 价格与行情软件显示的价格不一致,有时候甚至相差比较大?"
         left-text="返回"
         left-arrow
         @click-left="Arrow"
