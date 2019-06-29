@@ -3,7 +3,7 @@
     <!--标题-->
     <div class="head">
       <van-nav-bar
-        :title="symbol + side"
+        :title="symbol + ' ' + side"
         left-text="返回"
         left-arrow
         @click-left="Arrow"
@@ -16,9 +16,10 @@
           <md-detail-item :content="item_pow" :title="'No.' + item_pure" bold class="title" />
           <md-detail-item :content="price + ' ' + pair" title="兑换价格" />
           <md-detail-item :content="pay_amount + ' ' + pay_asset" title="兑换数量" />
-          <md-detail-item :content="pair_price + ' ' + symbol" title="成交获得" />
+          <md-detail-item :content="all_price + ' ' + symbol" title="兑换所得" />
           <md-detail-item :content="fee_cost + ' ' + symbol" title="交易所手续费" />
           <md-detail-item :content="filled_cost + ' ' + symbol" title="服务费" />
+          <md-detail-item :content="pair_price + ' ' + symbol" title="成交获得" />
         </md-field>
       </div>
       <!--进度条-->
@@ -69,7 +70,8 @@ export default {
       // 买入 卖出
       filled_cost: '',
       // 手续费
-      fee_cost: ''
+      fee_cost: '',
+      all_price: ''
     }
   },
   methods: {
@@ -92,16 +94,20 @@ export default {
     this.item_pure = obj_data.item
     this.item_pow = obj_data.item_pow
     this.pair = obj_data.pair
-    this.pay_asset = obj_data.pay_asset
-    this.symbol = obj_data.symbol
     this.fee_cost = obj_data.fee_cost
+    this.pair_price = obj_data.pair_price
+    this.all_price = obj_data.all_price
     // 成交方式
     if (obj_data.side === 'buy') {
       this.side = '买入'
       this.filled_cost = obj_data.filled
+      this.pay_asset = obj_data.symbol_sell
+      this.symbol = obj_data.symbol_buy
     } else if (obj_data.side === 'sell') {
       this.side = '卖出'
       this.filled_cost = obj_data.cost
+      this.pay_asset = obj_data.symbol_buy
+      this.symbol = obj_data.symbol_sell
     }
     // 兑换价格
     if (!obj_data.price) {
@@ -155,16 +161,10 @@ export default {
         this.active = 2
         this.tr_st = false
       } else {
-        this.tr_state = '支付失败'
+        this.tr_state = '挂单失败'
         this.active = 2
         this.tr_st = true
       }
-    }
-    // 成交获得
-    if (obj_data.pair_price === 'null') {
-      this.pair_price = '- -'
-    } else {
-      this.pair_price = obj_data.pair_price
     }
   }
 }
@@ -202,7 +202,7 @@ export default {
         }
         .md-detail-item{
           padding: 0;
-          line-height: 30px;
+          line-height: 33px;
         }
         .title{
           .md-detail-title{
@@ -246,13 +246,21 @@ export default {
         }
       }
     }
+    .md-field-content{
+      color: red;
+      .md-detail-item:nth-last-child(1){
+        div{
+          color: skyblue;
+        }
+      }
+    }
     /*说明*/
     .Explain{
       color: #999999;
       font-size: 14px;
       text-align: justify;
-      padding: 30px 30px;
-      line-height: 20px;
+      padding: 10px 30px;
+      line-height: 18px;
     }
   }
 </style>

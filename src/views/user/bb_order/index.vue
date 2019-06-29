@@ -140,7 +140,7 @@ export default {
   },
   methods: {
     // 传输
-    item_pass (i) {
+    item_pass: function (i) {
       // 纯时间
       let date = new Date(this.lists[i].created)
       let result, year, month, day
@@ -148,6 +148,24 @@ export default {
       month = date.getMonth() + 1
       day = date.getDate()
       result = year.toString() + (month > 9 ? month : '0' + month) + (day > 9 ? day : '0' + day)
+      // 成交金额
+      // eslint-disable-next-line camelcase
+      let filled_cost = ''
+      // 成交总金额
+      // eslint-disable-next-line camelcase
+      let all_price = ''
+      // 兑换数量
+      if (this.lists[i].side === 'buy') {
+        // eslint-disable-next-line camelcase
+        filled_cost = Math.round((this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost - (this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost))) * 1000000000) / 1000000000
+        // eslint-disable-next-line camelcase
+        all_price = Math.floor(this.lists[i].exchangeinstantordermodel.filled * 1000000000) / 1000000000
+      } else if (this.lists[i].side === 'sell') {
+        // eslint-disable-next-line camelcase
+        filled_cost = Math.floor((this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost - (this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost))) * 1000000000) / 1000000000
+        // eslint-disable-next-line camelcase
+        all_price = Math.floor(this.lists[i].exchangeinstantordermodel.cost * 1000000000) / 1000000000
+      }
       // eslint-disable-next-line camelcase
       let obj_data = {
         item: result + this.lists[i].created.substring(11, 13) + this.lists[i].created.substring(14, 16) + this.lists[i].created.substring(17, 19) + this.lists[i].created.substring(20, 26),
@@ -156,15 +174,21 @@ export default {
         side: this.lists[i].side,
         pay_amount: this.lists[i].pay_amount,
         pair: this.lists[i].pair.pair,
-        symbol: this.lists[i].pair.base.symbol,
-        pay_asset: this.lists[i].pay_asset.symbol,
-        pair_price: Math.floor((this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost - this.lists[i].exchangeinstantordermodel.price) * 100000) / 100000,
+        symbol_buy: this.lists[i].pair.base.symbol,
+        symbol_sell: this.lists[i].pair.quote.symbol,
+        // 总共成交金额
+        all_price: all_price,
+        // 成交获得
+        pair_price: filled_cost,
         state: this.lists[i].state,
         exchange_state: this.lists[i].exchange_state,
         transfer_state: this.lists[i].transfer_state,
-        filled: Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost)) * 1000000) / 1000000,
-        fee_cost: Math.round(this.lists[i].exchangeinstantordermodel.fee_cost * 1000000) / 1000000,
-        cost: Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost)) * 10000000) / 10000000
+        // 买入服务费
+        filled: Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost)) * 1000000000) / 1000000000,
+        // 手续费
+        fee_cost: Math.round(this.lists[i].exchangeinstantordermodel.fee_cost * 1000000000) / 1000000000,
+        // 卖出服务费
+        cost: Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost)) * 1000000000) / 1000000000
       }
       localStorage.setItem('obj_data', JSON.stringify(obj_data))
       this.$router.push({
@@ -267,7 +291,7 @@ export default {
           arrByZM.push(that.order[i])
         }
       }
-      return arrByZM.reverse()
+      return arrByZM
     }
   },
   components: {

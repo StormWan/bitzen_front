@@ -85,7 +85,7 @@
 <script>
 import { mapMutations } from 'vuex'
 import { Field, CellItem, Switch } from 'mand-mobile'
-import { Icon, Cell, CellGroup, NavBar, Toast } from 'vant'
+import { Icon, Cell, CellGroup, NavBar, Toast, Dialog } from 'vant'
 export default {
   data () {
     return {
@@ -113,9 +113,16 @@ export default {
     }),
     // 退出
     Exse () {
-      localStorage.clear()
-      Toast('退出成功')
-      this.Sing = true
+      Dialog.confirm({
+        title: '退出',
+        message: '是否退出登录'
+      }).then(() => {
+        localStorage.clear()
+        Toast('退出成功')
+        this.Sing = true
+      }).catch(() => {
+        Toast('已取消')
+      })
     }
   },
   components: {
