@@ -132,7 +132,7 @@ export default {
       limit: 10,
       offset: 0,
       state: '=paid',
-      transfer_state: '!=completed',
+      transfer_state: '!==completed',
       scr_off: true,
       bot: '',
       lod: true,
@@ -250,7 +250,7 @@ export default {
       if (e === 0) {
         // 进行中
         this.title_suo = 'paid'
-        this.transfer_state = '!=completed'
+        this.transfer_state = '!==completed'
         this.limit = 10
         this.offset = 0
         this.getPair()

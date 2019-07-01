@@ -330,12 +330,22 @@ export default {
     },
     // 取消订单
     async but_no () {
-      // this.item = false
-      this.delete_cre = true
-      this.flag = true
-      this.limittime = 0
-      this.StartCountDown()
-      await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_cancel_order' })
+      // 支付取消提醒
+      Dialog.confirm({
+        title: '取消',
+        message: '是否取消订单'
+      }).then(async () => {
+        // on confirm
+        await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_cancel_order' })
+        this.item = false
+        // this.item = false
+        this.delete_cre = true
+        this.flag = true
+        Toast('取消订单成功')
+      }).catch(() => {
+        // on cancel
+        Toast('取消订单失败')
+      })
     },
     // 确认订单
     async but_ok () {
