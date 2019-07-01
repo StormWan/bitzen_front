@@ -133,7 +133,7 @@ export default {
         }
       ],
       title_suo: '10',
-      price: '',
+      price: '00',
       act_index: 0
     }
   },
@@ -219,9 +219,11 @@ export default {
         this.price = '00'
       } else if (e === 1) {
         this.title_suo = '20'
+        this.price = '20'
       } else {
         // 失败
         this.title_suo = '30'
+        this.price = '30'
       }
     }
   },
@@ -231,11 +233,11 @@ export default {
       let arrByZM = []
       for (let i = 0; i < that.order.length; i++) {
         let pan = that.order[i].status.toString().length >= 2 ? that.order[i].status.toString() : that.order[i].status.toString() + '0'
-        if (pan.search(that.title_suo) !== -1) {
+        if (pan.search(that.title_suo) !== -1 || pan.search(that.price) !== -1) {
           arrByZM.push(that.order[i])
         }
       }
-      return arrByZM.reverse()
+      return arrByZM
     }
   },
   components: {

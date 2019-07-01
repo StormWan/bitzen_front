@@ -10,7 +10,7 @@
       </div>
       <div class="text">
         <h5>亲爱的用户：</h5>
-        <p class="tow">如您遇到问题，请先查看 <a href="">BlockPay 常见问题</a>，看看您的问题是否已经得到了解答，若还是找不到你想要的，<a href="">请提交工单</a>。</p>
+        <p class="tow">如您遇到问题，请先查看 <router-link to="/common">BlockPay 常见问题</router-link>，看看您的问题是否已经得到了解答，若还是找不到你想要的，<a href="">请提交工单</a>。</p>
         <p class="tow">交流与账户无关的话题，请移步我们的社区：</p>
         <ul>
           <li>微信入群请添加客服账号：exin512；</li>

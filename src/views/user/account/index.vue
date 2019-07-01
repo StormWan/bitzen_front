@@ -42,7 +42,11 @@ export default {
   mounted () {
     this.user_name = JSON.parse(localStorage.getItem('userInfo')).full_name
     this.user_ID = JSON.parse(localStorage.getItem('userInfo')).identity_num
-    this.user_bind = '已授权'
+    if (JSON.parse(localStorage.getItem('userInfo')).phone) {
+      this.user_bind = '已授权'
+    } else {
+      this.user_bind = '未授权'
+    }
   },
   components: {
     [NavBar.name]: NavBar
