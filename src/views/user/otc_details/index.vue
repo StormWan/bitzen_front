@@ -46,7 +46,7 @@
                 <span v-else-if="item.status === 12">承兑商已经释放USDT</span>
                 <span v-else-if="item.status === 30" class="active">取消</span>
                 <span v-else-if="item.status === 2">完成</span>
-                <span v-else>交易未知</span>
+                <span v-else class="active">交易未知</span>
               </div>
               <div @click="item_pass(index)">
                 <a>详情</a>
@@ -98,7 +98,7 @@
                 <span v-else-if="item.status === 24">用户已经确认转账</span>
                 <span v-else-if="item.status === 30" class="active">取消</span>
                 <span v-else-if="item.status === 2">完成</span>
-                <span v-else>交易未知</span>
+                <span v-else class="active">交易未知</span>
               </div>
               <div @click="item_pass(index)">
                 <a>详情</a>
@@ -108,12 +108,14 @@
         </md-bill>
       </div>
     </div>
+    <div class="load" v-if="lod"><van-loading type="spinner" /></div>
+    <div class="bottom" v-else>{{bot}}</div>
   </div>
 </template>
 
 <script>
 import { Field, DetailItem, Tag, Bill } from 'mand-mobile'
-import { Icon, Progress, Toast, NavBar } from 'vant'
+import { Icon, Progress, Toast, NavBar, Loading } from 'vant'
 export default {
   data () {
     return {
@@ -132,9 +134,16 @@ export default {
           title: '交易失败'
         }
       ],
-      title_suo: '10',
-      price: '00',
-      act_index: 0
+      title_suo: '',
+      price: 30,
+      act_index: 0,
+      ok: '20',
+      limit: 10,
+      offset: 0,
+      status: '',
+      lod: true,
+      bot: '',
+      scr_off: true
     }
   },
   methods: {
@@ -166,12 +175,58 @@ export default {
     },
     // 获取数据
     async getPair () {
-      const { data } = await this.$api.otc.orders_lis()
+      const { data } = await this.$api.otc.orders_lis(`?limit=${this.limit}&offset=${this.offset}`)
+      this.lod = false
+      this.bot = '- - - - - - - 到底了 - - - - - - -'
       if (data.code === 200) {
         this.order = data.data
         await this.Setitem()
       } else {
         Toast('获取数据失败，请刷新页面')
+      }
+    },
+    // 懒加载
+    handleScroll () {
+      let scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+      let windowHeight = document.documentElement.clientHeight || document.body.clientHeight
+      let scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
+      if ((scrollHeight - (scrollTop + windowHeight)) <= 20 && this.scr_off) {
+        this.scr_off = false
+        this.lod = true
+        this.offset = this.limit + 1
+        this.limit += 10
+        this.meet()
+      }
+    },
+    // 数据追加
+    async meet () {
+      this.scr_off = false
+      const { data } = await this.$api.otc.orders_lis(`?limit=${this.limit}&offset=${this.offset}`)
+      if (data) {
+        this.bot = '- - - - - - - 到底了 - - - - - - -'
+        if (data.code === 200) {
+          data.data.forEach((res) => {
+            this.order.push(res)
+          })
+          this.scr_off = true
+          this.me_ge()
+        } else {
+          Toast('获取数据失败，请刷新页面')
+        }
+      } else {
+        this.bot = '- - - - - - - 请检查网络 - - - - - - -'
+        Toast('网络链接失败')
+      }
+    },
+    // 数据相同
+    me_ge () {
+      if (this.limit > this.order.length) {
+        this.scr_off = false
+        this.lod = false
+        this.bot = '- - - - - - - 到底了 - - - - - - -'
+      } else {
+        this.scr_off = true
+        this.lod = false
       }
     },
     async Setitem () {
@@ -213,18 +268,26 @@ export default {
     },
     title_data (e) {
       this.act_index = e
+      this.lod = true
+      this.scr_off = true
       if (e === 0) {
         // 已完成
-        this.title_suo = '10'
-        this.price = '00'
+        this.title_suo = ''
+        this.price = 30
+        this.ok = '20'
       } else if (e === 1) {
         this.title_suo = '20'
-        this.price = '20'
+        this.price = 30
+        this.ok = ''
       } else {
         // 失败
         this.title_suo = '30'
-        this.price = '30'
+        this.price = ''
+        this.ok = ''
       }
+      this.limit = 10
+      this.offset = 0
+      this.getPair()
     }
   },
   computed: {
@@ -233,7 +296,7 @@ export default {
       let arrByZM = []
       for (let i = 0; i < that.order.length; i++) {
         let pan = that.order[i].status.toString().length >= 2 ? that.order[i].status.toString() : that.order[i].status.toString() + '0'
-        if (pan.search(that.title_suo) !== -1 || pan.search(that.price) !== -1) {
+        if (pan.search(that.title_suo) !== -1 && that.order[i].status !== this.price && pan !== this.ok) {
           arrByZM.push(that.order[i])
         }
       }
@@ -247,10 +310,12 @@ export default {
     [Progress.name]: Progress,
     [Bill.name]: Bill,
     [Tag.name]: Tag,
-    [NavBar.name]: NavBar
+    [NavBar.name]: NavBar,
+    [Loading.name]: Loading
   },
   async mounted () {
     await this.getPair()
+    window.addEventListener('scroll', this.handleScroll, true)
   }
 }
 </script>
@@ -371,6 +436,20 @@ export default {
           }
         }
       }
+    }
+    .load{
+      margin-bottom: 25px;
+      .van-loading{
+        left: 50%;
+        transform: translate(-50%,0);
+        margin-bottom: 70px;
+      }
+    }
+    .bottom{
+      color: #999;
+      text-align: center;
+      font-size: 15px;
+      margin-bottom: 70px;
     }
   }
 </style>

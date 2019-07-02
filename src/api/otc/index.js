@@ -34,8 +34,8 @@ const otc = {
     })
   },
   // 列表
-  orders_lis () {
-    return axios.get(`${base.base_api}/otc/orders/`)
+  orders_lis (params) {
+    return axios.get(`${base.base_api}/otc/orders/${params}`)
   },
   // 状态
   orders_patch (id, params) {

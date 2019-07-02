@@ -221,9 +221,9 @@ export default {
       // 价格大约
       if (this.data.otc_pair.pair) {
         this.best_sell_price = this.data.otc_pair.pair.bestorderbookmodel.best_sell_price
-        this.price = (Math.floor((this.data.usdt_price * this.best_sell_price) * 100) / 100) * this.data.asset_amount
+        this.price = ((Math.floor((this.data.usdt_price * this.best_sell_price) * 100) / 100) * this.data.asset_amount).toFixed(2)
       } else {
-        this.price = Math.floor((this.data.usdt_price * this.data.asset_amount) * 100) / 100 * this.data.asset_amount
+        this.price = (Math.floor((this.data.usdt_price * this.data.asset_amount) * 100) / 100 * this.data.asset_amount).toFixed(2)
       }
     },
     // 判断付款状态
@@ -273,7 +273,6 @@ export default {
     // 付款logo图片
     async logo_img () {
       const { data } = await this.$api.otc.payment_patch()
-      console.log(data)
       // 付款方式图片显示说明
       let mode = this.mode[0]
       // 微信付款
@@ -416,14 +415,17 @@ export default {
     // 付款调用
     async payment () {
       const obj = { service: 'cc', order_id: this.data.id }
+      console.log(obj)
       // buy/sell 买和卖; market/limit 市场表; mixin/blockpay 钱包;
       const memo = msgpack.encode(obj).toString('base64')
       const trace = uuidv4()
       // 买入金额
       const amount = this.data.asset_amount
+      console.log(amount)
       // 买入的用户ID
       // const asset = this.pair.base.asset_id
       const asset = this.data.otc_pair.asset.asset_id
+      console.log(asset)
       // EOS_ASSET_ID = "f8127159-e473-389d-8e0c-9ac5a4dc8cc6"
       const recipient = '28536b52-f840-4366-8619-3872fb5b3164'
       const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}&amount=${amount}&trace=${trace}&memo=${memo}`
@@ -438,7 +440,7 @@ export default {
         this.delete_cre = false
         this.item = false
         this.status_t = '已确认转账'
-        await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_paid_confirm' })
+        await this.$api.otc.orders_patch(this.data.id, { op_type: 'user_paid_confirm' })
       }).catch(() => {
         // on cancel
         console.log('失败')
