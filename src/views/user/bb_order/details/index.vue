@@ -14,12 +14,22 @@
       <div class="md-example-child md-example-child-detail-item md-example-child-detail-item-0">
         <md-field>
           <md-detail-item :content="item_pow" :title="'No.' + item_pure" bold class="title" />
+
           <md-detail-item :content="price + ' ' + pair" title="成交均价" />
+
           <md-detail-item :content="pay_amount + ' ' + pay_asset" title="兑换数量" />
-          <md-detail-item :content="all_price + ' ' + symbol" title="兑换所得" />
-          <md-detail-item :content="fee_cost + ' ' + symbol" title="交易所手续费" />
-          <md-detail-item :content="filled_cost + ' ' + symbol" title="服务费" />
-          <md-detail-item :content="pair_price + ' ' + symbol" title="成交获得" />
+
+          <md-detail-item v-if="!all_price" :content="'- -' + ' ' + symbol" title="兑换所得" />
+          <md-detail-item v-else :content="all_price + ' ' + symbol" title="兑换所得" />
+
+          <md-detail-item v-if="!fee_cost" :content="'- -' + ' ' + symbol" title="交易所手续费" />
+          <md-detail-item v-else :content="fee_cost + ' ' + symbol" title="交易所手续费" />
+
+          <md-detail-item v-if="!filled_cost" :content="'- -' + ' ' + symbol" title="服务费" />
+          <md-detail-item v-else :content="filled_cost + ' ' + symbol" title="服务费" />
+
+          <md-detail-item v-if="!pair_price" :content="'- -' + ' ' + symbol" title="成交获得" />
+          <md-detail-item v-else :content="pair_price + ' ' + symbol" title="成交获得" />
         </md-field>
       </div>
       <!--进度条-->

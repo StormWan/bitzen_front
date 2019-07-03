@@ -76,6 +76,7 @@
           </van-step>
         </van-steps>
       </div>
+      <div v-if="but_success" class="but_success" @click="but_succ">确认收到款项</div>
     </div>
     <!--付款方式-->
     <div class="wallet_box" @click="wallet_box" v-if="item">
@@ -166,6 +167,7 @@ export default {
         }
       ],
       item: false,
+      but_success: false,
       show_tot: false,
       bank: 'Mixin',
       triangle_active: false,
@@ -234,7 +236,7 @@ export default {
         this.StartCountDown()
       } else if (this.data.status === 1) {
         this.limittime = 0
-        this.item = false
+        this.item = true
         this.status_t = '已确认转账'
       } else if (this.data.status === 2) {
         this.limittime = 0
@@ -242,6 +244,7 @@ export default {
         this.active = 2
         this.status_t = '已确认转账'
         this.status_c = '承兑商确认转账'
+        this.but_success = false
       } else if (this.data.status === 21) {
         this.limittime = 0
         this.active = 1
@@ -252,22 +255,27 @@ export default {
         this.active = 1
         this.status_t = '已确认转账'
         this.status_c = '承兑商已经转账'
+        this.but_success = true
       } else if (this.data.status === 23) {
         this.limittime = 0
         this.active = 1
         this.item = false
         this.status_t = '已确认转账'
         this.status_c = '等待承兑商释确认转账'
+        this.but_success = true
       } else if (this.data.status === 24) {
         this.limittime = 0
         this.active = 1
         this.status_t = '已确认转账'
         this.status_c = '承兑商确认转账'
+        this.but_success = true
       } else if (this.data.status === 30) {
         this.limittime = 0
         this.delete_cre = true
+        this.but_success = true
       } else {
         this.limittime = 0
+        this.but_success = true
       }
     },
     // 付款logo图片
@@ -398,7 +406,7 @@ export default {
         })
         clipboard.on('error', e => {
           // 不支持复制
-          console.log('该浏览器不支持自动复制')
+          Toast('该浏览器不支持自动复制')
           // 释放内存
           clipboard.destroy()
         })
@@ -415,17 +423,14 @@ export default {
     // 付款调用
     async payment () {
       const obj = { service: 'cc', order_id: this.data.id }
-      console.log(obj)
       // buy/sell 买和卖; market/limit 市场表; mixin/blockpay 钱包;
       const memo = msgpack.encode(obj).toString('base64')
       const trace = uuidv4()
       // 买入金额
       const amount = this.data.asset_amount
-      console.log(amount)
       // 买入的用户ID
       // const asset = this.pair.base.asset_id
       const asset = this.data.otc_pair.asset.asset_id
-      console.log(asset)
       // EOS_ASSET_ID = "f8127159-e473-389d-8e0c-9ac5a4dc8cc6"
       const recipient = '28536b52-f840-4366-8619-3872fb5b3164'
       const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}&amount=${amount}&trace=${trace}&memo=${memo}`
@@ -435,16 +440,48 @@ export default {
         title: '付款结果',
         message: '是否成功支付'
       }).then(async () => {
-        // on confirm
-        console.log('成功')
         this.delete_cre = false
         this.item = false
         this.status_t = '已确认转账'
         await this.$api.otc.orders_patch(this.data.id, { op_type: 'user_paid_confirm' })
+        this.active = 1
       }).catch(() => {
         // on cancel
-        console.log('失败')
+        Toast('请稍后重试')
       })
+    },
+    // 确认已经收款
+    but_succ () {
+      if (this.data.status !== 22) {
+        if (this.data.status === 1) {
+          this.item = true
+          Toast('请付款之后再操作')
+          this.but_success = false
+        } else {
+          Toast('请等待商家完成操作')
+        }
+      } else {
+        // 收款
+        Dialog.confirm({
+          title: '收款状态',
+          message: '是否收到款项'
+        }).then(async () => {
+          const { data } = await this.$api.otc.orders_patch(this.data.id, { op_type: 'user_received_confirm' })
+          if (data) {
+            if (data.code === 200) {
+              this.but_success = false
+              this.active = 2
+            } else {
+              Toast('数据获取有误，请稍后再试')
+            }
+          } else {
+            Toast('网络错误，请稍后再试')
+          }
+        }).catch(() => {
+          // on cancel
+          Toast('请稍后重试')
+        })
+      }
     },
     // 钱包选择付款
     wallet_box () {
@@ -547,7 +584,6 @@ export default {
       }
     }
     /*取消*/
-    /*取消*/
     .delete{
       text-align: center;
       line-height: 50px;
@@ -587,6 +623,14 @@ export default {
           font-weight: bold;
           color: red;
         }
+      }
+      .but_success{
+        margin: 0px 40px 10px 40px;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+        background-color: #6495ED;
+        color: white;
       }
     }
     /*支付方式*/

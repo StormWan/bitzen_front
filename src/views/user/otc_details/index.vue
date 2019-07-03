@@ -81,6 +81,9 @@
                 <span v-else-if="item.status === 1">
                   <van-icon class="icon" name="cash-back-record"></van-icon>
                 </span>
+                <span v-else-if="item.status === 11">
+                  <van-icon class="icon" name="cash-back-record"></van-icon>
+                </span>
                 <span v-else-if="item.status === 21 || item.status === 22 || item.status === 23 || item.status === 24">
                   <van-icon class="icon" name="exchange"></van-icon>
                 </span>
@@ -92,6 +95,7 @@
                 </span>
                 <span v-if="item.status === 0">待转账</span>
                 <span v-else-if="item.status === 1">已确认转账</span>
+                <span v-else-if="item.status === 11">已托管,等待承兑商转账</span>
                 <span v-else-if="item.status === 21">已托管,等待承兑商转账</span>
                 <span v-else-if="item.status === 22">承兑商已经转账</span>
                 <span v-else-if="item.status === 23">等待用户确认转账</span>
@@ -173,9 +177,48 @@ export default {
         path: '/user'
       })
     },
+    title_data (e) {
+      this.act_index = e
+      this.lod = true
+      this.scr_off = true
+      this.limit = 10
+      this.offset = 0
+      if (e === 0) {
+        // 已完成
+        this.title_suo = ''
+        this.price = 30
+        this.ok = '20'
+        this.getPair()
+      } else if (e === 1) {
+        this.title_suo = '20'
+        this.price = 30
+        this.ok = ''
+        this.status = 2
+        this.getPair_remove()
+      } else {
+        // 失败
+        this.title_suo = '30'
+        this.price = ''
+        this.ok = ''
+        this.status = 30
+        this.getPair_remove()
+      }
+    },
     // 获取数据
     async getPair () {
-      const { data } = await this.$api.otc.orders_lis(`?limit=${this.limit}&offset=${this.offset}`)
+      const { data } = await this.$api.otc.orders_lis(`?limit=10&offset=${this.offset}`)
+      this.lod = false
+      this.bot = '- - - - - - - 到底了 - - - - - - -'
+      if (data.code === 200) {
+        this.order = data.data
+        await this.Setitem()
+      } else {
+        Toast('获取数据失败，请刷新页面')
+      }
+    },
+    // 获取取消的数据
+    async getPair_remove () {
+      const { data } = await this.$api.otc.orders_lis(`?status=${this.status}&limit=10&offset=${this.offset}`)
       this.lod = false
       this.bot = '- - - - - - - 到底了 - - - - - - -'
       if (data.code === 200) {
@@ -201,21 +244,40 @@ export default {
     // 数据追加
     async meet () {
       this.scr_off = false
-      const { data } = await this.$api.otc.orders_lis(`?limit=${this.limit}&offset=${this.offset}`)
-      if (data) {
-        this.bot = '- - - - - - - 到底了 - - - - - - -'
-        if (data.code === 200) {
-          data.data.forEach((res) => {
-            this.order.push(res)
-          })
-          this.scr_off = true
-          this.me_ge()
+      if (this.act_index === 0) {
+        const { data } = await this.$api.otc.orders_lis(`?limit=10&offset=${this.offset}`)
+        if (data) {
+          this.bot = '- - - - - - - 到底了 - - - - - - -'
+          if (data.code === 200) {
+            data.data.forEach((res) => {
+              this.order.push(res)
+            })
+            this.scr_off = true
+            this.me_ge()
+          } else {
+            Toast('获取数据失败，请刷新页面')
+          }
         } else {
-          Toast('获取数据失败，请刷新页面')
+          this.bot = '- - - - - - - 请检查网络 - - - - - - -'
+          Toast('网络链接失败')
         }
       } else {
-        this.bot = '- - - - - - - 请检查网络 - - - - - - -'
-        Toast('网络链接失败')
+        const { data } = await this.$api.otc.orders_lis(`?status=${this.status}&limit=10&offset=${this.offset}`)
+        if (data) {
+          this.bot = '- - - - - - - 到底了 - - - - - - -'
+          if (data.code === 200) {
+            data.data.forEach((res) => {
+              this.order.push(res)
+            })
+            this.scr_off = true
+            this.me_ge()
+          } else {
+            Toast('获取数据失败，请刷新页面')
+          }
+        } else {
+          this.bot = '- - - - - - - 请检查网络 - - - - - - -'
+          Toast('网络链接失败')
+        }
       }
     },
     // 数据相同
@@ -229,6 +291,7 @@ export default {
         this.lod = false
       }
     },
+    // 时间倒计时
     async Setitem () {
       this.order.forEach((i) => {
         // 下单时间
@@ -237,7 +300,7 @@ export default {
         this.set_item_M = item.getFullYear() + '' + (item.getMonth() + 1) + item.getDate() + item.getHours() + item.getMinutes() + item.getSeconds() + item.getMilliseconds()
         // 时间下单时间
         this.set_item_F = item.getFullYear() + '/' + (item.getMonth() + 1) + '/' + item.getDate() + ' ' + item.getHours() + ':' + item.getMinutes()
-        // 当前时间
+        // 当前时间 时间倒计时
         // eslint-disable-next-line camelcase
         let item_hours = item.getHours() > 9 ? item.getHours() : '0' + item.getHours()
         // eslint-disable-next-line camelcase
@@ -265,29 +328,6 @@ export default {
           this.$api.otc.orders_patch(i.id, { op_type: 'user_cancel_order' })
         }
       })
-    },
-    title_data (e) {
-      this.act_index = e
-      this.lod = true
-      this.scr_off = true
-      if (e === 0) {
-        // 已完成
-        this.title_suo = ''
-        this.price = 30
-        this.ok = '20'
-      } else if (e === 1) {
-        this.title_suo = '20'
-        this.price = 30
-        this.ok = ''
-      } else {
-        // 失败
-        this.title_suo = '30'
-        this.price = ''
-        this.ok = ''
-      }
-      this.limit = 10
-      this.offset = 0
-      this.getPair()
     }
   },
   computed: {

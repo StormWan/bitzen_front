@@ -82,7 +82,7 @@
       </div>
       <!--说明-->
       <div class="Tips">1.如需帮助请联系 BlockPay 客服，Mixin ID：28749，微信：jc_castle</div>
-      <!--弹出层-->
+      <!--收款码弹出层-->
       <div class="Tip">
         <van-popup v-model="show">
           <div class="Tip_img">
@@ -192,8 +192,8 @@ export default {
         this.off = false
       }
     },
+    // 判断状态码
     status () {
-      // 判断状态码
       if (this.data.status === 0) {
         this.item = true
         this.StartCountDown()
@@ -319,7 +319,7 @@ export default {
         })
         clipboard.on('error', e => {
           // 不支持复制
-          console.log('该浏览器不支持自动复制')
+          Toast('该浏览器不支持自动复制')
           // 释放内存
           clipboard.destroy()
         })
@@ -359,6 +359,7 @@ export default {
         this.item = false
         this.status_t = '已确认转账'
         Toast('确认付款')
+        this.active = 1
       }).catch(() => {
         // on cancel
         Toast('请转账后再试')

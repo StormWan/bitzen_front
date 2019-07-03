@@ -14,10 +14,10 @@
               <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
             </md-detail-item>
             <md-detail-item title="平均成交价">
-              <span v-if="!item.exchangeinstantordermodel.average_price">- -</span><span v-else>{{item.exchangeinstantordermodel.average_price}}</span>{{item.pair.pair}}
+              <span v-if="!item.exchangeinstantordermodel">- -</span><span v-else>{{item.exchangeinstantordermodel.average_price}}</span>{{item.pair.pair}}
             </md-detail-item>
             <md-detail-item title="实际到账">
-              <span v-if="!item.exchangeinstantordermodel.filled">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost))) * 1000000) / 1000000}} </span> {{item.pair.base.symbol}}
+              <span v-if="!item.exchangeinstantordermodel">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost))) * 1000000) / 1000000}} </span> {{item.pair.base.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
               <!--支付状态-->
@@ -62,7 +62,7 @@
               <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
             </md-detail-item>
             <md-detail-item title="平均成交价">
-              <span v-if="!item.exchangeinstantordermodel.average_price">- -</span><span v-else>{{item.exchangeinstantordermodel.average_price}}</span>{{item.pair.pair}}
+              <span v-if="!item.exchangeinstantordermodel">- -</span><span v-else>{{item.exchangeinstantordermodel.average_price}}</span>{{item.pair.pair}}
             </md-detail-item>
             <md-detail-item title="实际到账">
               <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost))) * 100000) / 100000}} </span> {{item.pair.quote.symbol}}
@@ -156,22 +156,32 @@ export default {
       // eslint-disable-next-line camelcase
       let all_price = ''
       // 兑换数量
-      if (this.lists[i].side === 'buy') {
+      if (this.lists[i].side === 'buy' && this.lists[i].exchangeinstantordermodel) {
         // eslint-disable-next-line camelcase
-        filled_cost = Math.round((this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost - (this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost))) * 1000000000) / 1000000000
+        filled_cost = Math.floor((this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost - (this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost))) * 100000000) / 100000000
         // eslint-disable-next-line camelcase
-        all_price = Math.floor(this.lists[i].exchangeinstantordermodel.filled * 1000000000) / 1000000000
-      } else if (this.lists[i].side === 'sell') {
+        all_price = Math.floor(this.lists[i].exchangeinstantordermodel.filled * 100000000) / 100000000
+      } else if (this.lists[i].side === 'sell' && this.lists[i].exchangeinstantordermodel) {
         // eslint-disable-next-line camelcase
-        filled_cost = Math.floor((this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost - (this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost))) * 1000000000) / 1000000000
+        filled_cost = Math.floor((this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost - (this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost))) * 100000000) / 100000000
         // eslint-disable-next-line camelcase
-        all_price = Math.floor(this.lists[i].exchangeinstantordermodel.cost * 1000000000) / 1000000000
+        all_price = Math.floor(this.lists[i].exchangeinstantordermodel.cost * 100000000) / 100000000
+      }
+      let ave = ''
+      let filled = ''
+      let fcost = ''
+      let costt = ''
+      if (this.lists[i].exchangeinstantordermodel) {
+        filled = Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost)) * 100000000) / 100000000
+        ave = this.lists[i].exchangeinstantordermodel.average_price
+        fcost = Math.round(this.lists[i].exchangeinstantordermodel.fee_cost * 100000000) / 100000000
+        costt = Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost)) * 100000000) / 100000000
       }
       // eslint-disable-next-line camelcase
       let obj_data = {
         item: result + this.lists[i].created.substring(11, 13) + this.lists[i].created.substring(14, 16) + this.lists[i].created.substring(17, 19) + this.lists[i].created.substring(20, 26),
         item_pow: this.lists[i].created.substring(0, 10) + ' ' + this.lists[i].created.substring(11, 19),
-        price: this.lists[i].exchangeinstantordermodel.average_price,
+        price: ave,
         side: this.lists[i].side,
         pay_amount: this.lists[i].pay_amount,
         pair: this.lists[i].pair.pair,
@@ -185,11 +195,11 @@ export default {
         exchange_state: this.lists[i].exchange_state,
         transfer_state: this.lists[i].transfer_state,
         // 买入服务费
-        filled: Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost)) * 1000000000) / 1000000000,
+        filled: filled,
         // 手续费
-        fee_cost: Math.round(this.lists[i].exchangeinstantordermodel.fee_cost * 1000000000) / 1000000000,
+        fee_cost: fcost,
         // 卖出服务费
-        cost: Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost)) * 1000000000) / 1000000000
+        cost: costt
       }
       localStorage.setItem('obj_data', JSON.stringify(obj_data))
       this.$router.push({
@@ -202,7 +212,7 @@ export default {
     // 获取数据
     async getPair () {
       this.lod = true
-      const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=${this.limit}&offset=${this.offset}`)
+      const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=10&offset=${this.offset}`)
       if (data) {
         this.bot = '- - - - - - - 到底了 - - - - - - -'
         if (data.code === 200) {
@@ -229,7 +239,7 @@ export default {
     },
     // 数据追加
     async meet () {
-      const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=${this.limit}&offset=${this.offset}`)
+      const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=10&offset=${this.offset}`)
       if (data) {
         this.bot = '- - - - - - - 到底了 - - - - - - -'
         if (data.code === 200) {
