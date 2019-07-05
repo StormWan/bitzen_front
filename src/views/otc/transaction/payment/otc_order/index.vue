@@ -146,10 +146,13 @@ export default {
       active: 0,
       status_t: '待转账',
       status_c: '等待承兑商释放USDT',
-      status_b: '完成'
+      status_b: '完成',
+      // 数据状态
+      data_item: true
     }
   },
   methods: {
+    // 数据获取
     async api () {
       const { data } = await this.$api.otc.orders_get(this.$route.params.id)
       this.data = data.data
@@ -167,7 +170,9 @@ export default {
       this.mode[1].price = data.data.currency_amount
       // 姓名
       this.mode[2].price = data.data.merchant.alipay_name
+      // 时间控制
       await this.Setitem()
+      // 订单完成状态
       this.status()
       // 付款方式图片显示说明
       let mode = this.mode[0]
@@ -207,6 +212,8 @@ export default {
         this.status_t = '已确认转账'
         this.status_c = '承兑商已经释放USDT'
         this.active = 2
+        // 订单成功取消计时器
+        this.data_item = false
       } else if (this.data.status === 11) {
         this.limittime = 0
         this.active = 1
@@ -368,6 +375,13 @@ export default {
   },
   async mounted () {
     this.api()
+    let set = setInterval(() => {
+      if (this.data_item) {
+        this.api()
+      } else {
+        clearInterval(set)
+      }
+    }, 3000)
   },
   components: {
     [NavBar.name]: NavBar,
@@ -382,6 +396,8 @@ export default {
     this.$router.push({
       path: '/lend'
     })
+    // 订单完成取消计时器
+    this.data_item = false
   }
 }
 </script>

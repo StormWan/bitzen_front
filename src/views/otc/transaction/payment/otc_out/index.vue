@@ -194,18 +194,21 @@ export default {
       active: 0,
       status_t: '待转账',
       status_c: '已托管,等待承兑商转账',
-      status_b: '完成'
+      status_b: '完成',
+      data_item: true
     }
   },
   methods: {
     async api () {
       const { data } = await this.$api.otc.orders_get(this.$route.params.id)
       this.data = data.data
+      console.log(this.data)
       this.style()
       // 付款方式logo图片
       this.logo_img()
       // 时间控制
       this.Setitem()
+      // 订单完成状态
       this.status()
     },
     // 开始渲染数据
@@ -245,6 +248,8 @@ export default {
         this.status_t = '已确认转账'
         this.status_c = '承兑商确认转账'
         this.but_success = false
+        // 订单完成停止计时器
+        this.data_item = false
       } else if (this.data.status === 21) {
         this.limittime = 0
         this.active = 1
@@ -369,7 +374,7 @@ export default {
         this.timeDown()
       }, 100)
     },
-    // 分钟
+    // 倒计分钟
     async timeDown () {
       const endTime = new Date(this.settime)
       const nowTime = new Date()
@@ -387,7 +392,7 @@ export default {
       }
       this.keepTime = `${h}:${m}:${s}`
     },
-    // 秒钟
+    // 倒计秒钟
     formate (time) {
       if (time >= 10) {
         return time
@@ -502,10 +507,19 @@ export default {
       this.triangle_active = false
     }
   },
-  async mounted () {
-    await this.api()
+  mounted () {
+    this.api()
+    let set = setInterval(() => {
+      if (this.data_item) {
+        this.api()
+      } else {
+        clearInterval(set)
+      }
+    }, 3000)
   },
   destroyed () {
+    // 离开页面删除计时器
+    this.data_item = false
     this.$router.push({
       path: '/lend'
     })

@@ -4,7 +4,7 @@
         <div v-for="(item,index) in title" :key="index" @click="title_data(index)" :class="{active: index === act_index}">{{item.title}}</div>
       </div>
       <div class="BG" v-for="(item,index) in lists" :key="index">
-        <!--订单详情-->
+        <!--买入订单详情-->
         <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'buy'">
           <md-bill
             :title="item.pair.pair + ' 买入'"
@@ -14,7 +14,7 @@
               <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
             </md-detail-item>
             <md-detail-item title="平均成交价">
-              <span v-if="!item.exchangeinstantordermodel">- -</span><span v-else>{{item.exchangeinstantordermodel.average_price}}</span>{{item.pair.pair}}
+              <span v-if="!item.exchangeinstantordermodel">- -</span><span v-else>{{Math.floor(item.exchangeinstantordermodel.average_price * 1000000) / 1000000}}</span>{{item.pair.pair}}
             </md-detail-item>
             <md-detail-item title="实际到账">
               <span v-if="!item.exchangeinstantordermodel">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost))) * 1000000) / 1000000}} </span> {{item.pair.base.symbol}}
@@ -39,7 +39,9 @@
                   <span v-else>
                     <van-icon class="icon" name="close"></van-icon>
                   </span>
-                  <span v-if="item.state && item.state === 'paid' && item.exchange_state !== 'closed'">已支付</span>
+                  <span v-if="item.state && item.state === 'paid' && !item.exchange_state">已支付</span>
+                  <span v-else-if="item.exchange_state && item.exchange_state === 'pending' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">未挂单</span>
+                  <span v-else-if="item.exchange_state && item.exchange_state === 'open' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">已持单</span>
                   <span v-else-if="item.exchange_state && item.exchange_state === 'closed' && item.transfer_state !== 'completed' && item.transfer_state !== 'fail'">兑换完毕</span>
                   <span v-else-if="item.transfer_state && item.transfer_state === 'completed'">已完成</span>
                   <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">挂单失败</span>
@@ -52,7 +54,7 @@
             </div>
           </md-bill>
         </div>
-        <!--订单详情-->
+        <!--卖出订单详情-->
         <div class="md-example-child md-example-child-bill-1" v-if="item.side === 'sell'">
           <md-bill
             :title="item.pair.pair + ' 卖出'"
@@ -62,10 +64,10 @@
               <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
             </md-detail-item>
             <md-detail-item title="平均成交价">
-              <span v-if="!item.exchangeinstantordermodel">- -</span><span v-else>{{item.exchangeinstantordermodel.average_price}}</span>{{item.pair.pair}}
+              <span v-if="!item.exchangeinstantordermodel">- -</span><span v-else>{{Math.floor(item.exchangeinstantordermodel.average_price * 10000) / 10000}}</span>{{item.pair.pair}}
             </md-detail-item>
             <md-detail-item title="实际到账">
-              <span v-if="!item.exchangeinstantordermodel.cost">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost))) * 100000) / 100000}} </span> {{item.pair.quote.symbol}}
+              <span v-if="!item.exchangeinstantordermodel">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.cost - item.exchangeinstantordermodel.fee_cost))) * 100000) / 100000}} </span> {{item.pair.quote.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
               <!--支付状态-->
@@ -101,6 +103,7 @@
           </md-bill>
         </div>
       </div>
+      <!--加载数据loading图-->
       <div class="load" v-if="lod"><van-loading type="spinner" /></div>
       <div class="bottom" v-else>{{bot}}</div>
     </div>
@@ -134,78 +137,23 @@ export default {
       state: '=paid',
       transfer_state: '!==completed',
       scr_off: true,
+      // 加载数据loading图
       bot: '',
       lod: true,
       set_off: true
     }
   },
   methods: {
-    // 传输
+    // 点击详情按钮跳转链接
     item_pass: function (i) {
-      // 纯时间
-      let date = new Date(this.lists[i].created)
-      let result, year, month, day
-      year = date.getYear() + 1900
-      month = date.getMonth() + 1
-      day = date.getDate()
-      result = year.toString() + (month > 9 ? month : '0' + month) + (day > 9 ? day : '0' + day)
-      // 成交金额
-      // eslint-disable-next-line camelcase
-      let filled_cost = ''
-      // 成交总金额
-      // eslint-disable-next-line camelcase
-      let all_price = ''
-      // 兑换数量
-      if (this.lists[i].side === 'buy' && this.lists[i].exchangeinstantordermodel) {
-        // eslint-disable-next-line camelcase
-        filled_cost = Math.floor((this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost - (this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost))) * 100000000) / 100000000
-        // eslint-disable-next-line camelcase
-        all_price = Math.floor(this.lists[i].exchangeinstantordermodel.filled * 100000000) / 100000000
-      } else if (this.lists[i].side === 'sell' && this.lists[i].exchangeinstantordermodel) {
-        // eslint-disable-next-line camelcase
-        filled_cost = Math.floor((this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost - (this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost))) * 100000000) / 100000000
-        // eslint-disable-next-line camelcase
-        all_price = Math.floor(this.lists[i].exchangeinstantordermodel.cost * 100000000) / 100000000
-      }
-      let ave = ''
-      let filled = ''
-      let fcost = ''
-      let costt = ''
-      if (this.lists[i].exchangeinstantordermodel) {
-        filled = Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.filled - this.lists[i].exchangeinstantordermodel.fee_cost)) * 100000000) / 100000000
-        ave = this.lists[i].exchangeinstantordermodel.average_price
-        fcost = Math.round(this.lists[i].exchangeinstantordermodel.fee_cost * 100000000) / 100000000
-        costt = Math.floor((this.lists[i].pair.fee * (this.lists[i].exchangeinstantordermodel.cost - this.lists[i].exchangeinstantordermodel.fee_cost)) * 100000000) / 100000000
-      }
-      // eslint-disable-next-line camelcase
-      let obj_data = {
-        item: result + this.lists[i].created.substring(11, 13) + this.lists[i].created.substring(14, 16) + this.lists[i].created.substring(17, 19) + this.lists[i].created.substring(20, 26),
-        item_pow: this.lists[i].created.substring(0, 10) + ' ' + this.lists[i].created.substring(11, 19),
-        price: ave,
-        side: this.lists[i].side,
-        pay_amount: this.lists[i].pay_amount,
-        pair: this.lists[i].pair.pair,
-        symbol_buy: this.lists[i].pair.base.symbol,
-        symbol_sell: this.lists[i].pair.quote.symbol,
-        // 总共成交金额
-        all_price: all_price,
-        // 成交获得
-        pair_price: filled_cost,
-        state: this.lists[i].state,
-        exchange_state: this.lists[i].exchange_state,
-        transfer_state: this.lists[i].transfer_state,
-        // 买入服务费
-        filled: filled,
-        // 手续费
-        fee_cost: fcost,
-        // 卖出服务费
-        cost: costt
-      }
-      localStorage.setItem('obj_data', JSON.stringify(obj_data))
       this.$router.push({
-        path: '/details'
+        name: 'details',
+        params: {
+          id: this.lists[i].id
+        }
       })
     },
+    // 点击返回上一页
     onClickLeft () {
       this.$router.go(-1)
     },
@@ -226,7 +174,7 @@ export default {
         Toast('网络链接失败')
       }
     },
-    // 数据相同
+    // 如果追加数据长度不到10条，停止请求
     me_ge () {
       if (this.limit > this.order.length) {
         this.scr_off = false
@@ -237,7 +185,7 @@ export default {
         this.lod = false
       }
     },
-    // 数据追加
+    // 滚轮到底触发数据(获取)追加
     async meet () {
       const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=10&offset=${this.offset}`)
       if (data) {
@@ -255,6 +203,7 @@ export default {
         Toast('网络链接失败')
       }
     },
+    // 导航栏状态筛选
     title_data (e) {
       this.act_index = e
       if (e === 0) {
@@ -280,6 +229,7 @@ export default {
         this.getPair()
       }
     },
+    // 滚轮事件监听
     handleScroll () {
       let scrollTop = document.documentElement.scrollTop || document.body.scrollTop
       let windowHeight = document.documentElement.clientHeight || document.body.clientHeight
@@ -294,6 +244,7 @@ export default {
     }
   },
   computed: {
+    // 获取数据(渲染)页面
     lists: function () {
       let that = this
       let arrByZM = []
@@ -317,6 +268,7 @@ export default {
   },
   mounted () {
     this.getPair()
+    // 滚轮事件监听
     window.addEventListener('scroll', this.handleScroll, true)
   }
 }

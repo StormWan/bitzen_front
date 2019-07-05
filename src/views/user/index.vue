@@ -10,7 +10,7 @@
     <div class="information">
       <!--用户信息-->
       <div class="img">
-        <img v-if="Sing" src="../../assets/cat_top.jpg">
+        <img v-if="Sing" :src="img">
         <img v-else :src="user_img">
         </div>
         <div>
@@ -90,12 +90,13 @@ export default {
     return {
       open: true,
       Sing: true,
-      user_img: '/img/cat.de5d7e86.jpg',
+      user_img: require('../../assets/cat.jpg'),
       money: 0,
       user_name: '',
       user_ID: '',
       Exse_none: false,
-      login: ''
+      login: '',
+      img: require('../../assets/cat_top.jpg')
     }
   },
   async mounted () {

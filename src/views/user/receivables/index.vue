@@ -204,6 +204,18 @@ export default {
     if (this.data.wechat_account) {
       this.user_acc = this.data.wechat_account
     }
+    if (sessionStorage.getItem('state')) {
+      if (sessionStorage.getItem('state') === '0') {
+        this.index = 2
+        this.act_index = 2
+      } else if (sessionStorage.getItem('state') === '1') {
+        this.index = 0
+        this.act_index = 0
+      } else {
+        this.index = 1
+        this.act_index = 1
+      }
+    }
   },
   components: {
     [NavBar.name]: NavBar,

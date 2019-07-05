@@ -151,7 +151,7 @@ export default {
     }
   },
   methods: {
-    // 传输
+    // 点击详情按钮跳转
     item_pass (i) {
       this.off = false
       if (this.lists[i].side === 'buy') {
@@ -172,11 +172,13 @@ export default {
         Toast('数据不存在')
       }
     },
+    // 点击返回上一页
     Arrow () {
       this.$router.push({
         path: '/user'
       })
     },
+    // 点击导航栏(状态)筛选
     title_data (e) {
       this.act_index = e
       this.lod = true
@@ -216,7 +218,7 @@ export default {
         Toast('获取数据失败，请刷新页面')
       }
     },
-    // 获取取消的数据
+    // 获取取消状态的数据
     async getPair_remove () {
       const { data } = await this.$api.otc.orders_lis(`?status=${this.status}&limit=10&offset=${this.offset}`)
       this.lod = false
@@ -228,7 +230,7 @@ export default {
         Toast('获取数据失败，请刷新页面')
       }
     },
-    // 懒加载
+    // 滚轮事件
     handleScroll () {
       let scrollTop = document.documentElement.scrollTop || document.body.scrollTop
       let windowHeight = document.documentElement.clientHeight || document.body.clientHeight
@@ -241,7 +243,7 @@ export default {
         this.meet()
       }
     },
-    // 数据追加
+    // 滚轮到底部触发数据追加获取
     async meet () {
       this.scr_off = false
       if (this.act_index === 0) {
@@ -280,7 +282,7 @@ export default {
         }
       }
     },
-    // 数据相同
+    // 滚轮到底触发数据获取
     me_ge () {
       if (this.limit > this.order.length) {
         this.scr_off = false
@@ -291,7 +293,7 @@ export default {
         this.lod = false
       }
     },
-    // 时间倒计时
+    // 下单时间倒计时(超过15分钟自动取消订单)
     async Setitem () {
       this.order.forEach((i) => {
         // 下单时间
@@ -323,6 +325,7 @@ export default {
         let itemSet_month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
         // eslint-disable-next-line camelcase
         let itemSet = date.getFullYear() + '' + itemSet_month + itemSet_date + itemSet_hours + itemSet_minutes
+        // 监听事件否过了下单期
         if ((itemSet - set) <= 3) {
         } else {
           this.$api.otc.orders_patch(i.id, { op_type: 'user_cancel_order' })
@@ -331,6 +334,7 @@ export default {
     }
   },
   computed: {
+    // 获取到的数据在这里渲染到页面
     lists: function () {
       let that = this
       let arrByZM = []
@@ -355,6 +359,7 @@ export default {
   },
   async mounted () {
     await this.getPair()
+    // 监听滚轮
     window.addEventListener('scroll', this.handleScroll, true)
   }
 }

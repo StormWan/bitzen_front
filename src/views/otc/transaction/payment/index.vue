@@ -25,7 +25,7 @@
             <span class="WeChat" v-if="index === 1">需 0.1 元转账手续费</span>
           </div>
           <!--付款说明-->
-          <div class="explain" v-if="index === 0 && on_hook !== 0">需实名验证</div>
+          <div class="explain" v-if="index === 0 && on_hook !== 0">需要实名验证</div>
           <div class="hook" v-if="index === on_hook">
             <van-icon name="success" />
           </div>
@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { NavBar, Icon, Dialog } from 'vant'
+import { NavBar, Icon, Dialog, Toast } from 'vant'
 export default {
   data () {
     return {
@@ -70,27 +70,35 @@ export default {
       this.$router.go(-1)
     },
     // 选择收款去向
-    mode_click (i) {
+    async mode_click (i) {
       this.index = i
       if (i !== 0) {
         this.on_hook = i
         this.but = true
       } else {
-        Dialog.confirm({
-          title: '提示',
-          message: '实名认证'
-        }).then(() => {
-          // on confirm
-          console.log('确定')
-          this.$router.push({
-            path: '/real_name'
-          })
-          this.but = true
-          // this.on_hook = i
-        }).catch(() => {
-          // on cancel
-          console.log('取消')
-        })
+        const { data } = await this.$api.kyc.kyc_get()
+        if (data.code === 200) {
+          if (data.data.verified_state !== 1) {
+            // 要实名认证
+            Dialog.confirm({
+              title: '提示',
+              message: '去实名认证'
+            }).then(() => {
+              // on confirm
+              console.log('确定')
+              this.$router.push({
+                path: '/real_name'
+              })
+              this.but = true
+              // this.on_hook = i
+            }).catch(() => {
+              // on cancel
+              console.log('取消')
+            })
+          }
+        } else {
+          Toast('发生错误啦，请稍后重试')
+        }
       }
     },
     // 点击提交按钮
@@ -138,6 +146,8 @@ export default {
               this.$router.push({
                 path: '/receivables'
               })
+              console.log(this.index)
+              sessionStorage.setItem('state', this.index)
             }
           } else if (this.index === 1) {
             // 微信收款时做的事情
@@ -153,6 +163,8 @@ export default {
               this.$router.push({
                 path: '/receivables'
               })
+              console.log(this.index)
+              sessionStorage.setItem('state', this.index)
             }
           } else {
             // 支付宝收款做的事情
@@ -168,6 +180,8 @@ export default {
               this.$router.push({
                 path: '/receivables'
               })
+              console.log(this.index)
+              sessionStorage.setItem('state', this.index)
             }
           }
         }

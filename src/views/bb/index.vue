@@ -43,6 +43,7 @@
 <script>
 import { mapMutations } from 'vuex'
 import { Tab, Tabs, Toast } from 'vant'
+import tabbar from '../../store/modules/tabbar'
 
 export default {
   data () {
@@ -76,13 +77,14 @@ export default {
     }
   },
   async mounted () {
+    // tabbar导航位置
     this.setActiveTab(3)
   },
   methods: {
     ...mapMutations({
       setActiveTab: 'tabbar/setActiveTab'
     }),
-    // 过滤选择引擎
+    // 交易所导航栏名称筛选
     title_click (index, title) {
       this.active = index
       this.arr = []
@@ -96,6 +98,7 @@ export default {
         }
       }
     },
+    // 获取数据
     async getPairs () {
       const { data } = await this.$api.bb.pairList()
       if (data.code === 200) {
@@ -166,6 +169,7 @@ export default {
       }
       /*数据*/
       .list{
+        margin-bottom: 50px;
         /*标题*/
         .title{
           width: 90%;

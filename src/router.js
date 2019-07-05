@@ -312,7 +312,7 @@ const router = new Router({
     },
     // bb详情
     {
-      path: '/details',
+      path: '/details/:id',
       name: 'details',
       component: () => import('./views/user/bb_order/details/index.vue'),
       meta: {
