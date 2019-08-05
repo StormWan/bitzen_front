@@ -160,7 +160,8 @@ export default {
     // 获取数据
     async getPair () {
       this.lod = true
-      const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=10&offset=${this.offset}`)
+      // const params = { 'state': this.state, 'transfer_state': this.transfer_state, 'limit': 10, 'offset': this.offset }
+      const { data } = await this.$api.bb.orders()
       if (data) {
         this.bot = '- - - - - - - 到底了 - - - - - - -'
         if (data.code === 200) {
@@ -187,7 +188,7 @@ export default {
     },
     // 滚轮到底触发数据(获取)追加
     async meet () {
-      const { data } = await this.$api.bb.orders(`?state${this.state}&transfer_state${this.transfer_state}&limit=10&offset=${this.offset}`)
+      const { data } = await this.$api.bb.orders()
       if (data) {
         this.bot = '- - - - - - - 到底了 - - - - - - -'
         if (data.code === 200) {

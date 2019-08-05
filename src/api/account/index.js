@@ -4,7 +4,7 @@ import qs from 'qs' // 根据需求是否导入qs模块
 
 const account = {
   /*
-  * @param {Object} params - {code, token}
+  * @param {Object} params - {code}
   * **/
   oauth (params) {
     return axios.post(`${base.base_api}/account/oauth/`, qs.stringify(params))

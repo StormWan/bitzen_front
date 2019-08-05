@@ -48,7 +48,7 @@
         <van-cell title="实名验证" icon="user-circle-o" is-link />
       </router-link>
       <!--收款方式-->
-      <router-link to="/receivables">
+      <router-link to="/payment-method">
         <van-cell title="收款方式" icon="peer-pay" is-link />
       </router-link>
       <!--账号关联-->
@@ -73,8 +73,8 @@
     <!--退出-->
     <div class="Effect" v-if="Exse_none">
       <!--退出-->
-      <a @click="Exse">
-        <van-cell title="退出" icon="share" is-link />
+      <a @click="logout">
+        <van-cell title="退出登陆" icon="share" is-link />
       </a>
     </div>
     <div class="hei"></div>
@@ -112,7 +112,7 @@ export default {
       setActiveTab: 'tabbar/setActiveTab'
     }),
     // 退出
-    Exse () {
+    logout () {
       Dialog.confirm({
         title: '退出',
         message: '是否退出登录'

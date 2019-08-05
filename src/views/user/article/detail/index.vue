@@ -15,7 +15,7 @@
 <script>
 import { NavBar, Toast } from 'vant'
 export default {
-  name: 'about-detail',
+  name: 'article-detail',
   components: {
     [NavBar.name]: NavBar
   },

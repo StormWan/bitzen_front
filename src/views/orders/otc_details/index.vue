@@ -208,7 +208,7 @@ export default {
     },
     // 获取数据
     async getPair () {
-      const { data } = await this.$api.otc.orders_lis(`?limit=10&offset=${this.offset}`)
+      const { data } = await this.$api.otc.orderList(`?limit=10&offset=${this.offset}`)
       this.lod = false
       this.bot = '- - - - - - - 到底了 - - - - - - -'
       if (data.code === 200) {
@@ -220,7 +220,7 @@ export default {
     },
     // 获取取消状态的数据
     async getPair_remove () {
-      const { data } = await this.$api.otc.orders_lis(`?status=${this.status}&limit=10&offset=${this.offset}`)
+      const { data } = await this.$api.otc.orderList(`?status=${this.status}&limit=10&offset=${this.offset}`)
       this.lod = false
       this.bot = '- - - - - - - 到底了 - - - - - - -'
       if (data.code === 200) {
@@ -247,7 +247,7 @@ export default {
     async meet () {
       this.scr_off = false
       if (this.act_index === 0) {
-        const { data } = await this.$api.otc.orders_lis(`?limit=10&offset=${this.offset}`)
+        const { data } = await this.$api.otc.orderList(`?limit=10&offset=${this.offset}`)
         if (data) {
           this.bot = '- - - - - - - 到底了 - - - - - - -'
           if (data.code === 200) {
@@ -264,7 +264,7 @@ export default {
           Toast('网络链接失败')
         }
       } else {
-        const { data } = await this.$api.otc.orders_lis(`?status=${this.status}&limit=10&offset=${this.offset}`)
+        const { data } = await this.$api.otc.orderList(`?status=${this.status}&limit=10&offset=${this.offset}`)
         if (data) {
           this.bot = '- - - - - - - 到底了 - - - - - - -'
           if (data.code === 200) {
@@ -328,7 +328,7 @@ export default {
         // 监听事件否过了下单期
         if ((itemSet - set) <= 3) {
         } else {
-          this.$api.otc.orders_patch(i.id, { op_type: 'user_cancel_order' })
+          this.$api.otc.orderUpdate(i.id, { op_type: 'user_cancel_order' })
         }
       })
     }

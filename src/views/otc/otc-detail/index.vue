@@ -17,8 +17,8 @@
             </div>
             <!--买入计算-->
             <div class="Calculation">
-              <div>至少支付 ￥<span class="red">{{Math.round((buy_price * Receive.buy_min) * 100) / 100}}</span>,购买<span class="red">{{Math.round(Receive.buy_min * 100) / 100}}</span><span>{{symbol_name}}</span></div>
-              <div>至支多付 ￥<span class="red">{{Math.round((buy_price * Receive.buy_max) * 100) / 100}}</span>,购买 <span class="red">{{Math.round(Receive.buy_max * 100) / 100}}</span> 个 <span>{{symbol_name}}</span></div>
+              <div>至少支付 ￥<span class="red">{{Math.round((buy_price * otcPair.buy_min) * 100) / 100}}</span>,购买<span class="red">{{Math.round(otcPair.buy_min * 100) / 100}}</span><span>{{symbol_name}}</span></div>
+              <div>至支多付 ￥<span class="red">{{Math.round((buy_price * otcPair.buy_max) * 100) / 100}}</span>,购买 <span class="red">{{Math.round(otcPair.buy_max * 100) / 100}}</span> 个 <span>{{symbol_name}}</span></div>
             </div>
             <!--金额计算-->
             <div class="md-example-child md-example-child-input-item-1">
@@ -50,7 +50,7 @@
                 ></md-input-item>
               </md-field>
               <!--下单提示说明-->
-              <div class="ts_text" v-if="Receive.pair">到账<span>{{symbol_name}}</span>数量以<span>实际交割价</span>为准</div>
+              <div class="ts_text" v-if="otcPair.pair">到账<span>{{symbol_name}}</span>数量以<span>实际交割价</span>为准</div>
             </div>
           </div>
         </van-tab>
@@ -66,8 +66,8 @@
             </div>
             <!--买入计算-->
             <div class="Calculation">
-              <div>最小出售 ￥ <span class="red">{{Math.round(Receive.sell_min * 100) / 100}}</span> 个 <span>{{symbol_name}}</span>,约到账￥<span class="red">{{Math.round((sell_price * Receive.sell_min) * 100) / 100}}</span></div>
-              <div>最大出售 ￥ <span class="red">{{Math.round(Receive.sell_max * 100) / 100}}</span> 个 <span>{{symbol_name}}</span>,约到账 <span class="red">{{Math.round((sell_price * Receive.sell_max) * 100) / 100}}</span></div>
+              <div>最小出售 ￥ <span class="red">{{Math.round(otcPair.sell_min * 100) / 100}}</span> 个 <span>{{symbol_name}}</span>,约到账￥<span class="red">{{Math.round((sell_price * otcPair.sell_min) * 100) / 100}}</span></div>
+              <div>最大出售 ￥ <span class="red">{{Math.round(otcPair.sell_max * 100) / 100}}</span> 个 <span>{{symbol_name}}</span>,约到账 <span class="red">{{Math.round((sell_price * otcPair.sell_max) * 100) / 100}}</span></div>
             </div>
             <!--金额计算-->
             <div class="md-example-child md-example-child-input-item-1">
@@ -132,7 +132,7 @@ export default {
   data () {
     return {
       // 接收数据
-      Receive: [],
+      otcPair: [],
       active_index: 0,
       inp_CNY: '',
       inp_market: '',
@@ -159,21 +159,21 @@ export default {
       if (data.code !== 200) {
         Toast('服务器异常,请稍后再试')
       } else {
-        this.Receive = data.data
-        this.title_img = this.Receive.asset.icon_url
-        this.symbol_name = this.Receive.asset.symbol
+        this.otcPair = data.data
+        this.title_img = this.otcPair.asset.icon_url
+        this.symbol_name = this.otcPair.asset.symbol
         // 标题判断是否相同
-        if (this.Receive.asset.name === this.Receive.asset.symbol) {
-          this.title = this.Receive.asset.symbol
+        if (this.otcPair.asset.name === this.otcPair.asset.symbol) {
+          this.title = this.otcPair.asset.symbol
         } else {
-          this.title = this.Receive.asset.name + ' ' + '(' + this.Receive.asset.symbol + ')'
+          this.title = this.otcPair.asset.name + ' ' + '(' + this.otcPair.asset.symbol + ')'
         }
-        if (!this.Receive.pair) {
-          this.buy_price = this.Receive.setting.usdt_buy_price
-          this.sell_price = this.Receive.setting.usdt_sell_price
+        if (!this.otcPair.pair) {
+          this.buy_price = this.otcPair.setting.usdt_buy_price
+          this.sell_price = this.otcPair.setting.usdt_sell_price
         } else {
-          this.buy_price = (this.Receive.pair.bestorderbookmodel.best_buy_price * this.Receive.setting.usdt_buy_price).toFixed(2)
-          this.sell_price = (this.Receive.pair.bestorderbookmodel.best_sell_price * this.Receive.setting.usdt_sell_price).toFixed(2)
+          this.buy_price = (this.otcPair.pair.bestorderbookmodel.best_buy_price * this.otcPair.setting.usdt_buy_price).toFixed(2)
+          this.sell_price = (this.otcPair.pair.bestorderbookmodel.best_sell_price * this.otcPair.setting.usdt_sell_price).toFixed(2)
           this.buy_money()
         }
         // 买入
@@ -212,7 +212,7 @@ export default {
           // eslint-disable-next-line camelcase
           inp_data = this.inp_market
         }
-        if (this.Receive.pair) {
+        if (this.otcPair.pair) {
           price = this.buy_Price
         } else {
           if (this.active_index === 0) {
@@ -222,7 +222,7 @@ export default {
           }
         }
         let order = {
-          otc_pair: this.Receive.id,
+          otc_pair: this.otcPair.id,
           side: side,
           amount: inp_data,
           price: price
@@ -243,14 +243,14 @@ export default {
       document.documentElement.scrollTop = 170
     },
     buy_money () {
-      if (this.Receive.pair) {
+      if (this.otcPair.pair) {
         // 判断买入卖出
         if (this.active_index === 0) {
           // 计算金额
-          this.buy_Price = (this.Receive.pair.bestorderbookmodel.best_buy_price * this.Receive.setting.usdt_buy_price).toFixed(2)
+          this.buy_Price = (this.otcPair.pair.bestorderbookmodel.best_buy_price * this.otcPair.setting.usdt_buy_price).toFixed(2)
         } else {
           // 计算金额
-          this.buy_Price = (this.Receive.pair.bestorderbookmodel.best_sell_price * this.Receive.setting.usdt_sell_price).toFixed(2)
+          this.buy_Price = (this.otcPair.pair.bestorderbookmodel.best_sell_price * this.otcPair.setting.usdt_sell_price).toFixed(2)
         }
       }
     }
@@ -264,14 +264,14 @@ export default {
       if (that.buyData) {
         if (that.inp_CNY) {
           // 判断是否USDA
-          if (this.Receive.pair) {
+          if (this.otcPair.pair) {
             if (that.inp_CNY.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.inp_CNY.length) {
               that.input_mon_size = this.inp_CNY.length
             } else {
               that.input_mon_size = 9
             }
             that.inp_market = (e.inp_CNY / that.buy_Price).toFixed(4)
-            if (that.inp_market >= (Math.round(that.Receive.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.buy_max * 100) / 100)) {
+            if (that.inp_market >= (Math.round(that.otcPair.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.buy_max * 100) / 100)) {
               that.Place_active = true
               that.beyond = false
             } else {
@@ -282,8 +282,8 @@ export default {
           } else {
             // USDA
             if (that.active_index === 0) {
-              that.inp_market = (e.inp_CNY / this.Receive.setting.usdt_buy_price).toFixed(4)
-              if (that.inp_market >= (Math.round(that.Receive.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.buy_max * 100) / 100)) {
+              that.inp_market = (e.inp_CNY / this.otcPair.setting.usdt_buy_price).toFixed(4)
+              if (that.inp_market >= (Math.round(that.otcPair.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.buy_max * 100) / 100)) {
                 that.Place_active = true
                 that.beyond = false
               } else {
@@ -291,8 +291,8 @@ export default {
                 that.beyond = true
               }
             } else {
-              that.inp_market = (e.inp_CNY / this.Receive.setting.usdt_sell_price).toFixed(4)
-              if (that.inp_market >= (Math.round(that.Receive.sell_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.sell_max * 100) / 100)) {
+              that.inp_market = (e.inp_CNY / this.otcPair.setting.usdt_sell_price).toFixed(4)
+              if (that.inp_market >= (Math.round(that.otcPair.sell_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.sell_max * 100) / 100)) {
                 that.Place_active = true
               } else {
                 that.Place_active = false
@@ -313,14 +313,14 @@ export default {
       if (!that.buyData) {
         if (that.inp_market) {
           // 判断是否USDT
-          if (this.Receive.pair) {
+          if (this.otcPair.pair) {
             if (e.inp_market.match(/^\d*(\.?\d{0,3})/g)[0].length + 1 === this.inp_market.length) {
               e.input_res_size = this.inp_market.length
             } else {
               e.input_res_size = 9
             }
             that.inp_CNY = (that.buy_Price * e.inp_market).toFixed(2)
-            if (that.inp_market >= (Math.round(that.Receive.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.buy_max * 100) / 100)) {
+            if (that.inp_market >= (Math.round(that.otcPair.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.buy_max * 100) / 100)) {
               that.Place_active = true
               that.beyond = false
             } else {
@@ -331,8 +331,8 @@ export default {
           } else {
             // USDT
             if (that.active_index === 0) {
-              that.inp_CNY = (e.inp_market * that.Receive.setting.usdt_buy_price).toFixed(2)
-              if (that.inp_market >= (Math.round(that.Receive.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.buy_max * 100) / 100)) {
+              that.inp_CNY = (e.inp_market * that.otcPair.setting.usdt_buy_price).toFixed(2)
+              if (that.inp_market >= (Math.round(that.otcPair.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.buy_max * 100) / 100)) {
                 that.Place_active = true
                 that.beyond = false
               } else {
@@ -340,8 +340,8 @@ export default {
                 that.beyond = true
               }
             } else {
-              that.inp_CNY = (e.inp_market * that.Receive.setting.usdt_sell_price).toFixed(2)
-              if (that.inp_market >= (Math.round(that.Receive.sell_min * 100) / 100) && that.inp_market <= (Math.round(that.Receive.sell_max * 100) / 100)) {
+              that.inp_CNY = (e.inp_market * that.otcPair.setting.usdt_sell_price).toFixed(2)
+              if (that.inp_market >= (Math.round(that.otcPair.sell_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.sell_max * 100) / 100)) {
                 that.Place_active = true
                 that.beyond = false
               } else {

@@ -118,9 +118,22 @@
 </template>
 
 <script>
-import { Icon, Popup, NavBar, Collapse, CollapseItem, Field, Button, Uploader, Toast } from 'vant'
+import { Icon, Popup, NavBar, Collapse, CollapseItem, Field, Button, Uploader, Toast, CellGroup, Cell } from 'vant'
 import Clipboard from 'clipboard'
 export default {
+  components: {
+    [Icon.name]: Icon,
+    [Popup.name]: Popup,
+    [NavBar.name]: NavBar,
+    [Collapse.name]: Collapse,
+    [CollapseItem.name]: CollapseItem,
+    [Field.name]: Field,
+    [Button.name]: Button,
+    [Uploader.name]: Uploader,
+    [Toast.name]: Toast,
+    [CellGroup.name]: CellGroup,
+    [Cell.name]: Cell
+  },
   data () {
     return {
       show: false,
@@ -333,17 +346,6 @@ export default {
     } else {
       Toast('发生错误啦，请稍后重试')
     }
-  },
-  components: {
-    [Icon.name]: Icon,
-    [Popup.name]: Popup,
-    [NavBar.name]: NavBar,
-    [Collapse.name]: Collapse,
-    [CollapseItem.name]: CollapseItem,
-    [Field.name]: Field,
-    [Button.name]: Button,
-    [Uploader.name]: Uploader,
-    [Toast.name]: Toast
   }
 }
 </script>

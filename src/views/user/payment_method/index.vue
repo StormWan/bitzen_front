@@ -154,10 +154,10 @@ export default {
             Toast('信息不完整')
           } else {
             if (this.index === 0) {
-              await this.$api.otc.payment_patch({ wechat_name: this.user_name, wechat_account: this.user_acc })
+              await this.$api.otc.paymentUpdate({ wechat_name: this.user_name, wechat_account: this.user_acc })
               Toast('添加成功')
             } else {
-              await this.$api.otc.payment_patch({ alipay_name: this.user_name, alipay_account: this.user_acc })
+              await this.$api.otc.paymentUpdate({ alipay_name: this.user_name, alipay_account: this.user_acc })
               Toast('添加成功')
             }
           }
@@ -165,11 +165,11 @@ export default {
           if (!this.user_acc || !this.user_name || !this.user_bankname) {
             Toast('信息不完整')
           } else {
-            await this.$api.otc.payment_patch({ bank_account_name: this.user_name, bank_account_number: this.user_acc, bank_branch_name: this.user_bankname, bank_name: this.user_bacname })
+            await this.$api.otc.paymentUpdate({ bank_account_name: this.user_name, bank_account_number: this.user_acc, bank_branch_name: this.user_bankname, bank_name: this.user_bacname })
             Toast('添加成功')
           }
         }
-        const { data } = await this.$api.otc.payment_patch()
+        const { data } = await this.$api.otc.paymentUpdate()
         this.data = data.data
         this.user()
       }
@@ -192,7 +192,7 @@ export default {
     }
   },
   async activated () {
-    const { data } = await this.$api.otc.payment_patch()
+    const { data } = await this.$api.otc.paymentUpdate()
     if (data.code === 200) {
       this.data = data.data
     }

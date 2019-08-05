@@ -1,7 +1,7 @@
 <template>
     <div class="Coin">
       <div class="tab">
-        <van-tabs class="order-tabs" v-model="active" sticky @click="title_click">
+        <van-tabs class="order-tabs" v-model="active" sticky @click="tabChange">
           <van-tab v-for="(title,title_index) in title" :key="title_index" :title="title.tiele_name">
             <div class="list">
               <!-------标题-------->
@@ -17,7 +17,7 @@
               </div>
               <div>
                 <!--------数据-------->
-                <div v-for="(item,index) in arr" :key="index" @click="data(item.id)">
+                <div v-for="(item,index) in arr" :key="index" @click="onItemClick(item.id)">
                   <div class="data" v-if="item.bestorderbookmodel">
                     <!--市场/成交量-->
                     <div class="market">
@@ -43,9 +43,12 @@
 <script>
 import { mapMutations } from 'vuex'
 import { Tab, Tabs, Toast } from 'vant'
-import tabbar from '../../store/modules/tabbar'
 
 export default {
+  components: {
+    [Tab.name]: Tab,
+    [Tabs.name]: Tabs
+  },
   data () {
     return {
       active: 1,
@@ -65,15 +68,8 @@ export default {
         }
       ],
       // 数据
-      list: [],
-      arr: [],
-      // 默认输入为空
-      searchVal: '',
-      // 默认不排序
-      letter: '',
-      // 默认从小到大排列
-      original: false,
-      set: false
+      pairs: [],
+      arr: []
     }
   },
   async mounted () {
@@ -85,15 +81,15 @@ export default {
       setActiveTab: 'tabbar/setActiveTab'
     }),
     // 交易所导航栏名称筛选
-    title_click (index, title) {
+    tabChange (index, title) {
       this.active = index
       this.arr = []
       if (index === 0) {
-        this.arr = this.list
+        this.arr = this.pairs
       } else {
-        for (let i = 0; i <= this.list.length - 1; i++) {
-          if (this.list[i].quote.symbol.search(title) !== -1) {
-            this.arr.push(this.list[i])
+        for (let i = 0; i <= this.pairs.length - 1; i++) {
+          if (this.pairs[i].quote.symbol.search(title) !== -1) {
+            this.arr.push(this.pairs[i])
           }
         }
       }
@@ -102,12 +98,12 @@ export default {
     async getPairs () {
       const { data } = await this.$api.bb.pairList()
       if (data.code === 200) {
-        this.list = data.data
+        this.pairs = data.data
         // 原始推值进去arr渲染
-        for (let i = 0; i <= this.list.length - 1; i++) {
-          if (this.list[i].quote.symbol.search(this.title[this.active].tiele_name) !== -1) {
+        for (let i = 0; i <= this.pairs.length - 1; i++) {
+          if (this.pairs[i].quote.symbol.search(this.title[this.active].tiele_name) !== -1) {
             this.arr = []
-            this.arr.push(this.list[i])
+            this.arr.push(this.pairs[i])
           }
         }
       } else {
@@ -115,36 +111,25 @@ export default {
       }
     },
     // 传值
-    data (id) {
+    onItemClick (id) {
       this.$router.push({
         name: 'pair', params: { id: id }
       })
     }
   },
-  components: {
-    [Tab.name]: Tab,
-    [Tabs.name]: Tabs
-  },
   computed: {
   },
   // keep-alive 组件激活时调用
   async activated () {
-    document.body.scrollTop = 0
-    document.documentElement.scrollTop = 0
-    this.set = false
     await this.getPairs()
-    let set = await setInterval(() => {
-      if (this.set === true) {
-        clearInterval(set)
-      } else {
-        this.getPairs()
-      }
-    }, 5000)
-  },
-  watch: {
-    '$route' (to, from) {
-      this.set = true
-    }
+    // 设置定时器，每隔2秒获取数据
+    let timer = await setInterval(() => {
+      this.getPairs()
+    }, 4000)
+    // 在离开页面时清楚定时器
+    this.$once('hook:deactivated', () => {
+      clearInterval(timer)
+    })
   }
 }
 </script>

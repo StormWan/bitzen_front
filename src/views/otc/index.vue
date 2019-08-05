@@ -7,7 +7,7 @@
       <div>涨跌幅</div>
     </div>
     <!--趋势-->
-    <div class="Mala" v-for="(item,index) in Market_label" :key="index" @click="text_click(item.id)">
+    <div class="Mala" v-for="(item,index) in pairs" :key="index" @click="text_click(item.id)">
       <!--名称-->
       <div class="Market">
         <div class="img" v-if="item">
@@ -40,16 +40,32 @@
 <script>
 import { mapMutations } from 'vuex'
 import { Icon, Toast } from 'vant'
+
 export default {
+  name: 'otc-list',
+  components: {
+    [Icon.name]: Icon,
+    [Toast.name]: Toast
+  },
   data () {
     return {
       // 行情标签涨幅
-      Market_label: [],
-      set: true
+      pairs: []
     }
   },
   async mounted () {
     this.setActiveTab(2)
+  },
+  async activated () {
+    await this.getOtcPairs()
+    // 设置定时器，每隔2秒获取数据
+    let timer = await setInterval(() => {
+      this.getOtcPairs()
+    }, 4000)
+    // 在离开页面时清楚定时器
+    this.$once('hook:deactivated', () => {
+      clearInterval(timer)
+    })
   },
   methods: {
     ...mapMutations({
@@ -65,36 +81,13 @@ export default {
       })
     },
     // 数据获取
-    async api () {
-      const { data } = await this.$api.otc.currency()
+    async getOtcPairs () {
+      const { data } = await this.$api.otc.otcPairList()
       if (data.code !== 200) {
         Toast('服务器异常,请稍后再试')
       } else {
-        this.Market_label = data.data
+        this.pairs = data.data
       }
-    }
-  },
-  components: {
-    [Icon.name]: Icon,
-    [Toast.name]: Toast
-  },
-  // router-link触发
-  async activated () {
-    document.body.scrollTop = 0
-    document.documentElement.scrollTop = 0
-    this.set = true
-    await this.api()
-    let set = await setInterval(() => {
-      if (this.set) {
-        this.api()
-      } else {
-        clearInterval(set)
-      }
-    }, 5000)
-  },
-  watch: {
-    '$route' () {
-      this.set = false
     }
   }
 }

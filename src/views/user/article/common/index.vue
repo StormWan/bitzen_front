@@ -11,7 +11,7 @@
     </div>
     <!--服务内容-->
     <div class="content" v-for="(item,index) in articles" :key="index" >
-      <van-cell :title="item.title" is-link :to="{ name: 'common-detail', params: { id: item.id }}"/>
+      <van-cell :title="item.title" is-link :to="{ name: 'article-detail', params: { id: item.id }}"/>
     </div>
   </div>
 </template>

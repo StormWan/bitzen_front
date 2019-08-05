@@ -1,7 +1,7 @@
 <template>
   <div class="lend">
     <van-tabs v-model="active" sticky>
-      <van-tab v-for="(item,index) in title" :title="item.title" :key="index">
+      <van-tab v-for="(item, index) in titles" :title="item.title" :key="index">
         <div v-if="index === 0" class="bb_otc">
           <bb_order></bb_order>
         </div>
@@ -16,13 +16,20 @@
 <script>
 import { mapMutations } from 'vuex'
 import { Tab, Tabs } from 'vant'
-import bb from '../user/bb_order'
-import otc from '../user/otc_details'
+import bb from './bb_order'
+import otc from './otc_details'
 export default {
+  name: 'orders',
+  components: {
+    [Tab.name]: Tab,
+    [Tabs.name]: Tabs,
+    'bb_order': bb,
+    'otc_details': otc
+  },
   data () {
     return {
       active: 0,
-      title: [
+      titles: [
         {
           title: '币币'
         },
@@ -33,20 +40,14 @@ export default {
     }
   },
   mounted () {
-    document.body.scrollTop = 0
-    document.documentElement.scrollTop = 0
+    // document.body.scrollTop = 0
+    // document.documentElement.scrollTop = 0
     this.setActiveTab(4)
   },
   methods: {
     ...mapMutations({
       setActiveTab: 'tabbar/setActiveTab'
     })
-  },
-  components: {
-    [Tab.name]: Tab,
-    [Tabs.name]: Tabs,
-    'bb_order': bb,
-    'otc_details': otc
   }
 }
 </script>
