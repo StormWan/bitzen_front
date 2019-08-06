@@ -1,31 +1,26 @@
 <template>
     <div class="Currency">
       <!--头部标题-->
-      <div class="top">
-        <!--返回-->
-        <div class="Arrow" @click="Arrow">
-          <van-icon name="arrow-left"></van-icon>
-        </div>
-        <div class="title">
-          <span>{{pair.pair}}</span>
-        </div>
-      </div>
+      <van-nav-bar
+        :title=pair.pair
+        left-text="返回"
+        left-arrow
+        @click-left="onClickLeft"
+      />
       <!--详情-->
-      <div>
-        <detail :sell="sell" :buy="buy"></detail>
-      </div>
+      <detail :sellerInfo="sellerInfo" :buyerInfo="buyerInfo"></detail>
 
-      <van-tabs @click="active_click" sticky>
+      <van-tabs @click="tabChange" sticky>
         <!--金额-->
-        <div class="price">
-          <div class="price_bg">
-            <div class="img_title">
-              <div class="price_img" v-if="price_img">
-                <img :src="price_img" alt="">
+        <div class="showPriceInfo">
+          <div class="price_bid">
+            <div class="logo_title">
+              <div class="logoImg" v-if="price_logoImg">
+                <img :src="price_logoImg" alt="">
               </div>
               <div class="price_title">{{price_title}}</div>
             </div>
-            <div class="price_bg" :class="{active: active_index === 1}">{{price_bg}}</div>
+            <div class="price_bid" :class="{active: active_index === 1}">{{price_bg}}</div>
           </div>
         </div>
 <!--        买入-->
@@ -77,7 +72,7 @@
         </van-tab>
       </van-tabs>
       <!--按钮-->
-      <but :index="active_index" @value_but="value_but" :Place="Place_active" :symbol="symbol" :wallet="wallet_data" :id="pair.id" :asset_id="asset_id" :value="value"></but>
+      <orderButton :index="active_index" @value_but="value_but" :Order="Order_active" :symbol="symbol" :wallet="wallet_data" :id="pair.id" :asset_id="asset_id" :value="value"></orderButton>
       <!--钱包-->
       <bb_wallet :pair="pair" @wallet="wallet" :index="active_index" :symbol="symbol"></bb_wallet>
       <!--说明-->
@@ -86,34 +81,51 @@
 </template>
 
 <script>
-import { Icon, Toast, Switch, Tab, Tabs } from 'vant'
+import { Icon, Toast, Switch, Tab, Tabs, NavBar } from 'vant'
 import { InputItem, Field } from 'mand-mobile'
 // eslint-disable-next-line camelcase
 import bb_wallet from '../../../components/wallet_mode'
 import Tips from './Tips_com'
 import details from './details_com'
-import but from './order_but_com'
+import orderButton from './order_but_com'
 
 export default {
+  components: {
+    [Icon.name]: Icon,
+    [InputItem.name]: InputItem,
+    [Field.name]: Field,
+    [Switch.name]: Switch,
+    [Tab.name]: Tab,
+    [Tabs.name]: Tabs,
+    [NavBar.name]: NavBar,
+    // 钱包
+    'bb_wallet': bb_wallet,
+    // 提示
+    'Tips': Tips,
+    // 标题数据
+    'detail': details,
+    // 下单按钮
+    'orderButton': orderButton
+  },
   data () {
     return {
-      buy: [],
-      sell: [],
-      arr_buy: [],
-      arr_sell: [],
+      buyerInfo: [],
+      sellerInfo: [],
+      best_buy_depth: [],
+      best_sell_depth: [],
       // 接收数据
       pair: [],
       active_index: 0,
       value: '',
       brief: '',
       placeholder: '',
-      Place_active: false,
+      Order_active: false,
       md_title: '',
       input_size: 9,
       buy_price: '',
       money: '',
       price_bg: '0',
-      price_img: '',
+      price_logoImg: '',
       price_title: '',
       pla_money: '0',
       // 定时器
@@ -134,15 +146,15 @@ export default {
     wallet (msg) {
       this.wallet_data = msg
     },
-    // 箭头
-    Arrow () {
+    // 返回上一页
+    onClickLeft () {
       this.$router.go(-1)
       localStorage.removeItem('Currency')
     },
     // 买入卖出点击点击
-    active_click (e) {
+    tabChange (e) {
       this.active_index = e
-      this.price_img = ''
+      this.price_logoImg = ''
       // 红点提示
       if (e === 1) {
         this.symbol = this.pair.base.symbol
@@ -153,7 +165,7 @@ export default {
         // input框提示
         this.placeholder = '请输入兑换数量'
         if (this.pair.bestorderbookmodel.best_sell_exchange.logo_32) {
-          this.price_img = this.pair.bestorderbookmodel.best_sell_exchange.logo_32
+          this.price_logoImg = this.pair.bestorderbookmodel.best_sell_exchange.logo_32
         }
         this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
         this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
@@ -166,7 +178,7 @@ export default {
         // input框提示
         this.placeholder = '请输入兑换数量'
         if (this.pair.bestorderbookmodel.best_buy_exchange.logo_32) {
-          this.price_img = this.pair.bestorderbookmodel.best_buy_exchange.logo_32
+          this.price_logoImg = this.pair.bestorderbookmodel.best_buy_exchange.logo_32
         }
         this.price_title = this.pair.bestorderbookmodel.best_buy_exchange.name
         this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
@@ -187,27 +199,27 @@ export default {
           this.asset_id = this.pair.quote.asset_id
           // 渲染
           if (this.pair.bestorderbookmodel.best_buy_exchange.logo_32) {
-            this.price_img = this.pair.bestorderbookmodel.best_buy_exchange.logo_32
+            this.price_logoImg = this.pair.bestorderbookmodel.best_buy_exchange.logo_32
           }
           this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
           this.price_title = this.pair.bestorderbookmodel.best_buy_exchange.name
           this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000
-          this.arr_buy = JSON.parse(data.data.bestorderbookmodel.best_buy_depth)
-          this.sell = this.arr_buy.bids.slice(this.item - 10, this.time)
-          this.buy = this.arr_buy.asks.slice(this.item - 10, this.time)
+          this.best_buy_depth = JSON.parse(data.data.bestorderbookmodel.best_buy_depth)
+          this.buyerInfo = this.best_buy_depth.bids.slice(this.item - 10, this.time)
+          this.sellerInfo = this.best_buy_depth.asks.slice(this.item - 10, this.time)
         } else {
           this.asset_id = this.pair.base.asset_id
           this.symbol = data.data.base.symbol
           // 渲染
           if (this.pair.bestorderbookmodel.best_sell_exchange.logo_32) {
-            this.price_img = this.pair.bestorderbookmodel.best_sell_exchange.logo_32
+            this.price_logoImg = this.pair.bestorderbookmodel.best_sell_exchange.logo_32
           }
           this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
           this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
           this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000
-          this.arr_sell = JSON.parse(data.data.bestorderbookmodel.best_sell_depth)
-          this.sell = this.arr_sell.bids.slice(this.item - 10, this.time)
-          this.buy = this.arr_sell.asks.slice(this.item - 10, this.time)
+          this.best_sell_depth = JSON.parse(data.data.bestorderbookmodel.best_sell_depth)
+          this.buyerInfo = this.best_sell_depth.bids.slice(this.item - 10, this.time)
+          this.sellerInfo = this.best_sell_depth.asks.slice(this.item - 10, this.time)
         }
       } else {
         Toast('获取数据失败，请刷新页面')
@@ -232,20 +244,20 @@ export default {
         if (this.value) {
           that.md_title = '请输入正确金额'
           if (this.value === '0' || this.value === '.' || Math.floor(this.pair.buy_min * 100) / 100 > this.value) {
-            that.Place_active = false
+            that.Order_active = false
           } else {
-            that.Place_active = true
+            that.Order_active = true
             that.md_title = '大约可以兑换' + ' ' + (this.value / this.pair.bestorderbookmodel.best_buy_price).toFixed(5) + ' ' + this.pair.base.symbol
             // 计算超出金额
             if (parseFloat(this.value) > parseFloat(this.pair.buy_max)) {
-              that.Place_active = false
+              that.Order_active = false
               that.brief = '你已超出约' + ' ' + (this.value - this.pair.buy_max).toFixed(3) + ' ' + this.pair.quote.symbol
             } else {
               that.brief = '最小下单 ' + Math.floor(this.pair.buy_min * 100) / 100 + ' ' + this.pair.quote.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
             }
           }
         } else {
-          that.Place_active = false
+          that.Order_active = false
           that.md_title = '兑换数量'
         }
       }
@@ -260,20 +272,20 @@ export default {
         if (this.value) {
           that.md_title = '请输入正确金额'
           if (this.value === '0' || this.value === '.' || Math.floor(this.pair.sell_min * 100) / 100 > this.value) {
-            that.Place_active = false
+            that.Order_active = false
           } else {
-            that.Place_active = true
+            that.Order_active = true
             that.md_title = '大约可以兑换' + ' ' + (this.value * this.pair.bestorderbookmodel.best_sell_price).toFixed(4) + ' ' + this.pair.quote.symbol
             // 计算超出金额
             if (parseFloat(this.value) > parseFloat(this.pair.sell_max)) {
-              that.Place_active = false
+              that.Order_active = false
               that.brief = '你已超出约' + ' ' + (this.value - this.pair.sell_max).toFixed(2) + ' ' + this.pair.base.symbol
             } else {
               that.brief = '最小下单 ' + Math.floor(this.pair.sell_min * 100) / 100 + ' ' + this.pair.base.symbol + ', 最大下单 ' + (Math.floor(this.pair.sell_max * 100) / 100).toFixed(this.pair.sell_decimal_digit) + ' ' + this.pair.base.symbol
             }
           }
         } else {
-          that.Place_active = false
+          that.Order_active = false
           that.md_title = '兑换数量'
         }
       }
@@ -316,22 +328,6 @@ export default {
     // input框提示
     this.placeholder = '请输入兑换数量'
   },
-  components: {
-    [Icon.name]: Icon,
-    [InputItem.name]: InputItem,
-    [Field.name]: Field,
-    [Switch.name]: Switch,
-    [Tab.name]: Tab,
-    [Tabs.name]: Tabs,
-    // 钱包
-    'bb_wallet': bb_wallet,
-    // 提示
-    'Tips': Tips,
-    // 标题数据
-    'detail': details,
-    // 下单按钮
-    'but': but
-  },
   // 监听离开页面
   watch: {
     '$route' (to, from) {
@@ -371,11 +367,11 @@ export default {
       }
     }
     /*金额*/
-    .price{
+    .showPriceInfo{
       font-weight: bold;
       font-size: 27px;
       padding-top: 30px;
-      .price_bg{
+      .price_bid{
         width: 110px;
         border-radius: 50%;
         margin: 0 auto;
@@ -383,12 +379,12 @@ export default {
         /*background-color: #FF8C00;*/
         text-align: center;
         padding: 5px 5px;
-        .img_title{
+        .logo_title{ // 币名字 + logo
           display: flex;
           justify-content: center;
           align-items: center;
           text-align: center;
-          .price_img{
+          .logoImg{
             width: 23px;
             margin: 0 3px 0 0px;
             img{
@@ -403,7 +399,7 @@ export default {
             color: #4682B4;
           }
         }
-        .price_bg{
+        .price_bid{
           margin: 5px 0;
           color: #228B22;
         }

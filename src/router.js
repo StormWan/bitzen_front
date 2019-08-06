@@ -244,7 +244,7 @@ router.beforeEach(async (to, from, next) => {
       return
     }
     // Mixin认证
-    const clientId = '28536b52-f840-4366-8619-3872fb5b3164'
+    const clientId = '6161a89b-795d-4cd8-b198-eccf0feb6f02'
     const scope = 'PROFILE:READ+ASSETS:READ+PHONE:READ'
     const oauthUrl = `https://mixin.one/oauth/authorize?client_id=${clientId}&scope=${scope}&code_challenge=PKCE`
     const code = getUrlKey('code')

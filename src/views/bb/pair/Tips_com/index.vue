@@ -1,5 +1,4 @@
 <template>
-  <div>
     <!--说明-->
     <div class="Explain">
       <div class="Explain_text">
@@ -11,11 +10,11 @@
         </ol>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
 export default {
+  name: 'tips-com',
   data () {
     return {
       Explain: [

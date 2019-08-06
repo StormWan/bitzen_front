@@ -1,59 +1,51 @@
 <template>
-    <div class="Coin">
-      <div class="tab">
-        <van-tabs class="order-tabs" v-model="active" sticky @click="tabChange">
-          <van-tab v-for="(title,title_index) in title" :key="title_index" :title="title.tiele_name">
-            <div class="list">
-              <!-------标题-------->
-              <div class="title">
-                <!--市场/成交量-->
-                <div class="market">
-                  <span>市场</span>
+  <div class="bb">
+    <van-tabs class="order-tabs" v-model="active" sticky @click="tabChange">
+      <van-tab v-for="(title,title_index) in bbTabTitle" :key="title_index" :title="title.tiele_name">
+        <!-------标题-------->
+        <van-row type="flex"  class="bb_title">
+          <van-col span="8">市场</van-col>
+          <van-col span="8" offset="2">最新价</van-col>
+          <van-col span="6"><div class="bb_title_name">24h涨跌</div></van-col>
+        </van-row>
+        <!--------数据-------->
+        <div v-for="(item,index) in pairs" :key="index" @click="onItemClick(item.id)">
+          <div v-if="item.bestorderbookmodel">
+            <van-row type="flex" class="bbdata_list">
+              <van-col span="10"><span>{{item.base.symbol}}</span>/<span class="second_marketname">{{item.quote.symbol}}</span></van-col>
+              <van-col span="7">{{item.bestorderbookmodel.best_buy_price}}</van-col>
+              <van-col span="6" offset="1">
+                <div class="up_or_down">
+                  <div class="go_up_green" v-if="!item.bestorderbookmodel.percentage">- -</div>
+                  <div class="go_up_green" v-else :class="{go_down_red: (item.bestorderbookmodel.percentage).toString().charAt(0) === '-'}">
+                    {{(Math.floor(item.bestorderbookmodel.percentage * 1000) / 1000).toFixed(2)}}%</div>
                 </div>
-                <!--最新价-->
-                <div class="cent">最新价</div>
-                <!--24小时涨跌-->
-                <div class="tail">24h涨跌</div>
-              </div>
-              <div>
-                <!--------数据-------->
-                <div v-for="(item,index) in arr" :key="index" @click="onItemClick(item.id)">
-                  <div class="data" v-if="item.bestorderbookmodel">
-                    <!--市场/成交量-->
-                    <div class="market">
-                      <span class="name">{{item.base.symbol}}</span>/<span class="market_name">{{item.quote.symbol}}</span>
-                    </div>
-                    <!--最新价-->
-                    <div class="cent">{{item.bestorderbookmodel.best_buy_price}}</div>
-                    <!--24小时涨跌-->
-                    <div class="tail">
-                      <div class="green" v-if="!item.bestorderbookmodel.percentage">- -</div>
-                      <div class="green" v-else :class="{red: (item.bestorderbookmodel.percentage).toString().charAt(0) === '-'}">{{(Math.floor(item.bestorderbookmodel.percentage * 1000) / 1000).toFixed(2)}}%</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </van-tab>
-        </van-tabs>
-      </div>
-    </div>
+              </van-col>
+            </van-row>
+          </div>
+        </div>
+      </van-tab>
+    </van-tabs>
+  </div>
 </template>
 
 <script>
 import { mapMutations } from 'vuex'
-import { Tab, Tabs, Toast } from 'vant'
+import { Tab, Tabs, Toast, Row, Col, Button } from 'vant'
 
 export default {
   components: {
     [Tab.name]: Tab,
-    [Tabs.name]: Tabs
+    [Tabs.name]: Tabs,
+    [Row.name]: Row,
+    [Col.name]: Col,
+    [Button.name]: Button
   },
   data () {
     return {
       active: 1,
       // tab标题名称
-      title: [
+      bbTabTitle: [
         {
           tiele_name: '全部'
         },
@@ -75,6 +67,7 @@ export default {
   async mounted () {
     // tabbar导航位置
     this.setActiveTab(3)
+    await this.getPairs()
   },
   methods: {
     ...mapMutations({
@@ -83,15 +76,10 @@ export default {
     // 交易所导航栏名称筛选
     tabChange (index, title) {
       this.active = index
-      this.arr = []
-      if (index === 0) {
-        this.arr = this.pairs
-      } else {
-        for (let i = 0; i <= this.pairs.length - 1; i++) {
-          if (this.pairs[i].quote.symbol.search(title) !== -1) {
-            this.arr.push(this.pairs[i])
-          }
-        }
+      if (index !== 0) {
+        this.pairs.filter(item => {
+          return item.quote.symbol.search(title) !== -1
+        })
       }
     },
     // 获取数据
@@ -99,13 +87,10 @@ export default {
       const { data } = await this.$api.bb.pairList()
       if (data.code === 200) {
         this.pairs = data.data
-        // 原始推值进去arr渲染
-        for (let i = 0; i <= this.pairs.length - 1; i++) {
-          if (this.pairs[i].quote.symbol.search(this.title[this.active].tiele_name) !== -1) {
-            this.arr = []
-            this.arr.push(this.pairs[i])
-          }
-        }
+        this.pairs.filter(a => {
+          return a.quote.symbol.search(this.bbTabTitle[this.active].tiele_name) !== -1
+        })
+        // console.log(this.pairs[0].active)
       } else {
         Toast('获取数据失败，请刷新')
       }
@@ -135,122 +120,62 @@ export default {
 </script>
 
 <style lang="less">
-  .Coin{
-    .tab{
-      font-size: 16px;
+    .bb{
       /*默认文字颜色*/
       .order-tabs .van-ellipsis {
         font-size: 13px;
         font-weight: bold;
       }
-      /*点击导航栏添加颜色*/
-      .order-tabs .van-tab--active{
-        /*color: #00BFFF;*/
-      }
-      /*下边索引条*/
+      /*tab 下边索引条*/
       .van-tabs__line{
         /*display: none;*/
         height: 2px;
       }
-      /*数据*/
-      .list{
-        margin-bottom: 50px;
-        /*标题*/
-        .title{
-          width: 90%;
-          margin: 0 auto;
-          font-size: 0;
-          color: #696969;
-          line-height: 15px;
+      /*标题*/
+      .bb_title{
           padding-top: 12px;
-          .active{
-            color: #800000;
-            font-weight: 600;
-          }
-          div{
-            font-size: 13px;
-            display: inline-block;
-            width: 33%;
-            overflow: hidden;
-            -ms-text-overflow: ellipsis;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          }
-          .cent{
-            text-align: center;
-          }
-          .tail{
-            text-align: right;
+          padding-left: 20px;
+          font-size: 14px; // 标题的字体的样式
+          color: #696969;
+          .bb_title_name{
+            padding-left: 17px;
           }
         }
-        /*数据*/
-        .data{
-          width: 90%;
-          margin: 0 auto;
-          font-size: 0;
-          border-bottom: 1px solid #ccc;
-          display: block;
+      .bbdata_list{
+        padding: 8px 0px;
+        padding-left: 5px;
+        font-size: 18px;
+        border-bottom: 1px solid #ccc;
+
+        margin: 0px 15px;
+        display:flex;/*Flex布局*/
+        display: -webkit-flex; /* Safari */
+        align-items:center;/*指定垂直居中*/
+        .second_marketname{
+          font-size: 14px;
           color: #000;
-          /*全据数据*/
-          div{
-            padding-bottom: 8px;
-            padding-top: 8px;
-            font-size: 14px;
-            display: inline-block;
-            width: 33%;
-            overflow: hidden;
-            -ms-text-overflow: ellipsis;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            vertical-align: middle;
+        }
+        /*上涨/下降 24h 涨跌的样式*/
+        .up_or_down{
+          margin-left: 10px;
+          width: 80%;
+          font-size: 14px;
+          text-align: center;
+          color: #F5F5F5;
+          .go_up_green{
+            border-radius: 5px;
+            padding: 8px 0px;
+            background-color: green;
           }
-          /*数据左边*/
-          .market{
-            .name{
-              font-size: 18px;
-              margin-right: 2px;
-            }
-            .market_name{
-              font-size: 14px;
-              color: #999;
-              margin-left: 2px;
-            }
-          }
-          /*数据中间*/
-          .cent{
-            text-align: center;
-            font-size: 17px;
-          }
-          /*数据右边*/
-          .tail{
-            text-align: right;
-            padding-left: 13.5%;
-            .green{
-              display: block;
-              width: 100%;
-              -webkit-border-radius: 5px;
-              -moz-border-radius: 5px;
-              border-radius: 5px;
-              background-color: green;
-              color: #F5F5F5;
-              text-align: center;
-            }
-            .red{
-              display: block;
-              width: 100%;
-              -webkit-border-radius: 5px;
-              -moz-border-radius: 5px;
-              border-radius: 5px;
-              background-color:#B22222;
-              color: #F5F5F5;
-              text-align: center;
-            }
+          .go_down_red{
+            border-radius: 5px;
+            padding: 8px 0px;
+            background-color:#B22222;
           }
         }
       }
     }
-  }
-  /*底部改变*/
+  /*底部 tabbar 字体改变*/
   .md-icon.icon-font.md{
     font-size: 16px;
   }

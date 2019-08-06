@@ -4,22 +4,27 @@
       <div :class="{mask: triangle_active}" @click="mask"></div>
       <!--付款方式-->
       <div class="wallet_box" @click="wallet_box">
-        <div class="wallet">
-          <div class="Bank">
-            <div class="left">
+        <van-row type="flex" justify="space-between" class="walletInfo">
+          <van-col span="11">
+            <div  class="BankIcon">
               <van-icon name="youzan-shield"></van-icon>
+              {{bank}} 钱包
             </div>
-            <div class="right">{{bank}} 钱包</div>
-          </div>
-          <div class="balance">
-            <div class="left">
+          </van-col>
+          <van-col span="5" offset="4">
+            <div class="bank-balance">
               <div>{{symbol}} 余额</div>
-              <div>{{Math.floor(pair.buy_price * 100) / 100}}</div>
+              <div class="balance-right">{{Math.floor(pair.buy_price * 100) / 100}}</div>
             </div>
-            <!--三角形-->
-            <div class="right" :class="{active: triangle_active}"></div>
-          </div>
-        </div>
+          </van-col>
+          <van-col span="3">
+            <div v-if="triangle_active == true">
+              <van-icon name="arrow-up" ></van-icon>
+            </div> <div v-else>
+              <van-icon name="arrow-down"></van-icon>
+            </div>
+          </van-col>
+        </van-row>
       </div>
 
       <!--付款方式钱包-->
@@ -28,24 +33,28 @@
         <!--钱包选择-->
         <div class="Choice">
           <div class="wallet_box" v-for="(item,index) in wallet" :key="index" @click="wallet_click(index)">
-            <div class="wallet">
-              <div class="Bank">
-                <div class="left">
+            <van-row type="flex" justify="space-between" class="walletInfo">
+              <van-col span="11">
+                <div  class="BankIcon">
                   <van-icon :name="item.icon"></van-icon>
+                  {{item.name}} 钱包
                 </div>
-                <div class="right">{{item.name}} 钱包</div>
-              </div>
-              <div class="balance">
-                <div class="left">
+              </van-col>
+              <van-col span="5" offset="4">
+                <div class="bank-balance">
                   <div>{{symbol}} 余额</div>
-                  <div>{{Math.floor(pair.buy_price * 100) / 100}}</div>
+                  <div class="balance-right">{{Math.floor(pair.buy_price * 100) / 100}}</div>
                 </div>
-                <!--三角形-->
-                <div class="right" :class="{active: index === icon_index}">
-                  <van-icon name="passed"></van-icon>
-                </div>
-              </div>
-            </div>
+              </van-col>
+              <van-col span="3">
+                <van-checkbox v-model="icon_index"></van-checkbox>
+              </van-col>
+            </van-row>
+<!--                <div class="right" :class="{active: index === icon_index}">-->
+<!--                  <van-icon name="passed"></van-icon>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
           </div>
         </div>
       </div>
@@ -53,12 +62,19 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, Row, Col, Checkbox } from 'vant'
 export default {
+  components: {
+    [Icon.name]: Icon,
+    [Row.name]: Row,
+    [Col.name]: Col,
+    [Checkbox.name]: Checkbox
+  },
   data () {
     return {
       triangle_active: false,
       bank: '',
+      showBanks: '',
       base_symbol: '',
       // 钱包数据
       wallet: [
@@ -66,12 +82,8 @@ export default {
           name: 'Mixin',
           icon: 'youzan-shield'
         }
-        // {
-        //   name: 'BlockPay',
-        //   icon: 'youzan-shield'
-        // }
       ],
-      icon_index: 0,
+      icon_index: 0
       // symbol: ''
     }
   },
@@ -100,9 +112,6 @@ export default {
     this.bank = this.wallet[0].name
     this.$emit('wallet', this.bank)
   },
-  components: {
-    [Icon.name]: Icon
-  },
   props: [
     'pair',
     'index',
@@ -117,56 +126,39 @@ export default {
     padding: 15px 0;
     margin-top: 15px;
     font-size: 15px;
-    .wallet{
-      width: 90%;
-      border-bottom: 1px solid rgba(0,0,0,.05);
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 20px;
-      /*全局*/
-      .Bank,.balance{
+    .walletInfo{
+      border-bottom: 0.02rem solid rgba(0, 0, 0, 0.05);
+      padding-bottom: 20px;
+      /*银行的类别*/
+      .BankIcon{
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
-      }
-      /*银行*/
-      .Bank{
-        color: #696969;
-        .left{
+        color: #696969; // 银行钱包字体颜色
+        .van-icon{ // 银行 icon  颜色
           font-size: 20px;
           color: #00BFFF;
-        }
-        .right{
-          font-size: 15px;
-          padding-left: 5px;
+          padding-right: 5px;
         }
       }
-      /*余额*/
-      .balance{
-        .left{
-          font-size: 13px;
-          color: #999;
-          text-align: right;
-          div:nth-last-child(1){
-            padding-top: 5px;
-          }
+      /*银行余额*/
+      .bank-balance{
+        font-size: 13px;
+        color: #999;
+        position: relative;
+        margin-bottom: 10px;
+        .balance-right{
+          position: absolute;
+          padding: 5px;
+          right: 15%;
         }
-        .right{
-          border: 10px solid transparent;
-          border-top-color: black;
-          margin-left: 10px;
-          -webkit-transition: .1s;
-          -moz-transition: .1s;
-          -ms-transition: .1s;
-          -o-transition: .1s;
-          transition: .1s;
-        }
-        .active{
-          border: 10px solid transparent;
-          border-bottom-color: black;
-        }
+      }
+      .van-icon{
+        font-size: 20px;
+      }
+      .active{
+        border: 10px solid transparent;
+        border-bottom-color: black;
       }
     }
   }
@@ -213,14 +205,14 @@ export default {
           align-items: center;
           padding: 5px 20px;
           /*全局*/
-          .Bank,.balance{
+          .BankIcon,.balance{
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: #696969;
           }
           /*付款*/
-          .Bank{
+          .BankIcon{
             .left{
               font-size: 20px;
               color: #00BFFF;

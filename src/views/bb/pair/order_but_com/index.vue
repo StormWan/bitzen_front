@@ -1,6 +1,6 @@
 <template>
-  <div class="Place">
-    <div @click="but_submit" class="Place_box" :class="{active: Place}">下单{{symbol}}</div>
+  <div class="Order">
+    <div @click="but_submit" class="Order_box" :class="{active: Order}">下单{{symbol}}</div>
   </div>
 </template>
 
@@ -12,6 +12,18 @@ var msgpack = require('msgpack-lite')
 var uuidv4 = require('uuid/v4')
 export default {
   name: 'index',
+  components: {
+    [Dialog.name]: Dialog
+  },
+  props: [
+    'Order',
+    'index',
+    'symbol',
+    'wallet',
+    'id',
+    'asset_id',
+    'value'
+  ],
   data () {
     return {
       title: '',
@@ -25,7 +37,7 @@ export default {
     // 下单按钮
     but_submit () {
       console.log(JSON.parse(localStorage.getItem('userInfo')).is_setup_pin)
-      if (this.Place === true) {
+      if (this.Order === true) {
         if (this.wallet.search('BlockPay') !== -1) {
           if (!JSON.parse(localStorage.getItem('userInfo')).is_setup_pin) {
             this.$router.push({
@@ -76,27 +88,15 @@ export default {
         Toast('付款取消')
       })
     }
-  },
-  components: {
-    [Dialog.name]: Dialog
-  },
-  props: [
-    'Place',
-    'index',
-    'symbol',
-    'wallet',
-    'id',
-    'asset_id',
-    'value'
-  ]
+  }
 }
 </script>
 
 <style scoped lang="less">
-  .Place{
+  .Order{
     width: 100%;
     padding-top: 30px;
-    .Place_box{
+    .Order_box{
       width: 80%;
       margin: 0 auto;
       background-color: #DCDCDC;

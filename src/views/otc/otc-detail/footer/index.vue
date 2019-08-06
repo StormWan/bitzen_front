@@ -1,5 +1,4 @@
 <template>
-  <div class="Explain">
     <div class="Explain_text">
       <ol type="1">
         <li v-for="(item,index) in Explain" :key="index">
@@ -8,7 +7,6 @@
         </li>
       </ol>
     </div>
-  </div>
 </template>
 
 <script>
@@ -44,12 +42,6 @@ export default {
 
 <style scoped lang="less">
   /*说明*/
-  .Explain{
-    width: 100%;
-    padding: 20px 0;
-    margin-top: 20px;
-    border-top: 10px solid rgba(0,0,0,.05);
-    text-align: left;
     .Explain_text{
       width: 85%;
       margin: 0 auto;
@@ -68,5 +60,4 @@ export default {
         }
       }
     }
-  }
 </style>
