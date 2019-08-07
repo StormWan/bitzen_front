@@ -1,7 +1,7 @@
 <template>
   <div class="transaction">
     <!--头部标题-->
-    <otctitle :title="title" :title_img="title_img"></otctitle>
+    <otctitle :title="title" :title_img="symbolIcon"></otctitle>
     <!--买入卖出-->
     <div class="Business">
       <van-tabs @click="onClick" sticky>
@@ -17,8 +17,8 @@
             </div>
             <!--买入计算-->
             <div class="Calculation">
-              <div>至少支付 ￥<span class="red">{{Math.round((buy_price * otcPair.buy_min) * 100) / 100}}</span>,购买<span class="red">{{Math.round(otcPair.buy_min * 100) / 100}}</span><span>{{symbol_name}}</span></div>
-              <div>至支多付 ￥<span class="red">{{Math.round((buy_price * otcPair.buy_max) * 100) / 100}}</span>,购买 <span class="red">{{Math.round(otcPair.buy_max * 100) / 100}}</span> 个 <span>{{symbol_name}}</span></div>
+              <div>至少支付 ￥<span class="red">{{Math.round((buy_price * otcPair.buy_min) * 100) / 100}}</span>,购买<span class="red">{{Math.round(otcPair.buy_min * 100) / 100}}</span><span>{{symbol}}</span></div>
+              <div>至支多付 ￥<span class="red">{{Math.round((buy_price * otcPair.buy_max) * 100) / 100}}</span>,购买 <span class="red">{{Math.round(otcPair.buy_max * 100) / 100}}</span> 个 <span>{{symbol}}</span></div>
             </div>
             <!--金额计算-->
             <div class="md-example-child md-example-child-input-item-1">
@@ -40,8 +40,8 @@
                 <md-input-item
                   type="Number"
                   v-model="inp_market"
-                  :title="'预估到账' + symbol_name + '数量'"
-                  :placeholder="'预估到账' + symbol_name + '数量'"
+                  :title="'预估到账' + symbol + '数量'"
+                  :placeholder="'预估到账' + symbol + '数量'"
                   is-title-latent
                   clearable
                   :size="result_monitoring"
@@ -50,7 +50,7 @@
                 ></md-input-item>
               </md-field>
               <!--下单提示说明-->
-              <div class="ts_text" v-if="otcPair.pair">到账<span>{{symbol_name}}</span>数量以<span>实际交割价</span>为准</div>
+              <div class="ts_text" v-if="otcPair.pair">到账<span>{{symbol}}</span>数量以<span>实际交割价</span>为准</div>
             </div>
           </div>
         </van-tab>
@@ -66,8 +66,8 @@
             </div>
             <!--买入计算-->
             <div class="Calculation">
-              <div>最小出售 ￥ <span class="red">{{Math.round(otcPair.sell_min * 100) / 100}}</span> 个 <span>{{symbol_name}}</span>,约到账￥<span class="red">{{Math.round((sell_price * otcPair.sell_min) * 100) / 100}}</span></div>
-              <div>最大出售 ￥ <span class="red">{{Math.round(otcPair.sell_max * 100) / 100}}</span> 个 <span>{{symbol_name}}</span>,约到账 <span class="red">{{Math.round((sell_price * otcPair.sell_max) * 100) / 100}}</span></div>
+              <div>最小出售 ￥ <span class="red">{{Math.round(otcPair.sell_min * 100) / 100}}</span> 个 <span>{{symbol}}</span>,约到账￥<span class="red">{{Math.round((sell_price * otcPair.sell_min) * 100) / 100}}</span></div>
+              <div>最大出售 ￥ <span class="red">{{Math.round(otcPair.sell_max * 100) / 100}}</span> 个 <span>{{symbol}}</span>,约到账 <span class="red">{{Math.round((sell_price * otcPair.sell_max) * 100) / 100}}</span></div>
             </div>
             <!--金额计算-->
             <div class="md-example-child md-example-child-input-item-1">
@@ -77,8 +77,8 @@
                   type="Number"
                   v-model="inp_market"
                   :size="result_monitoring"
-                  :title="'卖出' + symbol_name + '数量'"
-                  :placeholder="'卖出' + symbol_name + '数量'"
+                  :title="'卖出' + symbol + '数量'"
+                  :placeholder="'卖出' + symbol + '数量'"
                   is-title-latent
                   clearable
                   @focus="foc_market"
@@ -112,7 +112,7 @@
 
       <!--Mixin 钱包-->
       <div v-if="active_index === 0">
-        <otc_wallet :symbol="symbol_name"></otc_wallet>
+        <otc_wallet :symbol="symbol"></otc_wallet>
       </div>
 
       <!--说明-->
@@ -132,21 +132,15 @@ export default {
   data () {
     return {
       // 接收数据
-      otcPair: [],
+      otcPair: null,
       active_index: 0,
       inp_CNY: '',
       inp_market: '',
       beyond: false,
       Place_active: false,
-      set: false,
-      // 获取到数据
-      title: '',
-      title_img: '',
-      buy_price: '',
       // 计算金额
       buy_Price: '',
       sell_price: '',
-      symbol_name: '',
       input_mon_size: '',
       input_res_size: '',
       buyData: false
@@ -160,14 +154,6 @@ export default {
         Toast('服务器异常,请稍后再试')
       } else {
         this.otcPair = data.data
-        this.title_img = this.otcPair.asset.icon_url
-        this.symbol_name = this.otcPair.asset.symbol
-        // 标题判断是否相同
-        if (this.otcPair.asset.name === this.otcPair.asset.symbol) {
-          this.title = this.otcPair.asset.symbol
-        } else {
-          this.title = this.otcPair.asset.name + ' ' + '(' + this.otcPair.asset.symbol + ')'
-        }
         if (!this.otcPair.pair) {
           this.buy_price = this.otcPair.setting.usdt_buy_price
           this.sell_price = this.otcPair.setting.usdt_sell_price
@@ -175,11 +161,6 @@ export default {
           this.buy_price = (this.otcPair.pair.bestorderbookmodel.best_buy_price * this.otcPair.setting.usdt_buy_price).toFixed(2)
           this.sell_price = (this.otcPair.pair.bestorderbookmodel.best_sell_price * this.otcPair.setting.usdt_sell_price).toFixed(2)
           this.buy_money()
-        }
-        // 买入
-        if (this.active_index === 0) {
-        } else {
-          // 卖出
         }
       }
     },
@@ -259,6 +240,22 @@ export default {
   computed: {
     // input框价格输入判断监听
     // eslint-disable-next-line vue/return-in-computed-property
+    title () {
+      return this.otcPair === null ? '' : this.otcPair.asset.symbol
+    },
+    symbol () {
+      return this.otcPair === null ? '' : this.otcPair.asset.symbol
+    },
+    symbolIcon () {
+      return this.otcPair === null ? '' : this.otcPair.asset.icon_url
+    },
+    buy_price () {
+      if (!this.otcPair.is_portfolio) {
+        return this.otcPair.setting.usdt_buy_price
+      } else {
+        return (this.otcPair.pair.bestorderbookmodel.best_buy_price * this.otcPair.setting.usdt_buy_price).toFixed(2)
+      }
+    },
     input_monitoring (e) {
       let that = this
       if (that.buyData) {

@@ -7,7 +7,7 @@
       <div>涨跌幅</div>
     </div>
     <!--趋势-->
-    <div class="Mala" v-for="(item,index) in pairs" :key="index" @click="text_click(item.id)">
+    <div class="Mala" v-for="(item,index) in pairs" :key="index" @click="onItemClick(item.id)">
       <!--名称-->
       <div class="Market">
         <div class="img" v-if="item">
@@ -72,7 +72,7 @@ export default {
       setActiveTab: 'tabbar/setActiveTab'
     }),
     // 点击跳转
-    text_click (id) {
+    onItemClick (id) {
       this.$router.push({
         name: 'transaction',
         params: {

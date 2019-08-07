@@ -7,7 +7,7 @@
         left-arrow
         @click-left="onClickLeft"
       />
-      <!--详情-->
+      <!--order-book-->
       <detail :sellerInfo="sellerInfo" :buyerInfo="buyerInfo"></detail>
 
       <van-tabs @click="tabChange" sticky>
@@ -129,7 +129,6 @@ export default {
       price_title: '',
       pla_money: '0',
       // 定时器
-      set: false,
       show: false,
       time: 10,
       wallet_data: '',
@@ -190,7 +189,7 @@ export default {
         this.triangle_active = true
       }
     },
-    async api () {
+    async getPair () {
       const { data } = await this.$api.bb.pairDetail(this.$route.params.id)
       if (data.code === 200) {
         this.pair = data.data
@@ -307,34 +306,23 @@ export default {
   },
   // keep-alive 组件激活时调用
   async activated () {
-    document.body.scrollTop = 0
-    document.documentElement.scrollTop = 0
-    this.set = false
-    await this.api()
-    let set = await setInterval(() => {
-      if (this.set === true) {
-        clearInterval(set)
-      } else {
-        this.api()
-      }
-    }, 3000)
+    await this.getPair()
+    // 设置定时器，每隔2秒获取数据
+    let timer = await setInterval(() => {
+      this.getPair()
+    }, 4000)
+    // 在离开页面时清楚定时器
+    this.$once('hook:deactivated', () => {
+      clearInterval(timer)
+    })
     // 红点提示
     if (this.active_index === 0) {
       this.brief = '最小下单 ' + (Math.floor(this.pair.buy_min * 100)) / 100 + ' ' + this.pair.quote.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
     } else {
       this.brief = '最小下单 ' + (Math.floor(this.pair.buy_min * 100)) / 100 + ' ' + this.pair.base.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.base.symbol
     }
-
     // input框提示
     this.placeholder = '请输入兑换数量'
-  },
-  // 监听离开页面
-  watch: {
-    '$route' (to, from) {
-      document.body.scrollTop = 0
-      document.documentElement.scrollTop = 0
-      this.set = true
-    }
   }
 }
 </script>
