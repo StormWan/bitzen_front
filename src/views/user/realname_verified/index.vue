@@ -1,21 +1,19 @@
 <template>
     <div class="Real_name">
       <!--头部标题-->
-      <div class="head">
         <van-nav-bar
           title="LV ID 验证"
           left-text="返回"
           left-arrow
           @click-left="onClickLeft"
         />
-      </div>
       <!--实名验证文本-->
-      <div class="title_name">实名验证</div>
+      <h4>实名验证</h4>
       <van-collapse v-model="activeName" accordion>
         <!--普通认证-->
         <van-collapse-item title="Lv 1 认证" name="1">
           <!--开始认证-->
-          <div v-if="Lv_off">
+          <div v-if="lv_certification">
             <div class="content_Tips" :class="{out: Tips_title}" v-if="Tips_title">{{Tips_title}}</div>
             <!--姓名-->
             <div class="name">
@@ -85,7 +83,7 @@
 
             <!--提示-->
             <div class="Tips_box">
-              <div v-for="(item,index) in Tips" :key="index" class="Tips">
+              <div v-for="(item,index) in certificationTips" :key="index" class="Tips">
                 <div>{{index + 1}}、</div>
                 <div>{{item.text}}</div>
               </div>
@@ -121,6 +119,7 @@
 import { Icon, Popup, NavBar, Collapse, CollapseItem, Field, Button, Uploader, Toast, CellGroup, Cell } from 'vant'
 import Clipboard from 'clipboard'
 export default {
+  name: 'realname_verified',
   components: {
     [Icon.name]: Icon,
     [Popup.name]: Popup,
@@ -139,7 +138,7 @@ export default {
       show: false,
       activeName: '1',
       username: '',
-      Tips: [
+      certificationTips: [
         {
           text: 'C2C总交易额超过 10000 USDT 必须进行实名认证'
         },
@@ -164,7 +163,7 @@ export default {
       img_c: false,
       ID_off: false,
       // 提交后改变
-      Lv_off: false,
+      lv_certification: false,
       // 按钮颜色
       plain: true,
       ID: '',
@@ -272,7 +271,7 @@ export default {
             if (data) {
               if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
                 clearInterval(timer)
-                this.Lv_off = false
+                this.lv_certification = false
                 Toast('身份信息上传成功')
               }
             }
@@ -282,7 +281,7 @@ export default {
               // 检测上传数据完全性质
               if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
                 clearInterval(timer)
-                this.Lv_off = false
+                this.lv_certification = false
                 Toast('身份信息提交成功')
               } else {
                 clearInterval(timer)
@@ -329,7 +328,7 @@ export default {
     const { data } = await this.$api.kyc.kyc_get()
     if (data.code === 200) {
       if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
-        this.Lv_off = false
+        this.lv_certification = false
         this.ok_Tips = '认证提交成功，将会在工作日3天之内返回认证结果'
         if (data.data.verified_state === 1) {
           // 成功
@@ -337,11 +336,11 @@ export default {
           this.cla = true
         } else if (data.data.verified_state === 2) {
           // 不成功
-          this.Lv_off = true
+          this.lv_certification = true
           this.Tips_title = '历史提交' + data.data.verified_feedback + '不正确'
         }
       } else {
-        this.Lv_off = true
+        this.lv_certification = true
       }
     } else {
       Toast('发生错误啦，请稍后重试')
@@ -352,6 +351,10 @@ export default {
 
 <style scoped lang="less">
   .Real_name{
+    h4{
+      font-weight: normal;
+      padding: 10px;
+    }
     .van-popup{
       font-size: 20px;
       background-color: transparent;

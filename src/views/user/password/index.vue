@@ -1,128 +1,133 @@
 <template>
     <div class="password">
       <!--标题-->
-      <div class="head">
         <van-nav-bar
           :title="title"
           left-text="返回"
           left-arrow
-          @click-left="Arrow"
+          @click-left="onClick"
         />
-      </div>
       <!--输入密码-->
-      <div class="enter">
+      <div class="input-password">
         <!-- 密码输入框 -->
         <van-password-input
-          :value="value"
-          :info="info"
+          :value="passwordValue"
+          :info="passwordInfo"
           @focus="showKeyboard = true"
         />
         <!-- 数字键盘 -->
         <van-number-keyboard
           :show="showKeyboard"
-          @input="onInput"
-          @delete="onDelete"
+          @input="inputNumber"
+          @delete="deleteNumber"
           @blur="showKeyboard = false"
         />
       </div>
       <!--提示语-->
-      <div class="Tips" :class="{active: Tips}">{{Tips_title}}</div>
+      <div class="tips" :class="{active: Tips}">{{Tips_title}}</div>
     </div>
 </template>
 
 <script>
 import { PasswordInput, NumberKeyboard, Icon, NavBar } from 'vant'
 export default {
+  name: 'password',
+  components: {
+    [PasswordInput.name]: PasswordInput,
+    [NumberKeyboard.name]: NumberKeyboard,
+    [Icon.name]: Icon,
+    [NavBar.name]: NavBar
+  },
   data () {
     return {
       title: '修改 BlockPay 密码',
       // 密码输入框
-      value: '',
+      passwordValue: '',
       showKeyboard: true,
       Tips: false,
       again_password: false,
       New_password: false,
-      info: '',
+      passwordInfo: '',
       Tips_title: ''
     }
   },
   methods: {
-    // 标题箭头点击
-    Arrow () {
+    // 返回上一页
+    onClick () {
       this.$router.go(-1)
     },
     // 密码输入
-    onInput (key) {
-      this.value = (this.value + key).slice(0, 6)
+    inputNumber (key) {
+      this.passwordValue = (this.passwordValue + key).slice(0, 6)
       if (!JSON.parse(localStorage.getItem('userInfo')).is_setup_pin) {
-        this.x_pas()
+        this.createPassword()
       } else {
-        this.j_pas()
+        this.changePassword()
       }
     },
-    onDelete () {
-      this.value = this.value.slice(0, this.value.length - 1)
+    deleteNumber () {
+      this.passwordValue = this.passwordValue.slice(0, this.passwordValue.length - 1)
     },
     // 创建新密码
-    async x_pas () {
+    async createPassword () {
       // 没有设置密码(新建密码)
-      if (this.value.length >= 6) {
+      if (this.passwordValue.length >= 6) {
         if (localStorage.getItem('New_password')) {
-          if (this.value !== localStorage.getItem('New_password')) {
+          if (this.passwordValue !== localStorage.getItem('New_password')) {
             this.Tips = true
             this.Tips_title = '请重新输入新密码'
-            this.info = '重新输入新密码'
+            this.passwordInfo = '重新输入新密码'
             localStorage.removeItem('New_password')
             setTimeout(() => {
-              this.value = ''
+              this.passwordValue = ''
               this.Tips = false
             }, 800)
           } else {
-            await this.$api.pass.setup_pin({ 'pin': this.value })
+            await this.$api.pass.setup_pin({ 'pin': this.passwordValue })
             localStorage.removeItem('New_password')
             setTimeout(async () => {
               this.$router.go(-1)
-              this.value = ''
+              this.passwordValue = ''
             }, 800)
           }
         } else {
-          localStorage.setItem('New_password', this.value)
+          localStorage.setItem('New_password', this.passwordValue)
           setTimeout(() => {
-            this.value = ''
-            this.info = '确认新密码'
+            this.passwordValue = ''
+            this.passwordInfo = '确认新密码'
           }, 800)
         }
       }
     },
     // 修改旧密码
-    async j_pas () {
+    async changePassword () {
       // 修改密码
-      if (this.value.length >= 6) {
-        const { data } = await this.$api.pass.update_pin({ 'pin': this.value })
+      if (this.passwordValue.length >= 6) {
+        const { data } = await this.$api.pass.update_pin({ 'pin': this.passwordValue })
         console.log(data)
         // 旧密码
-        if (this.value === localStorage.getItem('user_pas') && this.New_password === false) {
+        if (this.passwordValue === localStorage.getItem('user_pas') && this.New_password === false) {
           setTimeout(() => {
-            this.value = ''
+            this.passwordValue = ''
             this.New_password = true
             this.again_password = false
-            this.info = '输入新的密码'
+            this.passwordInfo = '输入新的密码'
           }, 500)
-        } else if (this.again_password === false && this.New_password === true && localStorage.getItem('user_pas') !== this.value) {
+        } else if (this.again_password === false && this.New_password === true && localStorage.getItem('user_pas') !== this.passwordValue) {
           // 新密码
-          this.info = '请再次输入'
-          localStorage.setItem('New_password', this.value)
+          this.passwordInfo = '请再次输入'
+          localStorage.setItem('New_password', this.passwordValue)
           setTimeout(() => {
-            this.value = ''
+            this.passwordValue = ''
             this.again_password = true
           }, 500)
-        } else if (this.again_password === true && this.value === localStorage.getItem('New_password')) {
+        } else if (this.again_password === true && this.passwordValue === localStorage.getItem('New_password')) {
           // 再次输入
-          this.info = '修改成功'
-          localStorage.setItem('user_pas', this.value)
+          this.passwordInfo = '修改成功'
+          localStorage.setItem('user_pas', this.passwordValue)
           localStorage.removeItem('New_password')
           setTimeout(() => {
-            this.value = ''
+            this.passwordValue = ''
             this.$router.go(-1)
           }, 1500)
         } else {
@@ -131,25 +136,19 @@ export default {
           this.New_password = false
           this.again_password = false
           setTimeout(() => {
-            this.value = ''
+            this.passwordValue = ''
             this.Tips = false
           }, 1000)
         }
       }
     }
   },
-  components: {
-    [PasswordInput.name]: PasswordInput,
-    [NumberKeyboard.name]: NumberKeyboard,
-    [Icon.name]: Icon,
-    [NavBar.name]: NavBar
-  },
   async activated () {
     if (JSON.parse(localStorage.getItem('userInfo')).is_setup_pin) {
-      this.info = '请输入原密码'
+      this.passwordInfo = '请输入原密码'
       this.title = '修改 BlockPay 密码'
     } else {
-      this.info = '创建新密码'
+      this.passwordInfo = '创建新密码'
       this.title = '创建 BlockPay 新密码'
     }
   }
@@ -160,11 +159,11 @@ export default {
   .password{
     font-size: 18px;
     /*密码输入框*/
-    .enter{
+    .input-password{
       padding-top: 30px;
     }
     /*提示语*/
-    .Tips{
+    .tips{
       text-align: center;
       font-size: 20px;
       overflow: hidden;

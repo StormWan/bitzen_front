@@ -1,6 +1,6 @@
 <template>
   <div class="Order">
-    <div @click="but_submit" class="Order_box" :class="{active: Order}">下单{{symbol}}</div>
+    <div @click="but_submit" class="Order_box" :class="{active: order}">下单{{symbol}}</div>
   </div>
 </template>
 
@@ -16,7 +16,7 @@ export default {
     [Dialog.name]: Dialog
   },
   props: [
-    'Order',
+    'order',
     'index',
     'symbol',
     'wallet',
@@ -28,7 +28,6 @@ export default {
     return {
       title: '',
       side: ''
-      // type: ''
     }
   },
   beforeUpdate () {
@@ -37,7 +36,7 @@ export default {
     // 下单按钮
     but_submit () {
       console.log(JSON.parse(localStorage.getItem('userInfo')).is_setup_pin)
-      if (this.Order === true) {
+      if (this.order === true) {
         if (this.wallet.search('BlockPay') !== -1) {
           if (!JSON.parse(localStorage.getItem('userInfo')).is_setup_pin) {
             this.$router.push({
@@ -61,7 +60,6 @@ export default {
     payment () {
       const obj = { service: 'bb', side: this.side, type: this.type, pair_id: this.id, wallet: this.wallet }
       // buy/sell 买和卖; market/limit 市场表; mixin/blockpay 钱包;
-      // ,
       const memo = msgpack.encode(obj).toString('base64')
       const trace = uuidv4()
       // 买入金额
@@ -70,7 +68,7 @@ export default {
       // const asset = this.pair.base.asset_id
       const asset = this.asset_id
       // EOS_ASSET_ID = "f8127159-e473-389d-8e0c-9ac5a4dc8cc6"
-      const recipient = '28536b52-f840-4366-8619-3872fb5b3164'
+      const recipient = '6161a89b-795d-4cd8-b198-eccf0feb6f02'
       const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}&amount=${amount}&trace=${trace}&memo=${memo}`
       window.location.href = payUrl
       // 支付成功提醒

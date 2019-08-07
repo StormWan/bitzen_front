@@ -11,7 +11,7 @@
     <div class="details_data">
       <!--      买家数据-->
       <div>
-        <div class="buyerBid" v-for="(item,index) in buyerInfo" :key="index">
+        <div class="buyer_bid" v-for="(item,index) in buyerInfo" :key="index">
           <div v-if="!item[0]">- -</div>
           <div v-else>{{item[1].toFixed(2)}}</div>
           <div v-if="!item[1]">- -</div>
@@ -74,7 +74,7 @@ export default {
           color: #FF6347;
         }
       }
-      .buyerBid{ // 买家出价
+      .buyer_bid{ // 买家出价
         display: flex;
         width: 100%;
         div:nth-child(2){

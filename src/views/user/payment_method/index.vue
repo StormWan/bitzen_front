@@ -11,12 +11,12 @@
       </div>
       <div class="content">
         <!--头部收款账号说明-->
-        <header>绑定 <span>{{info[index].name}}</span> 收款账号</header>
+        <header>绑定 <span>{{paymentInfo[index].name}}</span> 收款账号</header>
         <!--收款logo与信息-->
         <div class="logo_info">
           <!--收款logo-->
           <div class="logo">
-            <div class="img" :class="{active: index === act_index}" v-for="(item,index) in info" :key="index" @click="account(index)">
+            <div class="img" :class="{active: index === logoIndex}" v-for="(item,index) in paymentInfo" :key="index" @click="paymentMethods(index)">
               <img :src="item.img" alt="">
             </div>
           </div>
@@ -27,7 +27,7 @@
             </div>
             <!--收款账号-->
             <div class="account">
-              <input type="text" :placeholder="info[index].name" v-model="user_acc" @input="submit_inp">
+              <input type="text" :placeholder="paymentInfo[index].name" v-model="user_account" @input="submit_inp">
             </div>
             <!--银行名称-->
             <div class="bank_name" v-if="index === 2">
@@ -35,16 +35,16 @@
             </div>
             <!--开户支行名称-->
             <div class="bank_account" v-if="index === 2">
-              <input type="text" placeholder="开户支行名称(选填)" v-model="user_bacname" @input="submit_inp">
+              <input type="text" placeholder="开户支行名称(选填)" v-model="user_branchname" @input="submit_inp">
             </div>
           </div>
         </div>
         <!--绑定按钮-->
-        <div class="but">
-          <button type="submit" :class="{active: submit}" @click="but">绑定</button>
+        <div class="binding_button">
+          <button type="submit" :class="{active: submit}" @click="bindingButton">绑定</button>
         </div>
         <!--说明-->
-        <div class="tips" v-for="(item,index) in li" :key="index">
+        <div class="tips" v-for="(item,index) in tipsList" :key="index">
           <div>{{index+1}}.</div>
           <div>{{item.text}}</div>
         </div>
@@ -57,7 +57,7 @@ import { NavBar, Toast } from 'vant'
 export default {
   data () {
     return {
-      li: [
+      tipsList: [
         {
           text: '支持微信、支付宝、银行卡三种支付方式，至少绑定一种'
         },
@@ -68,7 +68,7 @@ export default {
           text: '付款账号必须为已绑定账号，否则原路返回，不予放币'
         }
       ],
-      info: [
+      paymentInfo: [
         {
           name: '微信账号',
           img: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAYCAYAAADpnJ2CAAABiklEQVR4AbWVAWRCURSGf8gIGQyYgUEAgyAAbCCAAAQQGBAYIGAwAAgIwAMJGIsqRTAgQPAQEsKDu//kXHLddV+v+w6f0HnvP/e8/5yLYPzgAXN0yICsSUoyZUeW+l/nlFs45miSRF9scpKRBDM0rhGqacXmRobhE8/wwsQtMZHYyjv/E2swYU9MZPZW1DVGWoLYEQt88ffR/W7DyEIHCn3ab4gVKpjhzbayHlOI9K2QHqZFNsSctKSSCEI78oE17h1PTJy8PnRwjYdNjlanpEdqsLHC04XnltA2+KuWiudoe9y7xQLvWKF6JlSVE5DjxZZf3CRs91nV3zqjXYxw55iuk9PlGQKJGaZ4hoR123lM8cqc3yu+dSqC40BS4lkSdf9zQcY4tSic2LQLQgc5K+jmrl3Wu0DiUkxy4+o72LEJnDISUrDjtKREwTHc0DkalSA2sfPqE62oKWKJDWRmgzd+BKENaUGjLMGjzmbbLoiigmvSk/tMnKa3y0DQ9vdIM9S6gKCK6FqLGX+Ik2Cgy7oRZQAAAABJRU5ErkJggg=='
@@ -87,103 +87,108 @@ export default {
       // 用户名
       user_name: '',
       // 用户账号
-      user_acc: '',
+      user_account: '',
       // 用户银行卡名称
       user_bankname: '',
       // 用户支行名称
-      user_bacname: '',
-      data: [],
-      act_index: 0
+      user_branchname: '',
+      paymentData: '',
+      logoIndex: 0
     }
   },
   methods: {
+    /**
+     * 返回上页面
+     */
     onClickLeft () {
       this.$router.go(-1)
     },
-    // 切换收款方式
-    account (i) {
+    /**
+     * 切换收款方式
+     */
+    paymentMethods (i) {
       this.index = i
-      this.act_index = i
+      this.logoIndex = i
       this.user()
     },
     user () {
       this.submit = false
       if (this.index === 0) {
-        if (this.data.wechat_name && this.data.wechat_account) {
-          this.user_name = this.data.wechat_name
-          this.user_acc = this.data.wechat_account
+        if (this.paymentData.wechat_name && this.paymentData.wechat_account) {
+          this.user_name = this.paymentData.wechat_name
+          this.user_account = this.paymentData.wechat_account
         } else {
           this.user_name = ''
-          this.user_acc = ''
+          this.user_account = ''
           this.user_bankname = ''
-          this.user_bacname = ''
+          this.user_branchname = ''
         }
       }
       if (this.index === 1) {
-        if (this.data.alipay_name && this.data.alipay_account) {
-          this.user_name = this.data.alipay_name
-          this.user_acc = this.data.alipay_account
+        if (this.paymentData.alipay_name && this.paymentData.alipay_account) {
+          this.user_name = this.paymentData.alipay_name
+          this.user_account = this.paymentData.alipay_account
         } else {
           this.user_name = ''
-          this.user_acc = ''
+          this.user_account = ''
           this.user_bankname = ''
-          this.user_bacname = ''
+          this.user_branchname = ''
         }
       }
       if (this.index === 2) {
-        if (this.data.bank_account_name && this.data.bank_account_number && this.data.bank_branch_name) {
-          this.user_name = this.data.bank_account_name
-          this.user_acc = this.data.bank_account_number
-          this.user_bankname = this.data.bank_branch_name
-          if (this.data.bank_name) {
-            this.user_bacname = this.data.bank_name
+        if (this.paymentData.bank_account_name && this.paymentData.bank_account_number && this.paymentData.bank_branch_name) {
+          this.user_name = this.paymentData.bank_account_name
+          this.user_account = this.paymentData.bank_account_number
+          this.user_bankname = this.paymentData.bank_branch_name
+          if (this.paymentData.bank_name) {
+            this.user_branchname = this.paymentData.bank_name
           }
         } else {
           this.user_name = ''
-          this.user_acc = ''
+          this.user_account = ''
           this.user_bankname = ''
-          this.user_bacname = ''
+          this.user_branchname = ''
         }
       }
     },
     // 提交按钮
-    async but () {
+    async bindingButton () {
       if (this.submit) {
         if (this.index !== 2) {
-          if (!this.user_acc || !this.user_name) {
+          if (!this.user_account || !this.user_name) {
             Toast('信息不完整')
           } else {
             if (this.index === 0) {
-              await this.$api.otc.paymentUpdate({ wechat_name: this.user_name, wechat_account: this.user_acc })
+              await this.$api.otc.paymentUpdate({ wechat_name: this.user_name, wechat_account: this.user_account })
               Toast('添加成功')
             } else {
-              await this.$api.otc.paymentUpdate({ alipay_name: this.user_name, alipay_account: this.user_acc })
+              await this.$api.otc.paymentUpdate({ alipay_name: this.user_name, alipay_account: this.user_account })
               Toast('添加成功')
             }
           }
         } else {
-          if (!this.user_acc || !this.user_name || !this.user_bankname) {
+          if (!this.user_account || !this.user_name || !this.user_bankname) {
             Toast('信息不完整')
           } else {
-            await this.$api.otc.paymentUpdate({ bank_account_name: this.user_name, bank_account_number: this.user_acc, bank_branch_name: this.user_bankname, bank_name: this.user_bacname })
+            await this.$api.otc.paymentUpdate({ bank_account_name: this.user_name, bank_account_number: this.user_account, bank_branch_name: this.user_bankname, bank_name: this.user_branchname })
             Toast('添加成功')
           }
         }
         const { data } = await this.$api.otc.paymentUpdate()
-        this.data = data.data
+        this.paymentData = data.data
         this.user()
       }
     },
     // 监听输入框
     submit_inp () {
       if (this.index !== 2) {
-        if (this.user_name && this.user_acc) {
+        if (this.user_name && this.user_account) {
           this.submit = true
         } else {
           this.submit = false
         }
       } else {
-        if (this.user_name && this.user_acc && this.user_bankname) {
+        if (this.user_name && this.user_account && this.user_bankname) {
           this.submit = true
         } else {
           this.submit = false
@@ -194,26 +199,26 @@ export default {
   async activated () {
     const { data } = await this.$api.otc.paymentUpdate()
     if (data.code === 200) {
-      this.data = data.data
+      this.paymentData = data.data
     }
     // 用户名
-    if (this.data.wechat_name) {
-      this.user_name = this.data.wechat_name
+    if (this.paymentData.wechat_name) {
+      this.user_name = this.paymentData.wechat_name
     }
     // 用户账号
-    if (this.data.wechat_account) {
-      this.user_acc = this.data.wechat_account
+    if (this.paymentData.wechat_account) {
+      this.user_account = this.paymentData.wechat_account
     }
     if (sessionStorage.getItem('state')) {
       if (sessionStorage.getItem('state') === '0') {
         this.index = 2
-        this.act_index = 2
+        this.logoIndex = 2
       } else if (sessionStorage.getItem('state') === '1') {
         this.index = 0
-        this.act_index = 0
+        this.logoIndex = 0
       } else {
         this.index = 1
-        this.act_index = 1
+        this.logoIndex = 1
       }
     }
   },
@@ -275,7 +280,7 @@ export default {
         }
       }
       /*绑定按钮*/
-      .but{
+      .binding_button{
         margin-top: 20px;
         margin-bottom: 40px;
         button{

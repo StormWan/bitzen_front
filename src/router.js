@@ -150,9 +150,9 @@ const router = new Router({
     },
     // 实名认证
     {
-      path: '/real_name',
-      name: 'real_name',
-      component: () => import('./views/user/real_name/index.vue'),
+      path: '/realname_verified',
+      name: 'realname_verified',
+      component: () => import('./views/user/realname_verified/index.vue'),
       meta: {
         keepAlive: true,
         Auth: true

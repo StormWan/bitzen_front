@@ -101,7 +101,7 @@ export default {
               // on confirm
               console.log('确定')
               this.$router.push({
-                path: '/real_name'
+                path: '/realname_verified'
               })
               this.but = true
             }).catch(() => {
