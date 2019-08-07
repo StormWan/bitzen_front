@@ -11,7 +11,7 @@ import { Dialog, Toast } from 'vant'
 var msgpack = require('msgpack-lite')
 var uuidv4 = require('uuid/v4')
 export default {
-  name: 'index',
+  name: 'order-button',
   components: {
     [Dialog.name]: Dialog
   },

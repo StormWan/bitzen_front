@@ -8,7 +8,7 @@
         @click-left="onClickLeft"
       />
       <!--order-book-->
-      <detail :sellerInfo="sellerInfo" :buyerInfo="buyerInfo"></detail>
+      <orderBook :sellerInfo="sellerInfo" :buyerInfo="buyerInfo"></orderBook>
 
       <van-tabs @click="tabChange" sticky>
         <!--金额-->
@@ -20,20 +20,20 @@
               </div>
               <div class="price_title">{{price_title}}</div>
             </div>
-            <div class="price_bid" :class="{active: active_index === 1}">{{price_bg}}</div>
+            <div class="price_bid" :class="{active: active_index === 1}">{{price_owned}}</div>
           </div>
         </div>
 <!--        买入-->
         <van-tab title="买入">
           <!--数量价格0-->
           <div class="md-example-child md-example-child-input-item-3" v-if="active_index === 0">
-            <md-field :title="md_title">
+            <md-field :title="exchangeTip">
               <md-input-item
-                type="money"
-                v-model="value"
+                type="inputMoney"
+                v-model="exchangeValue"
                 :brief="brief"
                 :placeholder="placeholder"
-                :size="size"
+                :size="fontSize"
                 is-amount
                 is-highlight
                 ref="input10"
@@ -51,13 +51,13 @@
         <van-tab title="卖出">
           <!--数量价格1-->
           <div class="md-example-child md-example-child-input-item-3" v-if="active_index === 1">
-            <md-field :title="md_title">
+            <md-field :title="exchangeTip">
               <md-input-item
-                type="money"
-                v-model="value"
+                type="inputMoney"
+                v-model="exchangeValue"
                 :brief="brief"
                 :placeholder="placeholder"
-                :size="size"
+                :size="fontSize"
                 is-amount
                 is-highlight
                 ref="input10"
@@ -72,7 +72,7 @@
         </van-tab>
       </van-tabs>
       <!--按钮-->
-      <orderButton :index="active_index" @value_but="value_but" :Order="Order_active" :symbol="symbol" :wallet="wallet_data" :id="pair.id" :asset_id="asset_id" :value="value"></orderButton>
+      <orderButton :index="active_index" @value_but="clearData" :Order="order_active" :symbol="symbol" :wallet="wallet_data" :id="pair.id" :asset_id="asset_id" :value="exchangeValue"></orderButton>
       <!--钱包-->
       <bb_wallet :pair="pair" @wallet="wallet" :index="active_index" :symbol="symbol"></bb_wallet>
       <!--说明-->
@@ -85,11 +85,12 @@ import { Icon, Toast, Switch, Tab, Tabs, NavBar } from 'vant'
 import { InputItem, Field } from 'mand-mobile'
 // eslint-disable-next-line camelcase
 import bb_wallet from '../../../components/wallet_mode'
-import Tips from './Tips_com'
-import details from './details_com'
-import orderButton from './order_but_com'
+import Tips from './tips'
+import orderBook from './order_book'
+import orderButton from './order_button'
 
 export default {
+  name: 'bb-pair',
   components: {
     [Icon.name]: Icon,
     [InputItem.name]: InputItem,
@@ -103,7 +104,7 @@ export default {
     // 提示
     'Tips': Tips,
     // 标题数据
-    'detail': details,
+    'orderBook': orderBook,
     // 下单按钮
     'orderButton': orderButton
   },
@@ -114,30 +115,23 @@ export default {
       best_buy_depth: [],
       best_sell_depth: [],
       // 接收数据
-      pair: [],
+      pair: '',
       active_index: 0,
-      value: '',
+      exchangeValue: '', // 兑换数量
       brief: '',
-      placeholder: '',
-      Order_active: false,
-      md_title: '',
+      placeholder: '请输入兑换数量',
+      order_active: false,
+      exchangeTip: '', // 兑换时候的提示
       input_size: 9,
       buy_price: '',
-      money: '',
-      price_bg: '0',
-      price_logoImg: '',
-      price_title: '',
-      pla_money: '0',
-      // 定时器
-      show: false,
-      time: 10,
-      wallet_data: '',
-      symbol: '',
-      asset_id: ''
+      inputMoney: '',
+      wallet_data: '' // 钱包的数据
     }
   },
   methods: {
-    // input光标
+    /**
+     *     input光标
+     */
     foc_market () {
       document.body.scrollTop = 300
       document.documentElement.scrollTop = 300
@@ -145,45 +139,30 @@ export default {
     wallet (msg) {
       this.wallet_data = msg
     },
-    // 返回上一页
+    /**
+     *     返回上一页
+     */
     onClickLeft () {
       this.$router.go(-1)
       localStorage.removeItem('Currency')
     },
-    // 买入卖出点击点击
+    /**
+     *     买入卖出 Tab 点击事件，切换提示
+     */
     tabChange (e) {
       this.active_index = e
-      this.price_logoImg = ''
       // 红点提示
       if (e === 1) {
-        this.symbol = this.pair.base.symbol
-        this.asset_id = this.pair.base.asset_id
         this.brief = '最小下单 ' + (Math.floor(this.pair.sell_min * 100)) / 100 + ' ' + this.pair.base.symbol + ', 最大下单 ' + ((Math.floor(this.pair.sell_max * 100)) / 100).toFixed(this.pair.sell_decimal_digit) + ' ' + this.pair.base.symbol
-        this.value = ''
-        this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000
-        // input框提示
-        this.placeholder = '请输入兑换数量'
-        if (this.pair.bestorderbookmodel.best_sell_exchange.logo_32) {
-          this.price_logoImg = this.pair.bestorderbookmodel.best_sell_exchange.logo_32
-        }
-        this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
-        this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
+        this.exchangeValue = ''
       } else {
-        this.symbol = this.pair.quote.symbol
-        this.asset_id = this.pair.quote.asset_id
         this.brief = '最小下单 ' + (Math.floor(this.pair.buy_min * 100)) / 100 + ' ' + this.pair.quote.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
-        this.value = ''
-        this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000
-        // input框提示
-        this.placeholder = '请输入兑换数量'
-        if (this.pair.bestorderbookmodel.best_buy_exchange.logo_32) {
-          this.price_logoImg = this.pair.bestorderbookmodel.best_buy_exchange.logo_32
-        }
-        this.price_title = this.pair.bestorderbookmodel.best_buy_exchange.name
-        this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
+        this.exchangeValue = ''
       }
     },
-    // 钱包选择付款
+    /**
+     *     钱包选择付款，提交数据到后台
+     */
     wallet_box () {
       if (!this.triangle_active) {
         this.triangle_active = true
@@ -194,114 +173,142 @@ export default {
       if (data.code === 200) {
         this.pair = data.data
         if (this.active_index === 0) {
-          this.symbol = data.data.quote.symbol
-          this.asset_id = this.pair.quote.asset_id
-          // 渲染
-          if (this.pair.bestorderbookmodel.best_buy_exchange.logo_32) {
-            this.price_logoImg = this.pair.bestorderbookmodel.best_buy_exchange.logo_32
-          }
-          this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
-          this.price_title = this.pair.bestorderbookmodel.best_buy_exchange.name
-          this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000
           this.best_buy_depth = JSON.parse(data.data.bestorderbookmodel.best_buy_depth)
-          this.buyerInfo = this.best_buy_depth.bids.slice(this.item - 10, this.time)
-          this.sellerInfo = this.best_buy_depth.asks.slice(this.item - 10, this.time)
+          this.buyerInfo = this.best_buy_depth.bids.slice(this.item - 10, 10)
+          this.sellerInfo = this.best_buy_depth.asks.slice(this.item - 10, 10)
         } else {
-          this.asset_id = this.pair.base.asset_id
-          this.symbol = data.data.base.symbol
-          // 渲染
-          if (this.pair.bestorderbookmodel.best_sell_exchange.logo_32) {
-            this.price_logoImg = this.pair.bestorderbookmodel.best_sell_exchange.logo_32
-          }
-          this.pla_money = (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
-          this.price_title = this.pair.bestorderbookmodel.best_sell_exchange.name
-          this.price_bg = Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000
           this.best_sell_depth = JSON.parse(data.data.bestorderbookmodel.best_sell_depth)
-          this.buyerInfo = this.best_sell_depth.bids.slice(this.item - 10, this.time)
-          this.sellerInfo = this.best_sell_depth.asks.slice(this.item - 10, this.time)
+          this.buyerInfo = this.best_sell_depth.bids.slice(this.item - 10, 10)
+          this.sellerInfo = this.best_sell_depth.asks.slice(this.item - 10, 10)
         }
       } else {
         Toast('获取数据失败，请刷新页面')
       }
     },
-    value_but (msg) {
-      this.value = ''
+    clearData (msg) {
+      this.exchangeValue = ''
     }
   },
   computed: {
+    // 股票类型
+    symbol () {
+      if (this.pair === '') {
+        return ''
+      } else return this.active_index === 1 ? this.pair.base.symbol : this.pair.quote.symbol
+    },
+    // 用户的 id
+    asset_id () {
+      if (this.pair === '') {
+        return ''
+      } else return this.active_index === 1 ? this.pair.base.asset_id : this.pair.quote.asset_id
+    },
+    price_owned () {
+      if (this.pair === '') {
+        return ''
+      } else {
+        return this.active_index === 1 ? Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000
+          : Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000
+      }
+    },
+    price_title () {
+      if (this.pair === '') {
+        return ''
+      } else {
+        return this.active_index === 1 ? this.pair.bestorderbookmodel.best_sell_exchange.name
+          : this.pair.bestorderbookmodel.best_buy_exchange.name
+      }
+    },
+    pla_money () {
+      if (this.pair === '') {
+        return ''
+      } else {
+        return this.active_index === 1 ? (Math.floor(this.pair.bestorderbookmodel.best_sell_price * 10000) / 10000).toString()
+          : (Math.floor(this.pair.bestorderbookmodel.best_buy_price * 10000) / 10000).toString()
+      }
+    },
+    // 币的 logo
+    price_logoImg () {
+      if (this.pair === '') {
+        return ''
+      } else {
+        if (this.active_index === 1) {
+          return this.pair.bestorderbookmodel.best_sell_exchange.logo_32 ? this.pair.bestorderbookmodel.best_sell_exchange.logo_32 : ''
+        } else if (this.active_index === 0) {
+          return this.pair.bestorderbookmodel.best_buy_exchange.logo_32 ? this.pair.bestorderbookmodel.best_buy_exchange.logo_32 : ''
+        } else return ''
+      }
+    },
     // input框value值监听
     // eslint-disable-next-line vue/return-in-computed-property
-    size (e) {
+    fontSize (e) {
       let that = this
       // 判断active_index为0时的事件
       if (this.active_index === 0) {
-        if (e.value.match(/^\d*(\.?\d{0,3})/g)[0].length + 1 === this.value.length) {
+        if (e.exchangeValue.match(/^\d*(\.?\d{0,3})/g)[0].length + 1 === this.exchangeValue.length) {
           that.input_size = that.value.length
         } else {
           that.input_size = 9
         }
-        if (this.value) {
-          that.md_title = '请输入正确金额'
-          if (this.value === '0' || this.value === '.' || Math.floor(this.pair.buy_min * 100) / 100 > this.value) {
-            that.Order_active = false
+        if (this.exchangeValue) {
+          that.exchangeTip = '请输入正确金额'
+          if (this.exchangeValue === '0' || this.exchangeValue === '.' || Math.floor(this.pair.buy_min * 100) / 100 > this.exchangeValue) {
+            that.order_active = false
           } else {
-            that.Order_active = true
-            that.md_title = '大约可以兑换' + ' ' + (this.value / this.pair.bestorderbookmodel.best_buy_price).toFixed(5) + ' ' + this.pair.base.symbol
+            that.order_active = true
+            that.exchangeTip = '大约可以兑换' + ' ' + (this.exchangeValue / this.pair.bestorderbookmodel.best_buy_price).toFixed(5) + ' ' + this.pair.base.symbol
             // 计算超出金额
-            if (parseFloat(this.value) > parseFloat(this.pair.buy_max)) {
-              that.Order_active = false
-              that.brief = '你已超出约' + ' ' + (this.value - this.pair.buy_max).toFixed(3) + ' ' + this.pair.quote.symbol
+            if (parseFloat(this.exchangeValue) > parseFloat(this.pair.buy_max)) {
+              that.order_active = false
+              that.brief = '你已超出约' + ' ' + (this.exchangeValue - this.pair.buy_max).toFixed(3) + ' ' + this.pair.quote.symbol
             } else {
               that.brief = '最小下单 ' + Math.floor(this.pair.buy_min * 100) / 100 + ' ' + this.pair.quote.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
             }
           }
         } else {
-          that.Order_active = false
-          that.md_title = '兑换数量'
+          that.order_active = false
+          that.exchangeTip = '兑换数量'
         }
       }
       // 判断active_index为1时的事件
       if (this.active_index === 1) {
-        if (e.value.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.value.length) {
+        if (e.exchangeValue.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.exchangeValue.length) {
           that.input_size = that.value.length
         } else {
           that.input_size = 9
         }
-        that.md_title = ''
-        if (this.value) {
-          that.md_title = '请输入正确金额'
-          if (this.value === '0' || this.value === '.' || Math.floor(this.pair.sell_min * 100) / 100 > this.value) {
-            that.Order_active = false
+        that.exchangeTip = ''
+        if (this.exchangeValue) {
+          that.exchangeTip = '请输入正确金额'
+          if (this.exchangeValue === '0' || this.exchangeValue === '.' || Math.floor(this.pair.sell_min * 100) / 100 > this.exchangeValue) {
+            that.order_active = false
           } else {
-            that.Order_active = true
-            that.md_title = '大约可以兑换' + ' ' + (this.value * this.pair.bestorderbookmodel.best_sell_price).toFixed(4) + ' ' + this.pair.quote.symbol
+            that.order_active = true
+            that.exchangeTip = '大约可以兑换' + ' ' + (this.exchangeValue * this.pair.bestorderbookmodel.best_sell_price).toFixed(4) + ' ' + this.pair.quote.symbol
             // 计算超出金额
-            if (parseFloat(this.value) > parseFloat(this.pair.sell_max)) {
-              that.Order_active = false
-              that.brief = '你已超出约' + ' ' + (this.value - this.pair.sell_max).toFixed(2) + ' ' + this.pair.base.symbol
+            if (parseFloat(this.exchangeValue) > parseFloat(this.pair.sell_max)) {
+              that.order_active = false
+              that.brief = '你已超出约' + ' ' + (this.exchangeValue - this.pair.sell_max).toFixed(2) + ' ' + this.pair.base.symbol
             } else {
               that.brief = '最小下单 ' + Math.floor(this.pair.sell_min * 100) / 100 + ' ' + this.pair.base.symbol + ', 最大下单 ' + (Math.floor(this.pair.sell_max * 100) / 100).toFixed(this.pair.sell_decimal_digit) + ' ' + this.pair.base.symbol
             }
           }
         } else {
-          that.Order_active = false
-          that.md_title = '兑换数量'
+          that.order_active = false
+          that.exchangeTip = '兑换数量'
         }
       }
     },
     fixed () {
       let that = this
-      if (this.money) {
-        if (that.value) {
-          if (this.active_index === 0) {
-            that.md_title = '大约可以兑换' + ' ' + (that.value / this.money).toFixed(5) + ' ' + that.pair.base.symbol
-          }
-          if (this.active_index === 1) {
-            that.md_title = '大约可以兑换' + ' ' + (this.money / this.value).toFixed(5) + ' ' + that.pair.base.symbol
-          }
+      if (this.inputMoney && that.value) {
+        if (this.active_index === 0) {
+          that.exchangeTip = '大约可以兑换' + ' ' + (that.value / this.inputMoney).toFixed(5) + ' ' + that.pair.base.symbol
+        }
+        if (this.active_index === 1) {
+          that.exchangeTip = '大约可以兑换' + ' ' + (this.inputMoney / this.exchangeValue).toFixed(5) + ' ' + that.pair.base.symbol
         }
       }
-      return that.md_title
+      return that.exchangeTip
     }
   },
   // keep-alive 组件激活时调用

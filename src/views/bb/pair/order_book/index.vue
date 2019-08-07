@@ -35,7 +35,7 @@
 import { Row, NavBar, Col } from 'vant'
 
 export default {
-  name: 'index',
+  name: 'order-book',
   components: {
     [Row.name]: Row,
     [Col.name]: Col,
