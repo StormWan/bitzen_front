@@ -1,14 +1,12 @@
 <template>
     <div>
-      <div class="title">
         <van-nav-bar
           :title="title"
           left-text="返回"
           left-arrow
           @click-left="onClick"
         />
-      </div>
-      <div v-html="detail"></div>
+      <div v-html="detail" class="active-detail"></div>
     </div>
 </template>
 
@@ -52,5 +50,14 @@ export default {
 }
 </script>
 
-<style scoped lang="less">
+<style scoped>
+  .active-detail{
+    padding: 10px;
+    color: #080808;
+    margin: 5px 0;
+  }
+  .active-detail>>> p{
+    font-size: 12px;
+    line-height: normal;
+  }
 </style>

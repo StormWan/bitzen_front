@@ -138,6 +138,16 @@ const router = new Router({
         Auth: true
       }
     },
+    // BlackPay 钱包
+    {
+      path: '/wallet',
+      name: 'wallet',
+      component: () => import('./views/user/wallet/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
     // 密码
     {
       path: '/Password',
@@ -160,9 +170,9 @@ const router = new Router({
     },
     // 注册
     {
-      path: '/Sign_in',
-      name: 'Sign_in',
-      component: () => import('./views/user/Sign_in/index.vue'),
+      path: '/login',
+      name: 'login',
+      component: () => import('./views/user/login/index.vue'),
       meta: {
         keepAlive: true,
         Auth: true

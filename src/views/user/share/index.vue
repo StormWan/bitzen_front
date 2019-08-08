@@ -217,7 +217,7 @@ export default {
             text-align: center;
             line-height: 115px;
             color: #32CD32;
-            font-size: 25px;
+            font-size: 40px;
             border-top: 1px white solid;
             border-bottom: 1px white solid;
             display:inline-block;

@@ -105,6 +105,34 @@ export default {
     [Icon.name]: Icon,
     [NavBar.name]: NavBar
   },
+  async mounted () {
+    await this.getWallet()
+  },
+  computed: {
+    lists: function () {
+      let _this = this
+      let arrByZM = []
+      for (let i = 0; i < this.wallet_data.length; i++) {
+        // for循环数据中的每一项（根据name值）
+        if (this.wallet_data[i].symbol.toLowerCase().search(this.searchVal.toLowerCase()) !== -1 || this.wallet_data[i].name.toLowerCase().search(this.searchVal.toLowerCase()) !== -1) {
+          // 判断输入框中的值是否可以匹配到数据，如果匹配成功
+          arrByZM.push(this.wallet_data[i])
+          // 向空数组中添加数据
+        }
+      }
+      // 判断，如果要letter不为空，说明要进行排序
+      if (this.letter !== '') {
+        arrByZM.sort(function (a, b) {
+          if (_this.original) {
+            return b[_this.letter] - a[_this.letter]
+          } else {
+            return a[_this.letter] - b[_this.letter]
+          }
+        })
+      }
+      return arrByZM
+    }
+  },
   methods: {
     // 箭头
     icon_arrow () {
@@ -163,10 +191,10 @@ export default {
       }
     },
     // 数据获取
-    async wallet () {
+    async getWallet () {
       const { data } = await this.$api.wallet.walletAssets()
-      this.surface = data.data[0].asset.symbol
       if (data.code === 200) {
+        this.surface = data.data[0].asset.symbol
         for (let i = 0; i < data.data.length; i++) {
           this.wallet_data.push(data.data[i].asset)
           this.money_box += (data.data[i].asset.price_usd * data.data[i].asset.balance)
@@ -188,34 +216,6 @@ export default {
       })
       localStorage.setItem('lists', JSON.stringify(this.lists[i]))
     }
-  },
-  computed: {
-    lists: function () {
-      let _this = this
-      let arrByZM = []
-      for (let i = 0; i < this.wallet_data.length; i++) {
-        // for循环数据中的每一项（根据name值）
-        if (this.wallet_data[i].symbol.toLowerCase().search(this.searchVal.toLowerCase()) !== -1 || this.wallet_data[i].name.toLowerCase().search(this.searchVal.toLowerCase()) !== -1) {
-          // 判断输入框中的值是否可以匹配到数据，如果匹配成功
-          arrByZM.push(this.wallet_data[i])
-          // 向空数组中添加数据
-        }
-      }
-      // 判断，如果要letter不为空，说明要进行排序
-      if (this.letter !== '') {
-        arrByZM.sort(function (a, b) {
-          if (_this.original) {
-            return b[_this.letter] - a[_this.letter]
-          } else {
-            return a[_this.letter] - b[_this.letter]
-          }
-        })
-      }
-      return arrByZM
-    }
-  },
-  async created () {
-    await this.wallet()
   }
 }
 </script>
