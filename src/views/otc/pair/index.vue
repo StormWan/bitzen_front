@@ -9,7 +9,7 @@
         <!--买入-->
         <van-tab title="买入">
           <!--买入信息-->
-          <div v-if="active_index === 0" class="money_Calcu">
+          <div v-if="activeIndex === 0" class="money_Calcu">
             <!--金额-->
             <div class="money">
               <span>￥</span>
@@ -17,8 +17,8 @@
             </div>
             <!--买入计算-->
             <div class="Calculation">
-              <div>至少支付 ￥<span class="red">{{Math.round((buy_price * otcPair.buy_min) * 100) / 100}}</span>,购买<span class="red">{{Math.round(otcPair.buy_min * 100) / 100}}</span><span>{{symbol}}</span></div>
-              <div>至支多付 ￥<span class="red">{{Math.round((buy_price * otcPair.buy_max) * 100) / 100}}</span>,购买 <span class="red">{{Math.round(otcPair.buy_max * 100) / 100}}</span> 个 <span>{{symbol}}</span></div>
+              <div>至少支付 ￥<span class="red">{{buyMinCny}}</span>,购买<span class="red">{{buyMinAsset}}</span><span>{{symbol}}</span></div>
+              <div>至支多付 ￥<span class="red">{{buyMaxCny}}</span>,购买 <span class="red">{{buyMaxAsset}}</span> 个 <span>{{symbol}}</span></div>
             </div>
             <!--金额计算-->
             <div class="md-example-child md-example-child-input-item-1">
@@ -27,30 +27,30 @@
                 <md-input-item
                   @focus="foc_CNY"
                   type="Number"
-                  v-model="inp_CNY"
+                  v-model="inputCnyAmount"
                   :size="input_monitoring"
                   title="CNY 金额"
                   placeholder="CNY 金额"
                   is-title-latent
                   clearable
-                  :maxlength="input_mon_size"
+                  :maxlength="inputCnyMaxLength"
                 ></md-input-item>
                 <div class="CNY_money" v-if="beyond">请填入正确金额</div>
                 <!--预估到账-->
                 <md-input-item
                   type="Number"
-                  v-model="inp_market"
+                  v-model="inputAssetAmount"
                   :title="'预估到账' + symbol + '数量'"
                   :placeholder="'预估到账' + symbol + '数量'"
                   is-title-latent
                   clearable
                   :size="result_monitoring"
-                  :maxlength="input_res_size"
+                  :maxlength="inputAssetMaxLength"
                   @focus="foc_market"
                 ></md-input-item>
               </md-field>
               <!--下单提示说明-->
-              <div class="ts_text" v-if="otcPair.pair">到账<span>{{symbol}}</span>数量以<span>实际交割价</span>为准</div>
+              <div class="ts_text">到账<span>{{symbol}}</span>数量以<span>实际交割价</span>为准</div>
             </div>
           </div>
         </van-tab>
@@ -58,7 +58,7 @@
         <!--卖出-->
         <van-tab title="卖出">
           <!--买入信息-->
-          <div v-if="active_index === 1" class="money_Calcu">
+          <div v-if="activeIndex === 1" class="money_Calcu">
             <!--金额-->
             <div class="money">
               <span>￥</span>
@@ -66,8 +66,8 @@
             </div>
             <!--买入计算-->
             <div class="Calculation">
-              <div>最小出售 ￥ <span class="red">{{Math.round(otcPair.sell_min * 100) / 100}}</span> 个 <span>{{symbol}}</span>,约到账￥<span class="red">{{Math.round((sell_price * otcPair.sell_min) * 100) / 100}}</span></div>
-              <div>最大出售 ￥ <span class="red">{{Math.round(otcPair.sell_max * 100) / 100}}</span> 个 <span>{{symbol}}</span>,约到账 <span class="red">{{Math.round((sell_price * otcPair.sell_max) * 100) / 100}}</span></div>
+              <div>最小出售 ￥ <span class="red">{{sellMinAsset}}</span> 个 <span>{{symbol}}</span>,约到账￥<span class="red">{{sellMinCny}}</span></div>
+              <div>最大出售 ￥ <span class="red">{{sellMaxAsset}}</span> 个 <span>{{symbol}}</span>,约到账 <span class="red">{{sellMaxCny}}</span></div>
             </div>
             <!--金额计算-->
             <div class="md-example-child md-example-child-input-item-1">
@@ -75,27 +75,27 @@
                 <!--金额-->
                 <md-input-item
                   type="Number"
-                  v-model="inp_market"
+                  v-model="inputAssetAmount"
                   :size="result_monitoring"
                   :title="'卖出' + symbol + '数量'"
                   :placeholder="'卖出' + symbol + '数量'"
                   is-title-latent
                   clearable
                   @focus="foc_market"
-                  :maxlength="input_res_size"
+                  :maxlength="inputAssetMaxLength"
                 ></md-input-item>
                 <div class="CNY_money" v-if="beyond">请输入有效数</div>
                 <!--预估到账-->
                 <md-input-item
                   type="Number"
-                  v-model="inp_CNY"
+                  v-model="inputCnyAmount"
                   title="预估到账 CNY 金额"
                   placeholder="预估到账 CNY 金额"
                   is-title-latent
                   clearable
                   :size="input_monitoring"
                   @focus="foc_CNY"
-                  :maxlength="input_mon_size"
+                  :maxlength="inputCnyMaxLength"
                 ></md-input-item>
               </md-field>
               <!--下单提示说明-->
@@ -107,11 +107,11 @@
 
       <!--下单-->
       <div class="Place">
-        <div @click="but_submit" class="Place_box" :class="{active: Place_active}">下单</div>
+        <div @click="but_submit" class="Place_box" :class="{active: buttonActive}">下单</div>
       </div>
 
       <!--Mixin 钱包-->
-      <div v-if="active_index === 0">
+      <div v-if="activeIndex === 0">
         <otc_wallet :symbol="symbol"></otc_wallet>
       </div>
 
@@ -125,24 +125,29 @@
 import { NumberKeyboard, Tab, Tabs, Toast } from 'vant'
 import { InputItem, Field } from 'mand-mobile'
 import Footer from './footer'
-import otctitle from '../../../components/otc_title'
-// eslint-disable-next-line camelcase
-import otc_wallet from '../../../components/otc_wallet'
+import otcTitle from '../../../components/otc_title'
+import Wallet from '../../../components/otc_wallet'
+
 export default {
+  components: {
+    [NumberKeyboard.name]: NumberKeyboard,
+    [Tab.name]: Tab,
+    [Tabs.name]: Tabs,
+    [InputItem.name]: InputItem,
+    [Field.name]: Field,
+    [Toast.name]: Toast,
+    [Footer.name]: Footer,
+    'otc_wallet': Wallet,
+    'otctitle': otcTitle
+  },
   data () {
     return {
       // 接收数据
       otcPair: null,
-      active_index: 0,
-      inp_CNY: '',
-      inp_market: '',
-      beyond: false,
-      Place_active: false,
+      activeIndex: 0,
+      inputCnyAmount: '',
+      inputAssetAmount: '',
       // 计算金额
-      buy_Price: '',
-      sell_price: '',
-      input_mon_size: '',
-      input_res_size: '',
       buyData: false
     }
   },
@@ -151,52 +156,32 @@ export default {
     async getPair () {
       const { data } = await this.$api.otc.otcPairDetail(this.$route.params.id)
       if (data.code !== 200) {
-        Toast('服务器异常,请稍后再试')
+        Toast('网络异常,请刷新重试')
       } else {
         this.otcPair = data.data
-        if (!this.otcPair.pair) {
-          this.buy_price = this.otcPair.setting.usdt_buy_price
-          this.sell_price = this.otcPair.setting.usdt_sell_price
-        } else {
-          this.buy_price = (this.otcPair.pair.bestorderbookmodel.best_buy_price * this.otcPair.setting.usdt_buy_price).toFixed(2)
-          this.sell_price = (this.otcPair.pair.bestorderbookmodel.best_sell_price * this.otcPair.setting.usdt_sell_price).toFixed(2)
-          this.buy_money()
-        }
       }
     },
     // 买入卖出点击
     onClick (index, title) {
-      this.inp_CNY = ''
-      this.inp_market = ''
-      this.active_index = index
-      this.buy_money()
+      this.inputCnyAmount = ''
+      this.inputAssetAmount = ''
+      this.activeIndex = index
     },
     // 下单按钮
     but_submit () {
       // quote
-      if (this.Place_active) {
-        sessionStorage.setItem('page', this.active_index)
+      if (this.buttonActive) {
+        sessionStorage.setItem('page', this.activeIndex)
         this.$router.push({
           path: '/payment'
         })
-        let side = ''
-        // eslint-disable-next-line no-unused-vars
+        const side = this.activeIndex === 0 ? 'buy' : 'sell'
+        const amount = this.activeIndex === 0 ? this.inputCnyAmount : this.inputAssetAmount
         let price = ''
-        // eslint-disable-next-line camelcase
-        let inp_data = ''
-        if (this.active_index === 0) {
-          side = 'buy'
-          // eslint-disable-next-line camelcase
-          inp_data = this.inp_CNY
-        } else {
-          side = 'sell'
-          // eslint-disable-next-line camelcase
-          inp_data = this.inp_market
-        }
         if (this.otcPair.pair) {
-          price = this.buy_Price
+          price = this.buy_price()
         } else {
-          if (this.active_index === 0) {
+          if (this.activeIndex === 0) {
             price = this.buy_price
           } else {
             price = this.sell_price
@@ -205,7 +190,7 @@ export default {
         let order = {
           otc_pair: this.otcPair.id,
           side: side,
-          amount: inp_data,
+          amount: amount,
           price: price
         }
         sessionStorage.setItem('Obj', JSON.stringify(order))
@@ -214,26 +199,10 @@ export default {
     // input光标
     foc_market () {
       this.buyData = false
-      document.body.scrollTop = 170
-      document.documentElement.scrollTop = 170
     },
     // input光标
     foc_CNY () {
       this.buyData = true
-      document.body.scrollTop = 170
-      document.documentElement.scrollTop = 170
-    },
-    buy_money () {
-      if (this.otcPair.pair) {
-        // 判断买入卖出
-        if (this.active_index === 0) {
-          // 计算金额
-          this.buy_Price = (this.otcPair.pair.bestorderbookmodel.best_buy_price * this.otcPair.setting.usdt_buy_price).toFixed(2)
-        } else {
-          // 计算金额
-          this.buy_Price = (this.otcPair.pair.bestorderbookmodel.best_sell_price * this.otcPair.setting.usdt_sell_price).toFixed(2)
-        }
-      }
     }
   },
   // 计算
@@ -249,141 +218,136 @@ export default {
     symbolIcon () {
       return this.otcPair === null ? '' : this.otcPair.asset.icon_url
     },
+    buyMinAsset () {
+      return this.otcPair === null ? 0 : this.otcPair.buy_min
+    },
+    buyMinCny () {
+      return (this.otcPair === null ? 0 : this.buy_price * this.otcPair.buy_min).toFixed(2)
+    },
+    buyMaxAsset () {
+      return this.otcPair === null ? 0 : this.otcPair.buy_max
+    },
+    buyMaxCny () {
+      return (this.otcPair === null ? 0 : this.buy_price * this.otcPair.buy_max).toFixed(2)
+    },
+    sellMinAsset () {
+      return this.otcPair === null ? 0 : this.otcPair.sell_min
+    },
+    sellMinCny () {
+      return (this.otcPair === null ? 0 : this.sell_price * this.otcPair.sell_min).toFixed(2)
+    },
+    sellMaxAsset () {
+      return (this.otcPair === null ? 0 : this.otcPair.sell_max)
+    },
+    sellMaxCny () {
+      return (this.otcPair === null ? 0 : this.sell_price * this.otcPair.sell_max).toFixed(2)
+    },
     buy_price () {
+      if (this.otcPair === null) {
+        return 0
+      }
       if (!this.otcPair.is_portfolio) {
         return this.otcPair.setting.usdt_buy_price
       } else {
         return (this.otcPair.pair.bestorderbookmodel.best_buy_price * this.otcPair.setting.usdt_buy_price).toFixed(2)
       }
     },
+    sell_price () {
+      if (this.otcPair === null) {
+        return 0
+      }
+      if (!this.otcPair.is_portfolio) {
+        return this.otcPair.setting.usdt_sell_price
+      } else {
+        return (this.otcPair.pair.bestorderbookmodel.best_sell_price * this.otcPair.setting.usdt_sell_price).toFixed(2)
+      }
+    },
+    beyond () {
+      if (this.otcPair === null) {
+        return false
+      }
+      return !(this.inputAssetAmount >= (Math.round(this.otcPair.buy_min * 100) / 100) && this.inputAssetAmount <= (Math.round(this.otcPair.buy_max * 100) / 100))
+    },
+    buttonActive () {
+      return !this.beyond
+    },
+    inputCnyMaxLength () {
+      if (this.otcPair !== null) {
+        if (this.inputCnyAmount.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.inputCnyAmount.length) {
+          return this.inputCnyAmount.length
+        } else {
+          return 9
+        }
+      }
+      return 0
+    },
+    inputAssetMaxLength () {
+      if (this.otcPair !== null) {
+        if (this.inputAssetAmount.match(/^\d*(\.?\d{0,3})/g)[0].length + 1 === this.inputAssetAmount.length) {
+          return this.inputAssetAmount.length
+        } else {
+          return 9
+        }
+      }
+      return 0
+    },
     input_monitoring (e) {
       let that = this
       if (that.buyData) {
-        if (that.inp_CNY) {
-          // 判断是否USDA
+        if (that.inputCnyAmount) {
+          // 判断是否USDT
           if (this.otcPair.pair) {
-            if (that.inp_CNY.match(/^\d*(\.?\d{0,1})/g)[0].length + 1 === this.inp_CNY.length) {
-              that.input_mon_size = this.inp_CNY.length
-            } else {
-              that.input_mon_size = 9
-            }
-            that.inp_market = (e.inp_CNY / that.buy_Price).toFixed(4)
-            if (that.inp_market >= (Math.round(that.otcPair.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.buy_max * 100) / 100)) {
-              that.Place_active = true
-              that.beyond = false
-            } else {
-              // 输入提示提示
-              that.beyond = true
-              that.Place_active = false
-            }
+            that.inputAssetAmount = (e.inputCnyAmount / that.buy_Price).toFixed(4)
           } else {
-            // USDA
-            if (that.active_index === 0) {
-              that.inp_market = (e.inp_CNY / this.otcPair.setting.usdt_buy_price).toFixed(4)
-              if (that.inp_market >= (Math.round(that.otcPair.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.buy_max * 100) / 100)) {
-                that.Place_active = true
-                that.beyond = false
-              } else {
-                that.Place_active = false
-                that.beyond = true
-              }
+            // USDT
+            if (that.activeIndex === 0) {
+              that.inputAssetAmount = (e.inputCnyAmount / this.otcPair.setting.usdt_buy_price).toFixed(4)
             } else {
-              that.inp_market = (e.inp_CNY / this.otcPair.setting.usdt_sell_price).toFixed(4)
-              if (that.inp_market >= (Math.round(that.otcPair.sell_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.sell_max * 100) / 100)) {
-                that.Place_active = true
-              } else {
-                that.Place_active = false
-              }
+              that.inputAssetAmount = (e.inputCnyAmount / this.otcPair.setting.usdt_sell_price).toFixed(4)
             }
           }
         } else {
-          that.inp_market = ''
-          // 输入提示提示
-          that.beyond = false
+          that.inputAssetAmount = ''
         }
       }
     },
     // input框价格计算结果判断监听
-    // eslint-disable-next-line vue/return-in-computed-property
     result_monitoring (e) {
       let that = this
       if (!that.buyData) {
-        if (that.inp_market) {
+        if (that.inputAssetAmount) {
           // 判断是否USDT
           if (this.otcPair.pair) {
-            if (e.inp_market.match(/^\d*(\.?\d{0,3})/g)[0].length + 1 === this.inp_market.length) {
-              e.input_res_size = this.inp_market.length
+            if (e.inputAssetAmount.match(/^\d*(\.?\d{0,3})/g)[0].length + 1 === this.inputAssetAmount.length) {
+              e.inputAssetMaxLength = this.inputAssetAmount.length
             } else {
-              e.input_res_size = 9
+              e.inputAssetMaxLength = 9
             }
-            that.inp_CNY = (that.buy_Price * e.inp_market).toFixed(2)
-            if (that.inp_market >= (Math.round(that.otcPair.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.buy_max * 100) / 100)) {
-              that.Place_active = true
-              that.beyond = false
-            } else {
-              // 输入提示提示
-              that.beyond = true
-              that.Place_active = false
-            }
+            that.inputCnyAmount = (that.buy_Price * e.inputAssetAmount).toFixed(2)
           } else {
             // USDT
-            if (that.active_index === 0) {
-              that.inp_CNY = (e.inp_market * that.otcPair.setting.usdt_buy_price).toFixed(2)
-              if (that.inp_market >= (Math.round(that.otcPair.buy_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.buy_max * 100) / 100)) {
-                that.Place_active = true
-                that.beyond = false
-              } else {
-                that.Place_active = false
-                that.beyond = true
-              }
+            if (that.activeIndex === 0) {
+              that.inputCnyAmount = (e.inputAssetAmount * that.otcPair.setting.usdt_buy_price).toFixed(2)
             } else {
-              that.inp_CNY = (e.inp_market * that.otcPair.setting.usdt_sell_price).toFixed(2)
-              if (that.inp_market >= (Math.round(that.otcPair.sell_min * 100) / 100) && that.inp_market <= (Math.round(that.otcPair.sell_max * 100) / 100)) {
-                that.Place_active = true
-                that.beyond = false
-              } else {
-                that.Place_active = false
-                that.beyond = true
-              }
+              that.inputCnyAmount = (e.inputAssetAmount * that.otcPair.setting.usdt_sell_price).toFixed(2)
             }
           }
         } else {
-          that.inp_CNY = ''
-          that.Place_active = false
-          that.beyond = false
+          that.inputCnyAmount = ''
         }
       }
     }
   },
-  components: {
-    [NumberKeyboard.name]: NumberKeyboard,
-    [Tab.name]: Tab,
-    [Tabs.name]: Tabs,
-    [InputItem.name]: InputItem,
-    [Field.name]: Field,
-    [Toast.name]: Toast,
-    [Footer.name]: Footer,
-    'otc_wallet': otc_wallet,
-    'otctitle': otctitle
-  },
-  // keep-alive 组件激活时调用
   async activated () {
     await this.getPair()
-    this.set = true
-    let set = await setInterval(() => {
-      if (this.set) {
-        this.getPair()
-      } else {
-        clearInterval(set)
-      }
-    }, 3000)
-  },
-  watch: {
-    '$route' () {
-      this.set = false
-      this.inp_market = ''
-      this.inp_CNY = ''
-    }
+    // 设置定时器，每隔2秒获取数据
+    let timer = await setInterval(() => {
+      this.getPair()
+    }, 4000)
+    // 在离开页面时清楚定时器
+    this.$once('hook:deactivated', () => {
+      clearInterval(timer)
+    })
   }
 }
 </script>
