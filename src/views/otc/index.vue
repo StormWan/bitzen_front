@@ -74,7 +74,7 @@ export default {
     // 点击跳转
     onItemClick (id) {
       this.$router.push({
-        name: 'transaction',
+        name: 'otc-pair',
         params: {
           id: id
         }

@@ -19,6 +19,46 @@ const router = new Router({
         Auth: true
       }
     },
+    // 法币交易
+    {
+      path: '/otc/pair/:id',
+      name: 'otc-pair',
+      component: () => import('./views/otc/pair/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    // 付款方式
+    {
+      path: '/payment',
+      name: 'payment',
+      component: () => import('./views/otc/order/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    // 法币买入订单详情
+    {
+      path: '/otc_order/:id',
+      name: 'otc_order',
+      component: () => import('./views/otc/order/buy-detail/index.vue'),
+      meta: {
+        keepAlive: false,
+        Auth: true
+      }
+    },
+    // 法币卖出订单
+    {
+      path: '/otc_out/:id',
+      name: 'otc_out',
+      component: () => import('./views/otc/order/sell-detail/index.vue'),
+      meta: {
+        keepAlive: false,
+        Auth: true
+      }
+    },
     // 订单
     {
       path: '/orders',
@@ -65,46 +105,6 @@ const router = new Router({
       component: () => import('./views/account/login-phone.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
-      }
-    },
-    // 法币交易
-    {
-      path: '/transaction/:id',
-      name: 'transaction',
-      component: () => import('./views/otc/otc-detail/index.vue'),
-      meta: {
-        keepAlive: true,
-        Auth: true
-      }
-    },
-    // 付款方式
-    {
-      path: '/payment',
-      name: 'payment',
-      component: () => import('./views/otc/order/index.vue'),
-      meta: {
-        keepAlive: true,
-        Auth: true
-      }
-    },
-    // 法币买入订单详情
-    {
-      path: '/otc_order/:id',
-      name: 'otc_order',
-      component: () => import('./views/otc/order/buy-detail/index.vue'),
-      meta: {
-        keepAlive: false,
-        Auth: true
-      }
-    },
-    // 法币卖出订单
-    {
-      path: '/otc_out/:id',
-      name: 'otc_out',
-      component: () => import('./views/otc/order/sell-detail/index.vue'),
-      meta: {
-        keepAlive: false,
         Auth: true
       }
     },
@@ -281,7 +281,7 @@ router.beforeEach(async (to, from, next) => {
       return
     }
     // Mixin认证
-    const clientId = '6161a89b-795d-4cd8-b198-eccf0feb6f02'
+    const clientId = '28536b52-f840-4366-8619-3872fb5b3164'
     const scope = 'PROFILE:READ+ASSETS:READ+PHONE:READ'
     const oauthUrl = `https://mixin.one/oauth/authorize?client_id=${clientId}&scope=${scope}&code_challenge=PKCE`
     const code = getUrlKey('code')

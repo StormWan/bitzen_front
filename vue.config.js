@@ -2,7 +2,6 @@ const autoprefixer = require('autoprefixer')
 const pxtorem = require('postcss-pxtorem')
 const path = require('path')
 const poststylus = require('poststylus')
-// const pxtorem = require('postcss-pxtorem')
 const resolve = file => path.resolve(__dirname, file)
 
 module.exports = {
@@ -23,13 +22,11 @@ module.exports = {
       },
       stylus: {
         use: [
-          poststylus([
-            pxtorem({
-              rootValue: 100,
-              propWhiteList: []
-            }),
-            'autoprefixer'
-          ])
+          poststylus(pxtorem({
+            rootValue: 100,
+            minPixelValue: 2,
+            propWhiteList: []
+          }))
         ],
         import: [
           resolve('./src/assets/mant/theme.custom')
