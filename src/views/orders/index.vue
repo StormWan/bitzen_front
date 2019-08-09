@@ -1,7 +1,7 @@
 <template>
   <div class="lend">
     <van-tabs v-model="active" sticky>
-      <van-tab v-for="(item, index) in titles" :title="item.title" :key="index">
+      <van-tab v-for="(item, index) in bbTitles" :title="item.title" :key="index">
         <div v-if="index === 0" class="bb_otc">
           <bb_order></bb_order>
         </div>
@@ -29,7 +29,7 @@ export default {
   data () {
     return {
       active: 0,
-      titles: [
+      bbTitles: [
         {
           title: '币币'
         },
