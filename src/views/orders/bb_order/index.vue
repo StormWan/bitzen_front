@@ -1,7 +1,7 @@
 <template>
     <div class="bb_order">
       <div class="title">
-        <div v-for="(item,index) in title" :key="index" @click="title_data(index)" :class="{active: index === act_index}">{{item.title}}</div>
+        <div v-for="(item,index) in orderTitle" :key="index" @click="changeProcessTab(index)" :class="{active: index === process_tab_index}">{{item.title}}</div>
       </div>
       <div class="BG" v-for="(item,index) in lists" :key="index">
         <!--买入订单详情-->
@@ -104,8 +104,8 @@
         </div>
       </div>
       <!--加载数据loading图-->
-      <div class="load" v-if="lod"><van-loading type="spinner" /></div>
-      <div class="bottom" v-else>{{bot}}</div>
+      <div class="load" v-if="ifLoading"><van-loading type="spinner" /></div>
+      <div class="bottom" v-else>{{bottomTips}}</div>
     </div>
 </template>
 
@@ -113,150 +113,6 @@
 import { Field, DetailItem, Tag, Bill } from 'mand-mobile'
 import { Icon, Progress, Toast, NavBar, Loading } from 'vant'
 export default {
-  data () {
-    return {
-      value: 1,
-      color: 'red',
-      order: [],
-      order_index: Number,
-      title: [
-        {
-          title: '进行中'
-        },
-        {
-          title: '交易完成'
-        },
-        {
-          title: '交易失败'
-        }
-      ],
-      title_suo: 'paid',
-      act_index: 0,
-      limit: 10,
-      offset: 0,
-      state: '=paid',
-      transfer_state: '!==completed',
-      scr_off: true,
-      // 加载数据loading图
-      bot: '',
-      lod: true,
-      set_off: true
-    }
-  },
-  methods: {
-    // 点击详情按钮跳转链接
-    item_pass: function (i) {
-      this.$router.push({
-        name: 'details',
-        params: {
-          id: this.lists[i].id
-        }
-      })
-    },
-    // 点击返回上一页
-    onClickLeft () {
-      this.$router.go(-1)
-    },
-    // 获取数据
-    async getPair () {
-      this.lod = true
-      // const params = { 'state': this.state, 'transfer_state': this.transfer_state, 'limit': 10, 'offset': this.offset }
-      const { data } = await this.$api.bb.orders()
-      if (data) {
-        this.bot = '- - - - - - - 到底了 - - - - - - -'
-        if (data.code === 200) {
-          this.order = data.data
-          this.me_ge()
-        } else {
-          Toast('获取数据失败，请刷新页面')
-        }
-      } else {
-        this.bot = '- - - - - - - 请检查网络 - - - - - - -'
-        Toast('网络链接失败')
-      }
-    },
-    // 如果追加数据长度不到10条，停止请求
-    me_ge () {
-      if (this.limit > this.order.length) {
-        this.scr_off = false
-        this.lod = false
-        this.bot = '- - - - - - - 到底了 - - - - - - -'
-      } else {
-        this.scr_off = true
-        this.lod = false
-      }
-    },
-    // 滚轮到底触发数据(获取)追加
-    async meet () {
-      const { data } = await this.$api.bb.orders()
-      if (data) {
-        this.bot = '- - - - - - - 到底了 - - - - - - -'
-        if (data.code === 200) {
-          data.data.forEach((res) => {
-            this.order.push(res)
-          })
-          this.me_ge()
-        } else {
-          Toast('获取数据失败，请刷新页面')
-        }
-      } else {
-        this.bot = '- - - - - - - 请检查网络 - - - - - - -'
-        Toast('网络链接失败')
-      }
-    },
-    // 导航栏状态筛选
-    title_data (e) {
-      this.act_index = e
-      if (e === 0) {
-        // 进行中
-        this.title_suo = 'paid'
-        this.transfer_state = '!==completed'
-        this.limit = 10
-        this.offset = 0
-        this.getPair()
-      } else if (e === 1) {
-        // 已完成
-        this.title_suo = 'completed'
-        this.transfer_state = '=completed'
-        this.limit = 10
-        this.offset = 0
-        this.getPair()
-      } else {
-        // 失败
-        this.title_suo = 'fail'
-        this.transfer_state = '=fail'
-        this.limit = 10
-        this.offset = 0
-        this.getPair()
-      }
-    },
-    // 滚轮事件监听
-    handleScroll () {
-      let scrollTop = document.documentElement.scrollTop || document.body.scrollTop
-      let windowHeight = document.documentElement.clientHeight || document.body.clientHeight
-      let scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
-      if ((scrollHeight - (scrollTop + windowHeight)) <= 20 && this.scr_off) {
-        this.scr_off = false
-        this.lod = true
-        this.offset = this.limit + 1
-        this.limit += 10
-        this.meet()
-      }
-    }
-  },
-  computed: {
-    // 获取数据(渲染)页面
-    lists: function () {
-      let that = this
-      let arrByZM = []
-      for (let i = 0; i < that.order.length; i++) {
-        if (that.order[i].transfer_state.search(that.title_suo) !== -1 || (that.order[i].state.search(that.title_suo) !== -1 && that.order[i].transfer_state !== 'completed' && that.order[i].transfer_state !== 'fail')) {
-          arrByZM.push(that.order[i])
-        }
-      }
-      return arrByZM
-    }
-  },
   components: {
     [Field.name]: Field,
     [DetailItem.name]: DetailItem,
@@ -271,6 +127,146 @@ export default {
     this.getPair()
     // 滚轮事件监听
     window.addEventListener('scroll', this.handleScroll, true)
+  },
+  data () {
+    return {
+      orderData: [], // 获取后台传过来的数据
+      orderTitle: [
+        {
+          title: '进行中'
+        },
+        {
+          title: '交易完成'
+        },
+        {
+          title: '交易失败'
+        }
+      ],
+      processTab: 'paid',
+      process_tab_index: 0,
+      dataLimit: 10,
+      offset: 0,
+      // state: '=paid',
+      transfer_state: '!==completed',
+      scr_off: true,
+      // 加载数据loading图
+      bottomTips: '',
+      ifLoading: true
+    }
+  },
+  methods: {
+    // 点击详情按钮跳转链接
+    item_pass: function (i) {
+      this.$router.push({
+        name: 'details',
+        params: {
+          id: this.lists[i].id - 1
+        }
+      })
+    },
+    // 点击返回上一页
+    onClickLeft () {
+      this.$router.go(-1)
+    },
+    // 获取数据
+    async getPair () {
+      this.ifLoading = true
+      const { data } = await this.$api.bb.orders()
+      if (data) {
+        this.bottomTips = '- - - - - - - 到底了 - - - - - - -'
+        if (data.code === 200) {
+          console.log(data.data)
+          this.orderData = data.data
+          this.checkDataLength()
+        } else {
+          Toast('获取数据失败，请刷新页面')
+        }
+      } else {
+        this.bottomTips = '- - - - - - - 请检查网络 - - - - - - -'
+        Toast('网络链接失败')
+      }
+    },
+    // 如果追加数据长度不到10条，停止请求
+    checkDataLength () {
+      if (this.dataLimit > this.orderData.length) {
+        this.scr_off = false
+        this.ifLoading = false
+        this.bottomTips = '- - - - - - - 到底了 - - - - - - -'
+      } else {
+        this.scr_off = true
+        this.ifLoading = false
+      }
+    },
+    // 滚轮到底触发数据(获取)追加
+    async wheelAppendData () {
+      const { data } = await this.$api.bb.orders()
+      if (data) {
+        this.bottomTips = '- - - - - - - 到底了 - - - - - - -'
+        if (data.code === 200) {
+          data.data.forEach((res) => {
+            this.orderData.push(res)
+          })
+          this.checkDataLength()
+        } else {
+          Toast('获取数据失败，请刷新页面')
+        }
+      } else {
+        this.bottomTips = '- - - - - - - 请检查网络 - - - - - - -'
+        Toast('网络链接失败')
+      }
+    },
+    // 导航栏状态筛选
+    changeProcessTab (e) {
+      this.process_tab_index = e
+      if (e === 0) {
+        // 进行中
+        this.processTab = 'paid'
+        this.transfer_state = '!==completed'
+        this.dataLimit = 10
+        this.offset = 0
+        this.getPair()
+      } else if (e === 1) {
+        // 已完成
+        this.processTab = 'completed'
+        this.transfer_state = '=completed'
+        this.dataLimit = 10
+        this.offset = 0
+        this.getPair()
+      } else {
+        // 失败
+        this.processTab = 'fail'
+        this.transfer_state = '=fail'
+        this.dataLimit = 10
+        this.offset = 0
+        this.getPair()
+      }
+    },
+    // 滚轮事件监听
+    handleScroll () {
+      let scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+      let windowHeight = document.documentElement.clientHeight || document.body.clientHeight
+      let scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
+      if ((scrollHeight - (scrollTop + windowHeight)) <= 20 && this.scr_off) {
+        this.scr_off = false
+        this.ifLoading = true
+        this.offset = this.dataLimit + 1
+        this.dataLimit += 10
+        this.wheelAppendData()
+      }
+    }
+  },
+  computed: {
+    // 获取数据(渲染)页面
+    lists: function () {
+      let that = this
+      let arrByZM = []
+      for (let i = 0; i < that.orderData.length; i++) {
+        if (that.orderData[i].transfer_state.search(that.processTab) !== -1 || (that.orderData[i].state.search(that.processTab) !== -1 && that.orderData[i].transfer_state !== 'completed' && that.orderData[i].transfer_state !== 'fail')) {
+          arrByZM.push(that.orderData[i])
+        }
+      }
+      return arrByZM
+    }
   }
 }
 </script>

@@ -1,24 +1,21 @@
 <template>
     <div class="Real_name">
       <!--头部标题-->
-      <div class="head">
         <van-nav-bar
           title="LV ID 验证"
           left-text="返回"
           left-arrow
           @click-left="onClickLeft"
         />
-      </div>
       <!--实名验证文本-->
-      <div class="title_name">实名验证</div>
+      <h4>实名验证</h4>
       <van-collapse v-model="activeName" accordion>
         <!--普通认证-->
         <van-collapse-item title="Lv 1 认证" name="1">
           <!--开始认证-->
-          <div v-if="Lv_off">
+          <div v-if="lv_certification">
             <div class="content_Tips" :class="{out: Tips_title}" v-if="Tips_title">{{Tips_title}}</div>
             <!--姓名-->
-            <div class="name">
               <van-cell-group name="group">
                 <van-field
                   v-model="username"
@@ -26,13 +23,10 @@
                   clearable
                   label="姓名"
                   placeholder="输入您的姓名"
-                  @input="name"
                 />
               </van-cell-group>
-            </div>
 
             <!--身份证号-->
-            <div class="name">
               <van-cell-group name="group">
                 <van-field
                   v-model="ID"
@@ -42,22 +36,24 @@
                   placeholder="请输入身份证号码"
                   @input="ID_card"
                   maxlength="18"
+                  v-validate="{IDNumber: true}"
+                  data-vv-name="身份证号码"
                 />
+                <p>{{ errors.first('身份证号码')}}</p>
               </van-cell-group>
-            </div>
 
             <!--上传身份证正面图片-->
-            <div class="ID_just">
-              <van-uploader :after-read="onRead_just" accept="image/*" :max-count="1" multiple capture>
+            <div class="ID_uploader">
+              <van-uploader :after-read="onRead_front" accept="image/*" :max-count="1" multiple capture>
                 <span>*</span>
                 <span>上传身份证正面</span>
                 <span>
-                <img class="head-img" src="../../../assets/shenfenzhenegzheng.jpg" ref="onRead_just"/>
+                <img class="head-img" src="../../../assets/shenfenzhenegzheng.jpg" ref="onRead_front"/>
               </span>
               </van-uploader>
             </div>
             <!--上传身份证反面图片-->
-            <div class="ID_just">
+            <div class="ID_uploader">
               <van-uploader :after-read="onRead_back" accept="image/*" :max-count="1" multiple capture>
                 <span>*</span>
                 <span>上传身份证反面</span>
@@ -68,7 +64,7 @@
             </div>
 
             <!--手持身份证-->
-            <div class="ID_just">
+            <div class="ID_uploader">
               <van-uploader :after-read="onRead_hand" accept="image/*" :max-count="1" multiple capture>
                 <span>*</span>
                 <span>上传手持身份证</span>
@@ -79,13 +75,13 @@
             </div>
 
             <!--按钮-->
-            <div class="but" @click="primary_but">
-              <van-button type="primary" :plain="plain" size="large">开始验证</van-button>
+            <div class="verifyButton" @click="primary_but">
+              <van-button type="primary" :plain="ifPlain" size="large">开始验证</van-button>
             </div>
 
             <!--提示-->
-            <div class="Tips_box">
-              <div v-for="(item,index) in Tips" :key="index" class="Tips">
+            <div class="tips_box">
+              <div v-for="(item,index) in certificationTips" :key="index" class="tips">
                 <div>{{index + 1}}、</div>
                 <div>{{item.text}}</div>
               </div>
@@ -93,7 +89,7 @@
 
           </div>
           <!--认证成功-->
-          <div v-else class="content_Tips" :class="{ok: cla}">{{ok_Tips}}</div>
+          <div v-else class="content_Tips" :class="{ok: ifSuccess}">{{successTips}}</div>
         </van-collapse-item>
         <!--高级认证-->
         <van-collapse-item title="Lv 2 认证" name="2">
@@ -103,9 +99,9 @@
             <!--说明-->
             <div class="Explain fontSize">你可以尝试在浏览器中打开以下链接（点击复制）进行LV ID实名认证，然后再返回查看认证后果</div>
             <!--认证链接跳转-->
-            <div class="click" data-clipboard-text="https://baidu.con" @click="copy">https://baidu.con</div>
+            <div class="click" data-clipboard-text="https://baidu.con" @click="copyButton">https://baidu.con</div>
             <!--我已完成实名认证-->
-            <div class="bot" @click="bot">
+            <div class="bot" @click="loadingMessage">
               <a>我已完成实名认证</a>
             </div>
           </div>
@@ -118,9 +114,11 @@
 </template>
 
 <script>
-import { Icon, Popup, NavBar, Collapse, CollapseItem, Field, Button, Uploader, Toast, CellGroup, Cell } from 'vant'
+import { Icon, Popup, NavBar, Collapse, CollapseItem, Field, Button, Uploader, Toast, CellGroup } from 'vant'
 import Clipboard from 'clipboard'
+
 export default {
+  name: 'realname_verified',
   components: {
     [Icon.name]: Icon,
     [Popup.name]: Popup,
@@ -131,15 +129,14 @@ export default {
     [Button.name]: Button,
     [Uploader.name]: Uploader,
     [Toast.name]: Toast,
-    [CellGroup.name]: CellGroup,
-    [Cell.name]: Cell
+    [CellGroup.name]: CellGroup
   },
   data () {
     return {
       show: false,
       activeName: '1',
       username: '',
-      Tips: [
+      certificationTips: [
         {
           text: 'C2C总交易额超过 10000 USDT 必须进行实名认证'
         },
@@ -159,20 +156,17 @@ export default {
           text: '身份证号码不足 18 位的在后面补 0 即可'
         }
       ],
-      img_t: false,
-      img_b: false,
-      img_c: false,
-      ID_off: false,
+      ID_card_back: '', // 身份证反面
+      ID_card_front: '', // 身份证正面
+      ID_card_handheld: '', // 手持身份证
+      check_ID: false,
       // 提交后改变
-      Lv_off: false,
+      lv_certification: false,
       // 按钮颜色
-      plain: true,
-      ID: '',
-      ID_z: '',
-      ID_f: '',
-      ID_s: '',
-      ok_Tips: '',
-      cla: false,
+      ifPlain: true, // 判断是否为朴素按钮
+      ID: '', // 身份证
+      successTips: '',
+      ifSuccess: false,
       Tips_title: ''
     }
   },
@@ -181,79 +175,54 @@ export default {
     onClickLeft () {
       this.$router.go(-1)
     },
-    // 用户姓名
-    name (e) {
-      let that = this
-      if (this.username && this.ID_off && this.img_b && this.img_t && this.img_c) {
-        that.plain = false
+    // 判断是否按钮是否转换样式
+    checkPlain () {
+      if (this.username !== '' && this.check_ID !== false && this.ID_card_front !== '' &&
+        this.ID_card_back !== '' && this.ID_card_handheld !== '') {
+        this.ifPlain = false
       } else {
-        that.plain = true
+        this.ifPlain = true
       }
     },
     // 用户身份证号码
     ID_card (e) {
-      this.ID = e.replace(/[^\d]/g, '')
       if (e.length >= 18) {
-        this.ID_off = true
-      } else {
-        this.ID_off = false
-      }
-      if (this.username && this.ID_off && this.img_b && this.img_t && this.img_c) {
-        this.plain = false
-      } else {
-        this.plain = true
-      }
+        this.check_ID = true
+      } else this.check_ID = false
+      this.checkPlain()
     },
     // 身份证正面
-    onRead_just (file) {
-      this.img_b = true
+    onRead_front (file) {
+      // this.ID_card_front = true
       // 将原图片显示为选择的图片
-      this.$refs.onRead_just.src = file.content
-      this.ID_z = file.file
-      if (file) {
-        if (this.username && this.ID_off && this.img_b && this.img_t && this.img_c) {
-          this.plain = false
-        } else {
-          this.plain = true
-        }
-      }
+      this.$refs.onRead_front.src = file.content
+      this.ID_card_front = file.file
+      this.checkPlain()
     },
     // 身份证正反面
     onRead_back (file) {
       // 将原图片显示为选择的图片
-      this.img_t = true
+      // this.ID_card_back = true
       this.$refs.onRead_back.src = file.content
-      this.ID_f = file.file
-      if (file) {
-        if (this.username && this.ID_off && this.img_b && this.img_t && this.img_c) {
-          this.plain = false
-        } else {
-          this.plain = true
-        }
-      }
+      this.ID_card_back = file.file
+      this.checkPlain()
     },
     // 手持照片
     onRead_hand (file) {
       // 将原图片显示为选择的图片
-      this.img_c = true
+      // this.ID_card_handheld = true
       this.$refs.onRead_hand.src = file.content
-      this.ID_s = file.file
-      if (file) {
-        if (this.username && this.ID_off && this.img_b && this.img_t && this.img_c) {
-          this.plain = false
-        } else {
-          this.plain = true
-        }
-      }
+      this.ID_card_handheld = file.file
+      this.checkPlain()
     },
     // 点击开始验证按钮
     async primary_but () {
-      if (!this.plain) {
+      if (!this.ifPlain) {
         let Formdata = new FormData()
-        Formdata.append('id_in_hand', this.ID_s)
+        Formdata.append('id_in_hand', this.ID_card_handheld)
         Formdata.append('id_number', this.ID)
-        Formdata.append('id_photo_back', this.ID_f)
-        Formdata.append('id_photo_front', this.ID_z)
+        Formdata.append('id_photo_back', this.ID_card_back)
+        Formdata.append('id_photo_front', this.ID_card_front)
         Formdata.append('name', this.username)
         // lodin
         const toast = Toast.loading({
@@ -272,7 +241,7 @@ export default {
             if (data) {
               if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
                 clearInterval(timer)
-                this.Lv_off = false
+                this.lv_certification = false
                 Toast('身份信息上传成功')
               }
             }
@@ -282,7 +251,7 @@ export default {
               // 检测上传数据完全性质
               if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
                 clearInterval(timer)
-                this.Lv_off = false
+                this.lv_certification = false
                 Toast('身份信息提交成功')
               } else {
                 clearInterval(timer)
@@ -303,7 +272,7 @@ export default {
       }
     },
     // 复制按钮
-    copy () {
+    copyButton () {
       this.show = true
       setTimeout(() => {
         this.show = false
@@ -318,7 +287,7 @@ export default {
       })
     },
     // Lv 2认证使用loding
-    bot () {
+    loadingMessage () {
       Toast.loading({
         mask: true,
         message: '处理中...'
@@ -329,19 +298,19 @@ export default {
     const { data } = await this.$api.kyc.kyc_get()
     if (data.code === 200) {
       if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
-        this.Lv_off = false
-        this.ok_Tips = '认证提交成功，将会在工作日3天之内返回认证结果'
+        this.lv_certification = false
+        this.successTips = '认证提交成功，将会在工作日3天之内返回认证结果'
         if (data.data.verified_state === 1) {
           // 成功
-          this.ok_Tips = '您已经成功实名认证'
-          this.cla = true
+          this.successTips = '您已经成功实名认证'
+          this.ifSuccess = true
         } else if (data.data.verified_state === 2) {
           // 不成功
-          this.Lv_off = true
+          this.lv_certification = true
           this.Tips_title = '历史提交' + data.data.verified_feedback + '不正确'
         }
       } else {
-        this.Lv_off = true
+        this.lv_certification = true
       }
     } else {
       Toast('发生错误啦，请稍后重试')
@@ -352,6 +321,14 @@ export default {
 
 <style scoped lang="less">
   .Real_name{
+    h4{
+      font-weight: normal;
+      padding: 10px;
+    }
+    p{
+      text-align: center;
+      color: red;
+    }
     .van-popup{
       font-size: 20px;
       background-color: transparent;
@@ -378,11 +355,11 @@ export default {
     .out{
       color: #FF6347;
     }
-    .but{
+    .verifyButton{
       margin-top: 20px;
     }
     /*上传身份证*/
-      .ID_just{
+      .ID_uploader{
       padding: 10px 8px;
       font-size: 0;
       span{
@@ -445,9 +422,9 @@ export default {
         }
       }
     }
-    .Tips_box{
+    .tips_box{
       margin-top: 30px;
-      .Tips{
+      .tips{
         display: flex;
         font-size: 12px;
         margin: 5px 0;

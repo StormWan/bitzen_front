@@ -72,7 +72,7 @@
         </van-tab>
       </van-tabs>
       <!--按钮-->
-      <orderButton :index="active_index" @value_but="clearData" :Order="order_active" :symbol="symbol" :wallet="wallet_data" :id="pair.id" :asset_id="asset_id" :value="exchangeValue"></orderButton>
+      <orderButton :index="active_index" @value_but="clearData" :order="order_active" :symbol="symbol" :wallet="wallet_data" :id="pair.id" :asset_id="asset_id" :value="exchangeValue"></orderButton>
       <!--钱包-->
       <bb_wallet :pair="pair" @wallet="wallet" :index="active_index" :symbol="symbol"></bb_wallet>
       <!--说明-->

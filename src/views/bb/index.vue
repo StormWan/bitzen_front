@@ -1,7 +1,7 @@
 <template>
   <div class="bb">
     <van-tabs class="order-tabs" v-model="active" sticky @click="tabChange">
-      <van-tab v-for="(title,title_index) in bbTabTitle" :key="title_index" :title="title.tiele_name">
+      <van-tab v-for="(title,title_index) in bbTabTitle" :key="title_index" :title="title.title_name">
         <!-------标题-------->
         <van-row type="flex"  class="bb_title">
           <van-col span="8">市场</van-col>
@@ -47,21 +47,20 @@ export default {
       // tab标题名称
       bbTabTitle: [
         {
-          tiele_name: '全部'
+          title_name: '全部'
         },
         {
-          tiele_name: 'USDT'
+          title_name: 'USDT'
         },
         {
-          tiele_name: 'BTC'
+          title_name: 'BTC'
         },
         {
-          tiele_name: 'EOS'
+          title_name: 'EOS'
         }
       ],
       // 数据
-      pairs: [],
-      arr: []
+      pairs: []
     }
   },
   async mounted () {
@@ -88,9 +87,8 @@ export default {
       if (data.code === 200) {
         this.pairs = data.data
         this.pairs.filter(a => {
-          return a.quote.symbol.search(this.bbTabTitle[this.active].tiele_name) !== -1
+          return a.quote.symbol.search(this.bbTabTitle[this.active].title_name) !== -1
         })
-        // console.log(this.pairs[0].active)
       } else {
         Toast('获取数据失败，请刷新')
       }

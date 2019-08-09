@@ -44,7 +44,7 @@
     <!--用户认证作用页-->
     <div class="Effect">
       <!--实名验证-->
-      <router-link to="/real_name">
+      <router-link to="/realname_verified">
         <van-cell title="实名验证" icon="user-circle-o" is-link />
       </router-link>
       <!--收款方式-->

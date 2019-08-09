@@ -1,14 +1,12 @@
 <template>
     <div class="account">
       <!--标题-->
-      <div class="bar">
         <van-nav-bar
           title="账号关联"
           left-text="返回"
           left-arrow
           @click-left="onClickLeft"
         />
-      </div>
       <!--内容-->
       <div class="content">
         <div>
@@ -24,8 +22,14 @@
 </template>
 
 <script>
-import { NavBar } from 'vant'
+import { NavBar, Row, Col } from 'vant'
 export default {
+  name: 'account',
+  components: {
+    [NavBar.name]: NavBar,
+    [Row.name]: Row,
+    [Col.name]: Col
+  },
   data () {
     return {
       img: require('../../../assets/cat_top.jpg'),
@@ -47,9 +51,6 @@ export default {
     } else {
       this.user_bind = '未授权'
     }
-  },
-  components: {
-    [NavBar.name]: NavBar
   }
 }
 </script>

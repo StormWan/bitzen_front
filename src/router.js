@@ -138,6 +138,43 @@ const router = new Router({
         Auth: true
       }
     },
+    // BlackPay 钱包
+    {
+      path: '/wallet',
+      name: 'wallet',
+      component: () => import('./views/user/wallet/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    {
+      path: '/change_wallet',
+      name: 'change_wallet',
+      component: () => import('./views/user/wallet/change_wallet/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    {
+      path: '/wallet_recharge',
+      name: 'wallet_recharge',
+      component: () => import('./views/user/wallet/change_wallet/wallet_recharge/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    {
+      path: '/withdrawal',
+      name: 'withdrawal',
+      component: () => import('./views/user/wallet/change_wallet/withdrawal/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
     // 密码
     {
       path: '/Password',
@@ -150,9 +187,9 @@ const router = new Router({
     },
     // 实名认证
     {
-      path: '/real_name',
-      name: 'real_name',
-      component: () => import('./views/user/real_name/index.vue'),
+      path: '/realname_verified',
+      name: 'realname_verified',
+      component: () => import('./views/user/realname_verified/index.vue'),
       meta: {
         keepAlive: true,
         Auth: true
@@ -160,9 +197,9 @@ const router = new Router({
     },
     // 注册
     {
-      path: '/Sign_in',
-      name: 'Sign_in',
-      component: () => import('./views/user/Sign_in/index.vue'),
+      path: '/login',
+      name: 'login',
+      component: () => import('./views/user/login/index.vue'),
       meta: {
         keepAlive: true,
         Auth: true
