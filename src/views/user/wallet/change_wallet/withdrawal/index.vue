@@ -1,72 +1,62 @@
 <template>
   <div class="withdrawal">
     <!--标题-->
-    <div class="title">
       <van-nav-bar
-        :title="title"
+        :title="narbarTitle"
         left-text="返回"
         left-arrow
         @click-left="onClickLeft"
       />
-    </div>
     <!--选择器-->
     <!--一-->
     <div class="checked">
       <!--地址选择器-->
       <div>
-        <van-collapse v-model="activeNames" @change="title_con">
-<!--          头-->
-          <van-collapse-item :title="title_content" name="1">
+        <van-collapse v-model="activeNames" @change="showWallet">
+          <van-collapse-item :title="collapseTitle" name="1">
             <div class="address_box">
               <div v-for="(item,index) in address" :key="index">
                 <div class="address" @click="address_name(index)">提现到我的 {{item.name}} 钱包</div>
               </div>
-<!--              <div>+ 添加一个提现地址</div>-->
             </div>
           </van-collapse-item>
 
-<!--          中-->
-          <div class="money">
-            <div class="md-example-child md-example-child-input-item-3">
-              <md-field>
-                <md-input-item
-                  type="money"
-                  v-model="value"
-                  :brief="brief"
-                  :placeholder="placeholder"
-                  :size="size"
-                  is-amount
-                  is-highlight
-                >
-                  <div class="input-operator" slot="right" @click="takeAll">全部取出</div>
-                </md-input-item>
-              </md-field>
-            </div>
+          <div class="md-example-child md-example-child-input-item-3">
+            <md-field>
+              <md-input-item
+                type="money"
+                v-model="moneyValue"
+                :brief="brief"
+                :placeholder="placeholder"
+                :size="size"
+                is-amount
+                is-highlight
+              >
+                <div class="input-operator" slot="right" @click="takeOutAll">全部取出</div>
+              </md-input-item>
+            </md-field>
           </div>
-
-<!--          下-->
-          <div class="money">
-            <div class="md-example-child md-example-child-input-item-3">
-              <md-field>
-                <md-input-item
-                  type="text"
-                  v-model="text"
-                  maxlength="20"
-                  placeholder="备注（可选）"
-                  is-amount
-                  is-highlight
-                >
-                </md-input-item>
-              </md-field>
-            </div>
+          <!--          下-->
+          <div class="md-example-child md-example-child-input-item-3">
+            <md-field>
+              <md-input-item
+                type="text"
+                v-model="remarksText"
+                maxlength="20"
+                placeholder="备注（可选）"
+                is-amount
+                is-highlight
+              >
+              </md-input-item>
+            </md-field>
           </div>
         </van-collapse>
       </div>
       <!--提示文字-->
-      <div class="text">无需手续费</div>
+      <div class="free-tips">无需手续费</div>
       <!--确认按钮-->
-      <div class="but">
-        <button @click="active_click" :class="{active: onactive}">提现</button>
+      <div class="submit-button">
+        <button @click="submitButton" :class="{active: onactive}">提现</button>
       </div>
     </div>
   </div>
@@ -76,63 +66,7 @@
 import { NavBar, Collapse, CollapseItem, Popup } from 'vant'
 import { InputItem, Field } from 'mand-mobile'
 export default {
-  data () {
-    return {
-      title: '- -',
-      activeNames: ['0'],
-      title_content: '点击添加收款账号',
-      show: false,
-      address: [],
-      active: 0,
-      value: '',
-      brief: '',
-      placeholder: '',
-      money: '',
-      text: '',
-      onactive: false
-    }
-  },
-  methods: {
-    onClickLeft () {
-      this.$router.go(-1)
-    },
-    // 点击地址
-    title_con (index) {
-      this.show = true
-    },
-    // 地址选择器
-    address_name (e) {
-      this.active = e
-      this.title_content = '我的 ' + this.address[e].name + ' 钱包'
-      this.show = false
-      this.activeNames = ['0']
-    },
-    takeAll () {
-      this.value = this.money
-    },
-    active_click () {
-      if (this.onactive) {
-        alert('努力开发中')
-      }
-    }
-  },
-  computed: {
-    size () {
-      const that = this
-      console.log(this.value > '0')
-      if (that.value && this.value > '0') {
-        if (this.value > this.money) {
-          that.brief = '你已超出可转金额最大值 ' + (that.value - that.money)
-          that.onactive = false
-        } else {
-          that.onactive = true
-        }
-      } else {
-        that.brief = ''
-        that.onactive = false
-      }
-    }
-  },
+  name: 'withdrawal',
   components: {
     [NavBar.name]: NavBar,
     [Collapse.name]: Collapse,
@@ -141,10 +75,70 @@ export default {
     [InputItem.name]: InputItem,
     [Field.name]: Field
   },
+  data () {
+    return {
+      narbarTitle: '- -',
+      activeNames: ['0'],
+      collapseTitle: '点击添加收款账号',
+      showAddress: false,
+      address: [],
+      // active: 0,
+      moneyValue: '',
+      brief: '',
+      placeholder: '',
+      money: '',
+      remarksText: '',
+      onactive: false
+    }
+  },
+  computed: {
+    size () {
+      const that = this
+      console.log(this.moneyValue > '0')
+      if (that.moneyValue && this.moneyValue > '0') {
+        if (this.moneyValue > this.money) {
+          that.brief = '你已超出可转金额最大值 ' + (that.moneyValue - that.money)
+          that.onactive = false
+          return 'normal'
+        } else {
+          that.onactive = true
+          return 'normal'
+        }
+      } else {
+        that.brief = ''
+        that.onactive = false
+        return 'normal'
+      }
+    }
+  },
+  methods: {
+    onClickLeft () {
+      this.$router.go(-1)
+    },
+    // 点击地址
+    showWallet (index) {
+      this.showAddress = true
+    },
+    // 地址选择器
+    address_name (e) {
+      // this.active = e
+      this.collapseTitle = '我的 ' + this.address[e].name + ' 钱包'
+      this.showAddress = false
+      this.activeNames = ['0']
+    },
+    takeOutAll () {
+      this.moneyValue = this.money
+    },
+    submitButton () {
+      if (this.onactive) {
+        alert('努力开发中')
+      }
+    }
+  },
   activated () {
-    this.title = JSON.parse(localStorage.getItem('lists')).symbol
+    this.narbarTitle = JSON.parse(localStorage.getItem('lists')).symbol
     this.money = JSON.parse(localStorage.getItem('lists')).price_btc * JSON.parse(localStorage.getItem('lists')).balance
-    this.placeholder = '可以转出 ' + this.money + ' ' + this.title
+    this.placeholder = '可以转出 ' + this.money + ' ' + this.narbarTitle
     if (localStorage.getItem('withdrawal')) {
       this.address = JSON.parse(localStorage.getItem('withdrawal'))
     } else {
@@ -176,12 +170,12 @@ export default {
         }
       }
       /*提示文本*/
-      .text{
+      .free-tips{
         font-size: 12px;
         text-align: center;
       }
       /*提现按钮*/
-      .but{
+      .submit-button{
         width: 90%;
         margin: 0 auto;
         font-size: 18px;

@@ -54,7 +54,7 @@
             </div>
             <!--卡包信息-->
             <div class="information" v-for="(item, key) in lists" :key="key">
-              <a @click="onlists(key)">
+              <a @click="toWallet(key)">
                 <div class="left">
                   <div class="img">
                     <img :src="item.icon_url" />
@@ -207,9 +207,9 @@ export default {
       }
     },
     // 钱包跳转
-    onlists (i) {
+    toWallet (i) {
       this.$router.push({
-        name: 'charg_withd',
+        name: 'change_wallet',
         params: {
           arr: this.lists[i]
         }

@@ -148,6 +148,33 @@ const router = new Router({
         Auth: true
       }
     },
+    {
+      path: '/change_wallet',
+      name: 'change_wallet',
+      component: () => import('./views/user/wallet/change_wallet/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    {
+      path: '/wallet_recharge',
+      name: 'wallet_recharge',
+      component: () => import('./views/user/wallet/change_wallet/wallet_recharge/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
+    {
+      path: '/withdrawal',
+      name: 'withdrawal',
+      component: () => import('./views/user/wallet/change_wallet/withdrawal/index.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: true
+      }
+    },
     // 密码
     {
       path: '/Password',

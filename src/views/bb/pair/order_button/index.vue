@@ -1,6 +1,6 @@
 <template>
-  <div class="Order">
-    <div @click="but_submit" class="Order_box" :class="{active: order}">下单{{symbol}}</div>
+  <div class="order">
+    <div @click="submitOrder" class="order_box" :class="{active: order}">下单{{symbol}}</div>
   </div>
 </template>
 
@@ -34,7 +34,7 @@ export default {
   },
   methods: {
     // 下单按钮
-    but_submit () {
+    submitOrder () {
       console.log(JSON.parse(localStorage.getItem('userInfo')).is_setup_pin)
       if (this.order === true) {
         if (this.wallet.search('BlockPay') !== -1) {
@@ -91,10 +91,10 @@ export default {
 </script>
 
 <style scoped lang="less">
-  .Order{
+  .order{
     width: 100%;
     padding-top: 30px;
-    .Order_box{
+    .order_box{
       width: 80%;
       margin: 0 auto;
       background-color: #DCDCDC;

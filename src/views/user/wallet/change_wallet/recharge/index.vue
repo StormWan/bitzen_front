@@ -1,13 +1,11 @@
 <template>
   <div id="query">
-    <div class="title">
       <van-nav-bar
         :title="title"
         left-arrow
         left-text="返回"
         @click-left="onClickLeft"
       />
-    </div>
     <div class="content">
       <!--用户信息-->
       <div class="user">

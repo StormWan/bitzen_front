@@ -1,49 +1,54 @@
 <template>
-    <div class="charg_withd">
+    <div class="change_wallet">
       <div class="fixed"></div>
       <!--头部标题-->
-      <div class="title">
         <van-nav-bar
           :title="title"
           left-text="返回"
           left-arrow
           @click-left="onClickLeft"
         />
-      </div>
-      <div class="bgCloro">
+      <div class="content-box">
         <!--内容-->
         <div class="content">
           <!--图片-->
           <div class="img">
             <img :src="img" alt="">
           </div>
-          <div class="data">
-            <div class="data_top">
+          <div class="wallet-message">
+            <div class="message-top">
               <span v-cloak>{{price_btc}}</span>
               <span v-cloak>{{title}}</span>
             </div>
-            <div class="data_bot">
+            <div class="message-bottom">
               <span>≈ {{price_usd}}</span>
               <span>{{name}}</span>
             </div>
           </div>
         </div>
         <!--提现充值-->
-        <div class="Thrust">
-          <div>
-            <router-link to="/withdrawal">提现</router-link>
-          </div>
-          <div>
-            <router-link to="/wallet_recharge">充值</router-link>
-          </div>
-        </div>
+        <van-row type="flex" justify="space-between">
+          <van-col span="12">
+            <van-button type="default" to="/withdrawal" size="large">提现</van-button>
+          </van-col>
+          <van-col span="12">
+            <van-button type="default" to="/wallet_recharge" size="large">充值</van-button>
+          </van-col>
+        </van-row>
       </div>
     </div>
 </template>
 
 <script>
-import { NavBar } from 'vant'
+import { NavBar, Row, Col, Button } from 'vant'
 export default {
+  name: 'change_wallet',
+  components: {
+    [NavBar.name]: NavBar,
+    [Row.name]: Row,
+    [Col.name]: Col,
+    [Button.name]: Button
+  },
   data () {
     return {
       lists: Object,
@@ -68,9 +73,6 @@ export default {
     this.price_btc = this.lists.balance * this.lists.price_btc
     this.price_usd = this.lists.price_usd * this.lists.balance
     this.name = this.lists.name
-  },
-  components: {
-    [NavBar.name]: NavBar
   }
 }
 </script>
@@ -79,16 +81,12 @@ export default {
   [v-cloak]{
     display: none;
   }
-  .charg_withd{
+  .change_wallet{
     font-size: 18px;
     height: 100%;
-    .bgCloro{
+    .content-box{
       height: 100%;
       background-color: #F5F5F5;
-      /*标题*/
-      .title{
-        padding-top: 10px;
-      }
       /*内容*/
       .content{
         background-color:#F8F8FF;
@@ -101,9 +99,9 @@ export default {
             width: 100%;
           }
         }
-        .data{
+        .wallet-message{
           text-align: center;
-          .data_top{
+          .message-top{
             span:nth-child(1){
               font-size: 28px;
               margin-right: 8px;
@@ -113,7 +111,7 @@ export default {
               font-size: 22px;
             }
           }
-          .data_bot{
+          .message-bottom{
             margin-top: 5px;
             font-size: 16px;
             color: #C0C0C0;
@@ -121,28 +119,6 @@ export default {
               margin-right: 3px;
             }
           }
-        }
-      }
-      /*提现充值*/
-      .Thrust{
-        display: flex;
-        text-align: center;
-        background-color: #F8F8FF;
-        border-top: 1px solid rgba(0,0,0,.05);
-        border-bottom: 1px solid rgba(0,0,0,.05);
-        div{
-          width: 50%;
-          line-height: 60px;
-          height: 60px;
-          a{
-            font-size: 16px;
-          }
-        }
-        div:nth-child(1){
-          border-right: 1px solid rgba(0,0,0,.05);
-          -webkit-box-sizing: border-box;
-          -moz-box-sizing: border-box;
-          box-sizing: border-box;
         }
       }
     }
