@@ -160,7 +160,7 @@ const router = new Router({
     {
       path: '/wallet_recharge',
       name: 'wallet_recharge',
-      component: () => import('./views/user/wallet/change_wallet/wallet_recharge/index.vue'),
+      component: () => import('./views/user/wallet/change_wallet/recharge/index.vue'),
       meta: {
         keepAlive: true,
         Auth: true
