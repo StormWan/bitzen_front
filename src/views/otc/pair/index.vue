@@ -84,6 +84,7 @@
 import { Tab, Tabs, NavBar, Button, NumberKeyboard, Field, Toast } from 'vant'
 import Footer from './footer'
 import Wallet from '../../../components/otc_wallet'
+import {mapMutations} from "vuex";
 
 export default {
   components: {
@@ -109,6 +110,11 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      setBuyOrder: 'otc/setBuyOrder',
+      setSellOrder: 'otc/setSellOrder',
+      clearOrder: 'otc/clearOrder'
+    }),
     onClickLeft () {
       this.$router.go(-1)
     },
@@ -125,6 +131,7 @@ export default {
     onChangeTab (index, title) {
       this.amountBuy = ''
       this.amountSell = ''
+      this.clearOrder()
       this.activeIndex = index
     },
     onInputBuyKeyBoard (value) {
@@ -166,19 +173,27 @@ export default {
     submitOrder () {
       // quote
       if (true) {
-        this.$router.push({
-          path: '/payment'
-        })
         const side = this.activeIndex === 0 ? 'buy' : 'sell'
         const amount = this.activeIndex === 0 ? this.amountBuy : this.amountSell
         const price = this.activeIndex === 0 ? this.buyPrice : this.sellPrice
-        let order = {
-          otc_pair: this.otcPair.id,
-          side: side,
-          amount: amount,
-          price: price
+        if (side === 'buy') {
+          this.setBuyOrder({
+            otc_pair: this.otcPair.id,
+            currency_amount: amount,
+            price: price,
+            payment_method: ''
+          })
+        } else {
+          this.setBuyOrder({
+            otc_pair: this.otcPair.id,
+            asset_amount: amount,
+            price: price,
+            payment_method: ''
+          })
         }
-        Toast(JSON.stringify(order))
+        this.$router.push({
+          path: '/payment'
+        })
       }
     }
   },

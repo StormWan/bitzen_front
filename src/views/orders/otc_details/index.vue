@@ -172,12 +172,6 @@ export default {
         Toast('数据不存在')
       }
     },
-    // 点击返回上一页
-    Arrow () {
-      this.$router.push({
-        path: '/user'
-      })
-    },
     // 点击导航栏(状态)筛选
     title_data (e) {
       this.act_index = e
@@ -213,7 +207,7 @@ export default {
       this.bot = '- - - - - - - 到底了 - - - - - - -'
       if (data.code === 200) {
         this.order = data.data
-        await this.Setitem()
+        await this.setTime()
       } else {
         Toast('获取数据失败，请刷新页面')
       }
@@ -225,7 +219,7 @@ export default {
       this.bot = '- - - - - - - 到底了 - - - - - - -'
       if (data.code === 200) {
         this.order = data.data
-        await this.Setitem()
+        await this.setTime()
       } else {
         Toast('获取数据失败，请刷新页面')
       }
@@ -294,7 +288,7 @@ export default {
       }
     },
     // 下单时间倒计时(超过15分钟自动取消订单)
-    async Setitem () {
+    async setTime () {
       this.order.forEach((i) => {
         // 下单时间
         let item = new Date(i.created)

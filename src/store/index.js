@@ -3,12 +3,14 @@ import Vuex from 'vuex'
 import { LOGIN, LOGOUT, TITLE } from './types'
 import tabbar from './modules/tabbar'
 import account from './modules/account'
+import otc from './modules/otc'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   modules: {
     tabbar,
-    account
+    account,
+    otc
   },
   state: {
     user: {},

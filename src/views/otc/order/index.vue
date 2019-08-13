@@ -45,6 +45,11 @@ export default {
     [Icon.name]: Icon,
     [Dialog.name]: Dialog
   },
+  computed: {
+    otcOrder (side) {
+      return this.$store.state.getOtcOrder(side)
+    }
+  },
   async activated () {
     if (sessionStorage.getItem('page') === '0') {
       this.title = '付款方式'
