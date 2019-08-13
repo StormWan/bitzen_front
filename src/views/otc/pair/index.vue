@@ -11,14 +11,14 @@
     <van-tabs @click="onChangeTab" sticky>
       <!--买入-->
       <van-tab title="买入">
-        <div>
-          <div class="otc-price">
-            <span>￥</span>
-            <span>{{buyPrice}}</span>
+          <div class="show-price-info">
+            <div class="price-bid">
+              <div class="logo-Img" v-if="buyLogo"><img :src="buyLogo" alt=""></div>
+              <div class="price-title">{{title}}</div>
+              <div class="price-bid">￥{{buyPrice}}</div>
+            </div>
+            <div class="price-arrival">预计到账:{{estimatedAsset}}</div>
           </div>
-          <!--购买金额-->
-          <span>预计到账:{{estimatedAsset}}</span>
-          <div>
             <van-field
               readonly
               clickable
@@ -36,20 +36,37 @@
               @input="onInputBuyKeyBoard"
               @delete="onDeleteBuyKeyBoard"
             />
-          </div>
-        </div>
+
+            <van-field
+              readonly
+              clickable
+              :placeholder="placeholderBuyAmountArrival"
+              :value="buyAmountArrival"
+              @touchstart.native.stop="buyArrivalKeyboardShow = true"
+            />
+            <van-number-keyboard
+              :show="buyArrivalKeyboardShow"
+              :maxlength="12"
+              theme="custom"
+              extra-key="."
+              close-button-text="完成"
+              @blur="buyArrivalKeyboardShow = false"
+              @input="onInputBuyAmountKeyBoard"
+              @delete="onDeleteBuyAmountKeyBoard"
+            />
       </van-tab>
 
       <!--卖出-->
       <van-tab title="卖出">
-        <div>
-          <div class="otc-price">
-            <span>￥</span>
-            <span>{{sellPrice}}</span>
+        <div class="show-price-info">
+          <div class="price-bid">
+            <div class="logo-Img" v-if="sellLogo"><img :src="sellLogo" alt=""></div>
+            <div class="price-title">{{title}}</div>
+            <div class="price-bid">￥{{sellPrice}}</div>
           </div>
-          <span>预计到账:{{estimatedCny}}</span>
+          <div class="price-arrival">预计到账:{{estimatedCny}}</div>
+        </div>
           <!--购买金额-->
-          <div>
             <van-field
               :placeholder="placeholderSell"
               readonly
@@ -67,8 +84,24 @@
               @input="onInputSellKeyBoard"
               @delete="onDeleteSellKeyBoard"
             />
-          </div>
-        </div>
+
+        <van-field
+          :placeholder="placeholderSell"
+          readonly
+          clickable
+          :value="sellAmountArrival"
+          @touchstart.native.stop="sellArrivalKeyboardShow = true"
+        />
+        <van-number-keyboard
+          :show="sellArrivalKeyboardShow"
+          :maxlength="12"
+          theme="custom"
+          extra-key="."
+          close-button-text="完成"
+          @blur="sellArrivalKeyboardShow = false"
+          @input="onInputSellAmountKeyBoard"
+          @delete="onDeleteSellAmountKeyBoard"
+        />
       </van-tab>
     </van-tabs>
 
@@ -81,10 +114,10 @@
 </template>
 
 <script>
-import { Tab, Tabs, NavBar, Button, NumberKeyboard, Field, Toast } from 'vant'
+import { Tab, Tabs, NavBar, Button, NumberKeyboard, Field, Toast, Row, Col } from 'vant'
 import Footer from './footer'
 import Wallet from '../../../components/otc_wallet'
-import {mapMutations} from "vuex";
+import { mapMutations } from 'vuex'
 
 export default {
   components: {
@@ -96,6 +129,8 @@ export default {
     [Field.name]: Field,
     [Toast.name]: Toast,
     [Footer.name]: Footer,
+    [Row.name]: Row,
+    [Col.name]: Col,
     'otc_wallet': Wallet
   },
   data () {
@@ -105,7 +140,11 @@ export default {
       activeIndex: 0,
       amountBuy: '',
       amountSell: '',
+      buyAmountArrival: '',
+      sellAmountArrival: '',
       buyKeyboardShow: false,
+      buyArrivalKeyboardShow: false,
+      sellArrivalKeyboardShow: false,
       sellKeyboardShow: false
     }
   },
@@ -127,17 +166,28 @@ export default {
         this.otcPair = data.data
       }
     },
-    // 买入卖出点击
+    /**
+     * 切换买入卖出 tab
+     * */
     onChangeTab (index, title) {
       this.amountBuy = ''
       this.amountSell = ''
       this.clearOrder()
       this.activeIndex = index
     },
+    /**
+     * 限制第一个输入框的输入
+     * */
     onInputBuyKeyBoard (value) {
       this.amountBuy += value
       // 限制只能输入一个小数点及两位小数
       this.amountBuy = this.amountBuy.toString().match(/^\d*(\.?\d{0,2})/g)[0] || null
+      this.buyAmountArrival = (this.amountBuy / this.buyPrice).toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
+      if (parseInt(this.buyAmountArrival) > this.buyPrice) {
+        this.amountBuy = ''
+        this.buyAmountArrival = ''
+        Toast('输入数据超出范围')
+      }
     },
     /**
      * 模拟键盘删除时触发的函数
@@ -147,32 +197,97 @@ export default {
       if (flag) {
         // 删除掉字符串最后一个
         this.amountBuy = this.amountBuy.substring(0, this.amountBuy.length - 1)
+        this.buyAmountArrival = (this.amountBuy / this.buyPrice).toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
         if (this.amountBuy.length === 0) {
           flag = false
           return false
         }
       }
     },
+    /**
+     * 限制第二个输入框的输入，根据输入预算转出金额来推测金钱数
+     * */
+    onInputBuyAmountKeyBoard (value) {
+      if (value === '') {
+        this.amountBuy = ''
+      } else {
+        this.buyAmountArrival += value
+        // 限制只能输入一个小数点及四位小数
+        this.buyAmountArrival = this.buyAmountArrival.toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
+        this.amountBuy = this.buyCny
+        this.checkBuyArrival()
+      }
+    },
+    /**
+     * 模拟键盘删除时触发的函数，删除字符串的最后一个
+     */
+    onDeleteBuyAmountKeyBoard () {
+      let flag = true
+      if (flag) {
+        // 删除掉字符串最后一个
+        this.buyAmountArrival = this.buyAmountArrival.substring(0, this.buyAmountArrival.length - 1)
+        this.amountBuy = this.buyCny
+        if (this.buyAmountArrival.length === 0) {
+          flag = false
+          return false
+        }
+      }
+    },
+    /**
+     * 卖出
+     * */
     onInputSellKeyBoard (value) {
       this.amountSell += value
       // 限制只能输入一个小数点及两位小数
       this.amountSell = this.amountSell.toString().match(/^\d*(\.?\d{0,2})/g)[0] || null
+      this.sellAmountArrival = (this.amountSell * this.sellPrice).toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
+      if (parseInt(this.amountSell) > this.sellPrice) {
+        this.amountSell = ''
+        this.sellAmountArrival = ''
+        Toast('输入数据超出范围')
+      }
     },
     onDeleteSellKeyBoard () {
       let flag = true
       if (flag) {
         // 删除掉字符串最后一个
         this.amountSell = this.amountSell.substring(0, this.amountSell.length - 1)
+        this.sellAmountArrival = (this.amountSell * this.sellPrice).toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
         if (this.amountSell.length === 0) {
           flag = false
           return false
         }
       }
     },
-    // 下单按钮
+    onInputSellAmountKeyBoard (value) {
+      if (value === '') {
+        this.sellAmountArrival = ''
+      } else {
+        this.sellAmountArrival += value
+        // 限制只能输入一个小数点及两位小数
+        this.sellAmountArrival = this.sellAmountArrival.toString().match(/^\d*(\.?\d{0,2})/g)[0] || null
+        this.amountSell = this.sellCny
+        this.checkSellArrival()
+      }
+    },
+    onDeleteSellAmountKeyBoard () {
+      let flag = true
+      if (flag) {
+        // 删除掉字符串最后一个
+        this.sellAmountArrival = this.sellAmountArrival.substring(0, this.sellAmountArrival.length - 1)
+        this.amountSell = this.sellCny
+        if (this.sellAmountArrival.length === 0) {
+          flag = false
+          return false
+        }
+      }
+    },
+    /**
+     * 下单按钮，保存数据到state
+     * */
     submitOrder () {
       // quote
-      if (true) {
+      if (this.checkAmountBuy(this.amountBuy) === true || this.checkAmountSell(this.amountSell)) { // 验证输入数据是否超出范围
         const side = this.activeIndex === 0 ? 'buy' : 'sell'
         const amount = this.activeIndex === 0 ? this.amountBuy : this.amountSell
         const price = this.activeIndex === 0 ? this.buyPrice : this.sellPrice
@@ -195,6 +310,39 @@ export default {
           path: '/payment'
         })
       }
+    },
+    /**
+     * 检测输入数据是否超出范围
+     * */
+    checkAmountBuy (amount) {
+      if (amount < this.buyMinCny || amount > this.buyMaxCny & amount !== '') {
+        this.amount = ''
+        Toast('输入数据超出范围！请再次输入')
+        return false
+      } else return true
+    },
+    checkAmountSell (amount) {
+      if (amount < this.sellMinCny || amount > this.sellMaxCny & amount !== '') {
+        this.amountSell = ''
+        Toast('输入数据超出范围！请再次输入')
+        return false
+      } else return true
+    },
+    checkBuyArrival () {
+      if (parseInt(this.buyAmountArrival) > parseInt(this.buyPrice)) {
+        Toast('输入数据超出范围！请再次输入')
+        this.buyAmountArrival = ''
+        this.amountBuy = ''
+        return false
+      } else return true
+    },
+    checkSellArrival () {
+      if (parseInt(this.sellAmountArrival) > parseInt(this.sellPrice)) {
+        Toast('输入数据超出范围！请再次输入')
+        this.sellAmountArrival = ''
+        this.amountSell = ''
+        return true
+      } else return false
     }
   },
   // 计算
@@ -204,6 +352,9 @@ export default {
     },
     placeholderSell () {
       return this.otcPair === null ? '资金池不足' : this.otcPair.asset.symbol + ' 数量'
+    },
+    placeholderBuyAmountArrival () {
+      return this.otcPair === null ? '资金池不足' : this.otcPair.asset.symbol + ' 到账'
     },
     estimatedAsset () {
       return this.amountBuy === '' ? '0' : (parseFloat(this.amountBuy) / this.buyPrice).toFixed(4)
@@ -220,11 +371,17 @@ export default {
     symbolIcon () {
       return this.otcPair === null ? '' : this.otcPair.asset.icon_url
     },
+    buyCny () {
+      return (this.buyAmountArrival * this.buyPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0] || null
+    },
+    sellCny () {
+      return (this.sellAmountArrival / this.sellPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0] || null
+    },
     buyMinAsset () {
       return this.otcPair === null ? 0 : this.otcPair.buy_min
     },
     buyMinCny () {
-      return (this.otcPair === null ? 0 : this.buyPrice * this.otcPair.buy_min).toFixed(2)
+      return (this.otcPair === null ? 0 : this.buy_price * this.otcPair.buy_min).toFixed(2)
     },
     buyMaxAsset () {
       return this.otcPair === null ? 0 : this.otcPair.buy_max
@@ -272,6 +429,15 @@ export default {
     },
     buttonActive () {
       return !this.beyond
+    },
+    // 币的 logo
+    buyLogo () {
+      if (this.otcPair === null) return ''
+      else return this.otcPair.asset.icon_url ? this.otcPair.asset.icon_url : ''
+    },
+    sellLogo () {
+      if (this.otcPair === null) return ''
+      else return this.otcPair.asset.icon_url ? this.otcPair.asset.icon_url : ''
     }
   },
   async activated () {
@@ -289,4 +455,52 @@ export default {
 </script>
 
 <style lang="less">
+  /*金额*/
+  .show-price-info{
+    font-weight: bold;
+    font-size: 27px;
+    padding: 30px 0px;
+    .price-bid{
+      width: 130px;
+      border-radius: 50%;
+      margin: 0 auto;
+      color: #FFFAFA;
+      text-align: center;
+      .logo-Img{
+        display: flex;
+        width: 35px;
+        margin: 3px 0px;
+        padding-bottom: 5px;
+        margin-left: 35%;
+        img{
+          width: 100%;
+          -webkit-border-radius: 50%;
+          -moz-border-radius: 50%;
+          border-radius: 50%;
+        }
+      }
+      .price-title{
+        font-size: 18px;
+        color: #4682B4;
+        display: flex;
+        justify-content: center;
+      }
+      .price-bid{
+        margin: 5px 0;
+        color: #228B22;
+      }
+      .active{
+        color: #FF6347;
+      }
+    }
+    .price-arrival{
+      padding-top: 10px;
+      font-size: 15px;
+      font-weight: normal;
+      color: #32CD32;
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%,0);
+    }
+  }
 </style>

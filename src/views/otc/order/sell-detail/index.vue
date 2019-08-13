@@ -207,7 +207,7 @@ export default {
       // 付款方式logo图片
       this.logo_img()
       // 时间控制
-      this.Setitem()
+      this.setTime()
       // 订单完成状态
       this.status()
     },
@@ -313,7 +313,7 @@ export default {
       }
     },
     // 时间控制
-    async Setitem () {
+    async setTime () {
       // 下单时间
       let item = new Date(this.data.created)
       // 时间详细显示

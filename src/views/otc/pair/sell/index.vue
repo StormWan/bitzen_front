@@ -222,7 +222,9 @@ export default {
       return this.otcPair === null ? 0 : this.otcPair.buy_min
     },
     buyMinCny () {
+      // if () {
       return (this.otcPair === null ? 0 : this.buy_price * this.otcPair.buy_min).toFixed(2)
+      // }
     },
     buyMaxAsset () {
       return this.otcPair === null ? 0 : this.otcPair.buy_max
