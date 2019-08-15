@@ -33,7 +33,7 @@ const router = new Router({
     {
       path: '/payment',
       name: 'payment',
-      component: () => import('./views/otc/order/index.vue'),
+      component: () => import('./views/otc/payment/index.vue'),
       meta: {
         keepAlive: true,
         Auth: true
@@ -41,9 +41,9 @@ const router = new Router({
     },
     // 法币买入订单详情
     {
-      path: '/otc_order/:id',
-      name: 'otc_order',
-      component: () => import('./views/otc/order/buy-detail/index.vue'),
+      path: '/buy-detail/:id',
+      name: 'buy-detail',
+      component: () => import('./views/orders/otc_order/details/buy-detail/index.vue'),
       meta: {
         keepAlive: false,
         Auth: true
@@ -51,9 +51,9 @@ const router = new Router({
     },
     // 法币卖出订单
     {
-      path: '/otc_out/:id',
-      name: 'otc_out',
-      component: () => import('./views/otc/order/sell-detail/index.vue'),
+      path: '/sell-detail/:id',
+      name: 'sell-detail',
+      component: () => import('./views/orders/otc_order/details/sell-detail/index.vue'),
       meta: {
         keepAlive: false,
         Auth: true

@@ -299,7 +299,7 @@ export default {
             payment_method: ''
           })
         } else {
-          this.setBuyOrder({
+          this.setSellOrder({
             otc_pair: this.otcPair.id,
             asset_amount: amount,
             price: price,
@@ -315,14 +315,22 @@ export default {
      * 检测输入数据是否超出范围
      * */
     checkAmountBuy (amount) {
-      if (amount < this.buyMinCny || amount > this.buyMaxCny & amount !== '') {
+      if (amount < this.buyMinCny & amount !== '') {
+        this.amount = ''
+        Toast('输入数据超出范围！请再次输入')
+        return false
+      } else if (amount > this.buyMaxCny & amount !== ''){
         this.amount = ''
         Toast('输入数据超出范围！请再次输入')
         return false
       } else return true
     },
     checkAmountSell (amount) {
-      if (amount < this.sellMinCny || amount > this.sellMaxCny & amount !== '') {
+      if (amount < this.sellMinCny & amount !== '') {
+        this.amountSell = ''
+        Toast('输入数据超出范围！请再次输入')
+        return false
+      } else if (amount > this.sellMaxCny & amount !== '') {
         this.amountSell = ''
         Toast('输入数据超出范围！请再次输入')
         return false
@@ -381,7 +389,7 @@ export default {
       return this.otcPair === null ? 0 : this.otcPair.buy_min
     },
     buyMinCny () {
-      return (this.otcPair === null ? 0 : this.buy_price * this.otcPair.buy_min).toFixed(2)
+      return (this.otcPair === null ? 0 : this.buyPrice * this.otcPair.buy_min).toFixed(2)
     },
     buyMaxAsset () {
       return this.otcPair === null ? 0 : this.otcPair.buy_max

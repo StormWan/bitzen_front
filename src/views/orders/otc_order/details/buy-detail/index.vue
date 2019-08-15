@@ -1,18 +1,16 @@
 <template>
     <div class="otc_order">
       <!--标题-->
-      <div class="title">
         <van-nav-bar
           :title='title'
           left-arrow
           @click-left="onClickLeft"
         />
-      </div>
       <div class="top">
           <!--下单时间-->
           <div class="item">
-            <div>No:{{set_item_M}}</div>
-            <div>{{set_item_F}}</div>
+            <div>No:{{specificTime}}</div>
+            <div>{{orderTime}}</div>
           </div>
           <!--购买转账人-->
           <div class="turn_name">你向 {{alipay_name}} 购买 {{data.price}} {{usdt_amount}} {{Fun}}</div>
@@ -44,22 +42,26 @@
       <div class="method_bos" v-if="item">
         <!--付款用户信息栏-->
         <div v-for="(item,index) in mode" :key="index">
-          <div class="method" v-if="off">
-            <div class="mode">{{item.name}}</div>
-            <div class="style" :class="{active: index === 0}">
-              <div class="img" v-if="index === 0">
-                <img :src="mode[0].img" alt="">
-              </div>
-              <div class="tag-read" :data-clipboard-text="item.price" @click="method_click(index)">{{item.price}}<span v-if="index !== 0">
-              <van-icon name="arrow" />
-            </span></div>
+          <div v-if="off">
+            <div v-if="index === 0" class="payment-box">
+              <van-cell :title="item.name" center>
+              <van-icon :name="mode[0].img" color="#1e90ff" size="30px" style="position: absolute;right: 50px;"/>
+              <span>{{item.price}}</span>
+              </van-cell>
+            </div>
+            <div v-if="index !== 0">
+              <van-cell :title="item.name" is-link center>
+                <div class="tag-read" :data-clipboard-text="item.price" @click="method_click(index)">
+                  <span class="method-box">{{item.price}}</span>
+                </div>
+              </van-cell>
             </div>
           </div>
         </div>
         <!--付款确认-->
         <div class="but">
-          <div class="but_ok" @click="but_ok">我已付款</div>
-          <div class="but_no" @click="but_no">取消订单</div>
+          <div class="but_ok" @click="successfulPayment">我已付款</div>
+          <div class="but_no" @click="cancelOrder">取消订单</div>
         </div>
       </div>
       <!--取消付款之后显示-->
@@ -69,13 +71,13 @@
         <div class="status">
           <van-steps direction="vertical" :active="active">
             <van-step>
-              <h3>{{status_t}}</h3>
+              <h3>{{transferStatus}}</h3>
             </van-step>
             <van-step>
-              <h3>{{status_c}}</h3>
+              <h3>{{releaseStatus}}</h3>
             </van-step>
             <van-step>
-              <h3>{{status_b}}</h3>
+              <h3>完成</h3>
             </van-step>
           </van-steps>
         </div>
@@ -94,16 +96,24 @@
 </template>
 
 <script>
-import { NavBar, Icon, Popup, Toast, Step, Steps, Dialog } from 'vant'
+import { NavBar, Icon, Popup, Toast, Step, Steps, Dialog, Cell, CellGroup } from 'vant'
 import Clipboard from 'clipboard'
 export default {
+  components: {
+    [NavBar.name]: NavBar,
+    [Icon.name]: Icon,
+    [Popup.name]: Popup,
+    [Toast.name]: Toast,
+    [Step.name]: Step,
+    [Steps.name]: Steps,
+    [Dialog.name]: Dialog,
+    [Cell.name]: Cell,
+    [CellGroup.name]: CellGroup
+  },
   data () {
     return {
       title: '',
       keepTime: '',
-      // 时间设定
-      limittime: 0,
-      settime: '',
       flag: false,
       mode: [
         {
@@ -131,12 +141,12 @@ export default {
       item: false,
       item_of: true,
       show: false,
-      data: [],
+      data: {},
       // 收款人信息
       alipay_name: '',
       // 时间
       set_item_M: '',
-      set_item_F: '',
+      setOrderTime: '',
       Fun: '',
       usdt_amount: '',
       currency_amount: '',
@@ -144,162 +154,175 @@ export default {
       off: true,
       delete_cre: false,
       active: 0,
-      status_t: '待转账',
-      status_c: '等待承兑商释放USDT',
-      status_b: '完成',
+      transferStatus: '待转账',
+      releaseStatus: '等待承兑商释放USDT',
       // 数据状态
       data_item: true
     }
   },
+  computed: {
+    /**
+     * 获取当前时间
+     * */
+    currentTime () { return new Date(this.data.created) },
+    /**
+     * 获取具体时间
+     * */
+    specificTime () {
+      return this.currentTime.getFullYear() + '' + (this.currentTime.getMonth() + 1) +
+        this.currentTime.getDate() + this.currentTime.getHours() + this.currentTime.getMinutes() +
+        this.currentTime.getSeconds() + this.currentTime.getMilliseconds()
+    },
+    /**
+     * 下单时间获取
+     * */
+    orderTime () {
+      return this.currentTime.getFullYear() + '/' + (this.currentTime.getMonth() + 1) + '/' +
+        this.currentTime.getDate() + ' ' + this.currentTime.getHours() + ':' + this.currentTime.getMinutes()
+    },
+    /**
+     * 付款倒计时
+     * */
+    limitTime () {
+      let itemHours = this.currentTime.getHours() > 9 ? this.currentTime.getHours() : '0' + this.currentTime.getHours()
+      let itemMinutes = this.currentTime.getMinutes() > 9 ? this.currentTime.getMinutes() : '0' + this.currentTime.getMinutes()
+      let itemDate = this.currentTime.getDate() > 9 ? this.currentTime.getDate() : '0' + this.currentTime.getDate()
+      let itemMonth = (this.currentTime.getMonth() + 1) > 9 ? (this.currentTime.getMonth() + 1) : '0' + (this.currentTime.getMonth() + 1)
+      let set = this.currentTime.getFullYear() + '' + itemMonth + itemDate + itemHours + itemMinutes
+      let date = new Date()
+      let itemSetHours = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+      let itemSetMinutes = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+      let itemSetDate = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
+      let itemSetMonth = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
+      const itemSet = date.getFullYear() + '' + itemSetMonth + itemSetDate + itemSetHours + itemSetMinutes
+      if ((itemSet - set) <= 15) {
+        return 15 - (itemSet - set)
+      } else return 0
+    },
+    settingTime () {
+      let myDate = new Date()
+      myDate.setMinutes(myDate.getMinutes() + this.limitTime)
+      return myDate
+    }
+  },
   methods: {
-    // 数据获取
-    async getOrder () {
+    /**
+     * 数据获取
+     */
+    async getBuyOrderDetail () {
       const { data } = await this.$api.otc.orderDetail(this.$route.params.id)
-      this.data = data.data
-      // 标题
-      this.title = data.data.otc_pair.asset.symbol
-      this.alipay_name = data.data.merchant.alipay_name
-      if (data.data.otc_pair.pair) {
-        this.Fun = data.data.otc_pair.pair.quote.symbol
-      } else {
-        this.Fun = 'USDT'
-      }
-      this.usdt_amount = data.data.usdt_amount
-      this.currency_amount = data.data.currency_amount
-      // 总金额
-      this.mode[1].price = data.data.currency_amount
-      // 姓名
-      this.mode[2].price = data.data.merchant.alipay_name
-      // 时间控制
-      await this.Setitem()
-      // 订单完成状态
-      this.status()
-      // 付款方式图片显示说明
-      let mode = this.mode[0]
-      // 微信付款
-      if (data.data.payment_method === 'wechat') {
-        mode.img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAYCAYAAADpnJ2CAAABiklEQVR4AbWVAWRCURSGf8gIGQyYgUEAgyAAbCCAAAQQGBAYIGAwAAgIwAMJGIsqRTAgQPAQEsKDu//kXHLddV+v+w6f0HnvP/e8/5yLYPzgAXN0yICsSUoyZUeW+l/nlFs45miSRF9scpKRBDM0rhGqacXmRobhE8/wwsQtMZHYyjv/E2swYU9MZPZW1DVGWoLYEQt88ffR/W7DyEIHCn3ab4gVKpjhzbayHlOI9K2QHqZFNsSctKSSCEI78oE17h1PTJy8PnRwjYdNjlanpEdqsLHC04XnltA2+KuWiudoe9y7xQLvWKF6JlSVE5DjxZZf3CRs91nV3zqjXYxw55iuk9PlGQKJGaZ4hoR123lM8cqc3yu+dSqC40BS4lkSdf9zQcY4tSic2LQLQgc5K+jmrl3Wu0DiUkxy4+o72LEJnDISUrDjtKREwTHc0DkalSA2sfPqE62oKWKJDWRmgzd+BKENaUGjLMGjzmbbLoiigmvSk/tMnKa3y0DQ9vdIM9S6gKCK6FqLGX+Ik2Cgy7oRZQAAAABJRU5ErkJggg=='
-        mode.price = '微信'
-        this.mode[3].price = data.data.merchant.wechat_account
-        this.img = 'http://124.156.115.134' + data.data.merchant.wechat_qrcode
-      } else if (data.data.payment_method === 'alipay') {
-        // 支付宝付款
-        mode.img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAB7ElEQVR4Ac2WA6weQRSFb62gtuPajetGtW0FNcO6cVK7XdRu2Ia149R2Z6bP9r6T+yb5bZ7k/Bh9gzt3l1hXfzUiS+4iU36GK2AnTq6AP/PYJ/42JhZ+oPAp7CTWYDDUVHu4IDneCaD8kkTgV4r4zA5+akBuivhMI56llyLv768wXkpfYNK3NGXAaHQhpxlHY9KAlpwc6Qojt6W2urZYnYoFWA5XhWhTSaf/dmHYDqc2/v+NFPiZDLmKzv7pxAPAZIvWZPwbjrqN8B242LU6edUtgMZGGjS3XI8R6IRTj/yI2xhiPNofA7CPCyiuRAL8wM9FUy6AH8I5urwE/gwb8FSdS311+ldz1KsIgGIpmWpNGEGSQYbaC7f1gWIyPClD3uaJBgWeld3x/S3MyCwkWwz1AfqsWCzV8EIfIAeJqd6GAcuHx7oFylz4AVlqGl116gQ/c3HABTTkFH1pywPD1Esy//V0wdQMlJe6Rex3MtQ2OvO/fRgZXbziGVqqP+CmXm0m/AED2WT9G0GOU4sg/sYVCZLCyngrLTHRJ9K9Gl4jWzShYDoj+5Ih7keQiSQWcwgTHqKBPrP8wanK/D+QLzwOH4DeOgDu+maeiPwmBS9RuFNJA1pyV9JfhF33BHS9vZVxhFTWjCn2kYZVAyRlGm3AoxGeAAAAAElFTkSuQmCC'
-        this.mode[0].price = '支付宝'
-        this.mode[3].price = data.data.merchant.alipay_account
-        // this.img = data.data.merchant.alipay_qrcode
-        this.img = 'http://124.156.115.134' + data.data.merchant.alipay_qrcode
-      } else {
-        // 银行卡付款
-        mode.img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAABHklEQVR4Ae2WgUYEURSGh70oQIB6gh6gHmBsqhfqHdq2hAJTUYAACMCytqQISUDAVpsEsWi09TX/XFcxYeJ0E/vzMf4z7uc6cJMQWi6l1egU5AUYkfszXZp8TVFmBfwyWbhZU0UcXKrbdWMJ5ZLwNaIwl5CY1BPen8HgAtoT1dn6pJ/dnRoKn64p01mpztQpj1eGwsNlyuTPsDX92W/P+A70j6FQ3BxR5nI3dP4bNDPeochmYZTD+xvsz8HBvP8evWhmLvScb1Cm3/Mo6sLcXLg5BcMHQhgO1BkL+8fUjP6NLLw9MRB+R0h19h+F4x3WYSystVe/rx/zJ0+MXtxHVNstxBO6ZqKw2tiLINxJQrzULenKxjvVWV3W3GLwfAD9KR4TBA12SgAAAABJRU5ErkJggg=='
-        mode.price = '银行卡'
-        this.mode[3].price = data.data.merchant.bank_account_number
-        this.off = false
-      }
+      if (data.code === 200) {
+        this.data = data.data
+        // 标题
+        this.title = data.data.otc_pair.asset.symbol
+        this.alipay_name = data.data.merchant.alipay_name
+        if (data.data.otc_pair.pair) {
+          this.Fun = data.data.otc_pair.pair.quote.symbol
+        } else {
+          this.Fun = 'USDT'
+        }
+        this.usdt_amount = data.data.usdt_amount
+        this.currency_amount = data.data.currency_amount
+        // 总金额
+        this.mode[1].price = data.data.currency_amount
+        // 姓名
+        this.mode[2].price = data.data.merchant.alipay_name
+        // 时间控制
+        await this.setItem()
+        // 订单完成状态
+        this.status()
+        // 付款方式图片显示说明
+        let mode = this.mode[0]
+        // 微信付款
+        if (data.data.payment_method === 'wechat') {
+          mode.img = 'wechat'
+          mode.price = '微信'
+          this.mode[3].price = data.data.merchant.wechat_account
+          this.img = 'http://124.156.115.134' + data.data.merchant.wechat_qrcode
+        } else if (data.data.payment_method === 'alipay') {
+          // 支付宝付款
+          mode.img = 'alipay'
+          this.mode[0].price = '支付宝'
+          this.mode[3].price = data.data.merchant.alipay_account
+          this.img = 'http://124.156.115.134' + data.data.merchant.alipay_qrcode
+        } else {
+          // 银行卡付款
+          mode.img = 'card'
+          mode.price = '银行卡'
+          this.mode[3].price = data.data.merchant.bank_account_number
+          this.off = false
+        }
+      } else { Toast('请求错误，请再次重试！') }
     },
     // 判断状态码
     status () {
       if (this.data.status === 0) {
         this.item = true
-        this.StartCountDown()
+        this.countDown()
       } else if (this.data.status === 1) {
-        this.limittime = 0
+        this.limitTime = 0
         this.item = false
-        this.status_t = '已确认转账'
+        this.transferStatus = '已确认转账'
       } else if (this.data.status === 2) {
-        this.limittime = 0
+        this.limitTime = 0
         this.item = false
-        this.status_t = '已确认转账'
-        this.status_c = '承兑商已经释放USDT'
+        this.transferStatus = '已确认转账'
+        this.releaseStatus = '承兑商已经释放USDT'
         this.active = 2
         // 订单成功取消计时器
         this.data_item = false
       } else if (this.data.status === 11) {
-        this.limittime = 0
+        this.limitTime = 0
         this.active = 1
         this.item = false
-        this.status_t = '已确认转账'
+        this.transferStatus = '已确认转账'
       } else if (this.data.status === 12) {
-        this.limittime = 0
+        this.limitTime = 0
         this.item = false
         this.active = 1
-        this.status_t = '已确认转账'
-        this.status_c = '承兑商已经释放USDT'
+        this.transferStatus = '已确认转账'
+        this.releaseStatus = '承兑商已经释放USDT'
       } else if (this.data.status === 30) {
-        this.limittime = 0
+        this.limitTime = 0
         this.item = false
         this.delete_cre = true
       } else {
-        this.limittime = 0
+        this.limitTime = 0
         this.item = false
         Toast('数据错误')
       }
     },
-    // 时间控制
-    async Setitem () {
-      // 下单时间
-      let item = new Date(this.data.created)
-      // 时间详细显示
-      this.set_item_M = item.getFullYear() + '' + (item.getMonth() + 1) + item.getDate() + item.getHours() + item.getMinutes() + item.getSeconds() + item.getMilliseconds()
-      // 时间下单时间
-      this.set_item_F = item.getFullYear() + '/' + (item.getMonth() + 1) + '/' + item.getDate() + ' ' + item.getHours() + ':' + item.getMinutes()
-      // 当前时间
-      // eslint-disable-next-line camelcase
-      let item_hours = item.getHours() > 9 ? item.getHours() : '0' + item.getHours()
-      // eslint-disable-next-line camelcase
-      let item_minutes = item.getMinutes() > 9 ? item.getMinutes() : '0' + item.getMinutes()
-      // eslint-disable-next-line camelcase
-      let item_date = item.getDate() > 9 ? item.getDate() : '0' + item.getDate()
-      // eslint-disable-next-line camelcase
-      let item_month = (item.getMonth() + 1) > 9 ? (item.getMonth() + 1) : '0' + (item.getMonth() + 1)
-      // eslint-disable-next-line camelcase
-      let set = item.getFullYear() + '' + item_month + item_date + item_hours + item_minutes
-      // 本地时间
-      let date = new Date()
-      // eslint-disable-next-line camelcase
-      let itemSet_hours = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
-      // eslint-disable-next-line camelcase
-      let itemSet_minutes = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
-      // eslint-disable-next-line camelcase
-      let itemSet_date = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
-      // eslint-disable-next-line camelcase
-      let itemSet_month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
-      // eslint-disable-next-line camelcase
-      let itemSet = date.getFullYear() + '' + itemSet_month + itemSet_date + itemSet_hours + itemSet_minutes
-      if ((itemSet - set) <= 15) {
-        this.limittime = 15 - (itemSet - set)
-      } else {
-        this.limittime = 0
+    /**
+     * 下单时间控制
+     * */
+    async setItem () {
+      if (this.limitTime === 0) {
         await this.$api.otc.orderUpdate(this.$route.params.id, { op_type: 'user_cancel_order' })
       }
     },
+    /**
+     * 返回上一页
+     * */
     onClickLeft () {
-      this.$router.push({
-        path: '/lend'
-      })
+      this.$router.go(-1)
     },
-    // 时间开始倒计时
-    StartCountDown () {
-      let mydate = new Date()
-      mydate.setMinutes(mydate.getMinutes() + this.limittime)
-      this.settime = mydate
-
+    /**
+     * 倒计时开始
+     * */
+    countDown () {
       let time = setInterval(() => {
-        if (this.flag === true) {
-          clearInterval(time)
-        }
-        this.timeDown()
+        if (this.flag === true) { clearInterval(time) }
+        this.minute()
       }, 100)
     },
     // 分钟
-    timeDown () {
-      const endTime = new Date(this.settime)
+    minute () {
+      const endTime = new Date(this.settingTime)
       const nowTime = new Date()
       let leftTime = parseInt((endTime.getTime() - nowTime.getTime()) / 1000)
-      // let d = parseInt(leftTime / (24 * 60 * 60))
-      let h = this.formate(parseInt(leftTime / (60 * 60) % 24))
-      let m = this.formate(parseInt(leftTime / 60 % 60))
-      let s = this.formate(parseInt(leftTime % 60))
+      let h = this.second(parseInt(leftTime / (60 * 60) % 24))
+      let m = this.second(parseInt(leftTime / 60 % 60))
+      let s = this.second(parseInt(leftTime % 60))
       if (leftTime <= 0) {
         this.flag = true
         this.item = false
@@ -308,12 +331,10 @@ export default {
       this.keepTime = `${h}:${m}:${s}`
     },
     // 秒钟
-    formate (time) {
+    second (time) {
       if (time >= 10) {
         return time
-      } else {
-        return `0${time}`
-      }
+      } else { return `0${time}` }
     },
     // 支付方式复制
     method_click (i) {
@@ -336,7 +357,7 @@ export default {
       }
     },
     // 取消订单
-    async but_no () {
+    async cancelOrder () {
       // 支付取消提醒
       Dialog.confirm({
         title: '取消',
@@ -355,7 +376,7 @@ export default {
       })
     },
     // 确认订单
-    async but_ok () {
+    async successfulPayment () {
       // 支付成功提醒
       Dialog.confirm({
         title: '付款结果',
@@ -364,7 +385,7 @@ export default {
         // on confirm
         await this.$api.otc.orderUpdate(this.$route.params.id, { op_type: 'user_paid_confirm' })
         this.item = false
-        this.status_t = '已确认转账'
+        this.transferStatus = '已确认转账'
         Toast('确认付款')
         this.active = 1
       }).catch(() => {
@@ -374,28 +395,19 @@ export default {
     }
   },
   async activated () {
-    await this.getOrder()
+    await this.getBuyOrderDetail()
     // 设置定时器，每隔2秒获取数据
     let timer = await setInterval(() => {
-      this.getOrder()
+      this.getBuyOrderDetail()
     }, 4000)
     // 在离开页面时清楚定时器
     this.$once('hook:deactivated', () => {
       clearInterval(timer)
     })
   },
-  components: {
-    [NavBar.name]: NavBar,
-    [Icon.name]: Icon,
-    [Popup.name]: Popup,
-    [Toast.name]: Toast,
-    [Step.name]: Step,
-    [Steps.name]: Steps,
-    [Dialog.name]: Dialog
-  },
   destroyed () {
     this.$router.push({
-      path: '/lend'
+      path: '/'
     })
     // 订单完成取消计时器
     this.data_item = false
@@ -524,15 +536,13 @@ export default {
             color: #999;
             vertical-align: middle;
           }
-          .img{
-            width: 20px;
-            margin-right: 8px;
-            color: #7FFFAA;
-            img{
-              width: 100%;
-              vertical-align: middle;
-            }
+          .van-icon{
+            margin: 10px auto;
+            margin-bottom: 0px;
           }
+          /*.img{*/
+          /*  margin: 10px auto;*/
+          /*}*/
         }
         .active{
           color: #999;
@@ -552,6 +562,25 @@ export default {
         .but_ok{
           background-color: #6495ED;
           color: white;
+        }
+      }
+    }
+    .van-cell{
+      padding: auto 20px;
+      font-size: 16px;
+      border-bottom: 0.02rem solid rgba(0, 0, 0, 0.05);
+      .payment-box{
+        position: relative;
+        width: 100%;
+        height: 100%;
+        .payment-icon{
+          position: absolute;
+          right: 50px;
+        }
+        span{
+          position: absolute;
+          right: 0px;
+          padding-top: 3%;
         }
       }
     }

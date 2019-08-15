@@ -34,23 +34,22 @@ const mutations = {
   }
 }
 const getters = {
-  getOtcOrder (state, side) {
-    if (side === 'buy') {
-      return {
-        otc_pair: state.otc_pair,
-        side: state.side,
-        currency_amount: state.currency_amount,
-        price: state.price,
-        payment_method: state.payment_method
-      }
-    } else {
-      return {
-        otc_pair: state.otc_pair,
-        side: state.side,
-        asset_amount: state.asset_amount,
-        price: state.price,
-        payment_method: state.payment_method
-      }
+  getBuyOtcOrder (state) {
+    return {
+      otc_pair: state.otc_pair,
+      side: state.side,
+      currency_amount: state.currency_amount,
+      price: state.price,
+      payment_method: state.payment_method
+    }
+  },
+  getSellOtcOrder (state) {
+    return {
+      otc_pair: state.otc_pair,
+      side: state.side,
+      asset_amount: state.asset_amount,
+      price: state.price,
+      payment_method: state.payment_method
     }
   }
 }
