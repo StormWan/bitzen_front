@@ -108,7 +108,9 @@
     <van-button type="primary" size="large" v-on:click="submitOrder">提交订单</van-button>
     <!--Mixin 钱包-->
     <div v-if="activeIndex === 0">
-      <otc_wallet :symbol="symbol"></otc_wallet>
+<!--      <otc_wallet :symbol="symbol"></otc_wallet>-->
+
+      <otc_wallet :symbol="symbol" :pair="walletOtcPair" @wallet="walletMessage" :index="0"></otc_wallet>
     </div>
   </div>
 </template>
@@ -116,7 +118,7 @@
 <script>
 import { Tab, Tabs, NavBar, Button, NumberKeyboard, Field, Toast, Row, Col } from 'vant'
 import Footer from './footer'
-import Wallet from '../../../components/otc_wallet'
+import Wallet from '../../../components/wallet_mode'
 import { mapMutations } from 'vuex'
 
 export default {
@@ -145,7 +147,8 @@ export default {
       buyKeyboardShow: false,
       buyArrivalKeyboardShow: false,
       sellArrivalKeyboardShow: false,
-      sellKeyboardShow: false
+      sellKeyboardShow: false,
+      walletData: '' // 钱包的数据
     }
   },
   methods: {
@@ -351,6 +354,41 @@ export default {
         this.amountSell = ''
         return true
       } else return false
+    },
+    successfulPayment () {
+      if (this.data.status !== 22) {
+        if (this.data.status === 1) {
+          this.item = true
+          Toast('请付款之后再操作')
+          this.sellSuccess = false
+        } else {
+          Toast('请等待商家完成操作')
+        }
+      } else {
+        // 收款
+        Dialog.confirm({
+          title: '收款状态',
+          message: '是否收到款项'
+        }).then(async () => {
+          const { data } = await this.$api.otc.orderUpdate(this.data.id, { op_type: 'user_received_confirm' })
+          if (data) {
+            if (data.code === 200) {
+              this.sellSuccess = false
+              this.active = 2
+            } else {
+              Toast('数据获取有误，请稍后再试')
+            }
+          } else {
+            Toast('网络错误，请稍后再试')
+          }
+        }).catch(() => {
+          Toast('请稍后重试')
+        })
+      }
+    },
+    // 钱包选择付款
+    walletMessage (msg) {
+      this.walletData = msg
     }
   },
   // 计算
@@ -446,6 +484,11 @@ export default {
     sellLogo () {
       if (this.otcPair === null) return ''
       else return this.otcPair.asset.icon_url ? this.otcPair.asset.icon_url : ''
+    },
+    walletOtcPair () {
+      if (this.otcPair === null) {
+        return ''
+      } else return this.otcPair.pair
     }
   },
   async activated () {

@@ -53,9 +53,18 @@
 </template>
 
 <script>
-import { Icon } from 'vant'
+import { Icon, Row, Col, Checkbox } from 'vant'
 export default {
-  name: 'index',
+  name: 'otc-wallet',
+  components: {
+    [Icon.name]: Icon,
+    [Row.name]: Row,
+    [Col.name]: Col,
+    [Checkbox.name]: Checkbox
+  },
+  props: [
+    'symbol'
+  ],
   data () {
     return {
       // 钱包数据
@@ -64,10 +73,6 @@ export default {
           name: 'Mixin',
           icon: 'youzan-shield'
         }
-        // {
-        //   name: 'BlockPay',
-        //   icon: 'youzan-shield'
-        // }
       ],
       bank: 'Mixin',
       triangle_active: false,
@@ -93,13 +98,7 @@ export default {
       }, 100)
       this.icon_index = e
     }
-  },
-  components: {
-    [Icon.name]: Icon
-  },
-  props: [
-    'symbol'
-  ]
+  }
 }
 </script>
 

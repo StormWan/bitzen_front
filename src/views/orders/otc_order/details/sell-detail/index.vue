@@ -3,21 +3,21 @@
     <!--遮罩层-->
     <div :class="{mask: triangle_active}" @click="mask"></div>
     <!--标题-->
-    <div class="title">
       <van-nav-bar
         :title="title"
         left-arrow
         @click-left="onClickLeft"
       />
-    </div>
     <div class="top">
       <!--下单时间-->
       <div class="item">
-        <div>No:{{set_item_M}}</div>
-        <div>{{set_item_F}}</div>
+        <div>No:{{specificTime}}</div>
+        <div>{{orderTime}}</div>
       </div>
       <!--购买转账人-->
-      <div class="turn_name">你出售 {{data.asset_amount}} {{title}}<span v-if="title !== 'USDT'">,价值约 {{Math.floor(best_sell_price * 100) / 100}} {{Fun}}</span></div>
+      <div class="turn_name">你出售 {{data.asset_amount}} {{title}}
+        <span v-if="title !== 'USDT'">,价值约 {{Math.floor(best_sell_price * 100) / 100}} {{Fun}}</span>
+      </div>
       <!--单价-->
       <div class="price">
         <div class="unit">
@@ -26,10 +26,10 @@
         </div>
         <div class="total">
           <span>预估到账：</span>
-          <span @click="tot_T">
+          <span @click="showTips">
             <van-icon name="question-o" />
           </span>
-          <span>{{price}} CNY</span>
+          <span>{{amountArrival}} CNY</span>
         </div>
       </div>
     </div>
@@ -43,92 +43,59 @@
     <!--支付方式-->
     <div class="method_bos" v-if="item">
       <!--付款用户信息栏-->
-      <div class="method" v-for="(item,index) in mode" :key="index">
-        <div class="mode">{{item.name}}</div>
-        <div class="style" :class="{active: item.img}">
-          <div class="img" v-if="item.img">
-            <img :src="mode[0].img" alt="">
+      <div v-for="(item,index) in mode" :key="index">
+          <div v-if="index === 0" class="sell-payment-box">
+            <van-cell :title="item.name" center>
+              <div v-show="mode[0].img == 'card'">
+                <van-icon :name="mode[0].img" size="30px" class="logo-card"/>
+              </div>
+              <div v-show="mode[0].img == 'wechat'">
+                <van-icon :name="mode[0].img" size="30px" class="logo-wechat"/>
+              </div>
+              <div v-show="mode[0].img == 'alipay'">
+                <van-icon :name="mode[0].img" size="30px" class="logo-alipay"/>
+              </div>
+              <span>{{item.price}}</span>
+            </van-cell>
           </div>
-          <div class="tag-read" :data-clipboard-text="item.price" @click="method_click(index)">{{item.price}}<span v-if="index !== 0">
-              <van-icon name="arrow" />
-            </span></div>
-        </div>
+          <div v-if="index !== 0">
+            <van-cell :title="item.name" is-link center>
+              <div class="tag-read" :data-clipboard-text="item.price" @click="method_click(index)">
+                <span class="method-box">{{item.price}}</span>
+              </div>
+            </van-cell>
+          </div>
       </div>
-      <!--付款确认-->
-      <div class="but">
-        <div class="but_ok" @click="but_no">支付 EOS</div>
-      </div>
+      <van-button type="info" @click="paymentButton" size="large">支付 EOS </van-button>
     </div>
     <!--取消付款之后显示-->
-    <div class="delete" v-if="delete_cre"><span><van-icon name="close" /></span><span>已取消</span></div>
+    <div class="afterPayment" v-if="delete_cre">
+      <span><van-icon name="close" /></span><span>已取消</span>
+    </div>
     <!--成功付款之后显示-->
-    <div class="delete" v-else>
+    <div class="afterPayment" v-else>
       <div class="status">
         <van-steps direction="vertical" :active="active">
           <van-step>
-            <h3>{{status_t}}</h3>
+            <h3>{{transferStatus}}</h3>
           </van-step>
           <van-step>
-            <h3>{{status_c}}</h3>
+            <h3>{{releaseStatus}}</h3>
           </van-step>
           <van-step>
-            <h3>{{status_b}}</h3>
+            <h3>完成</h3>
           </van-step>
         </van-steps>
       </div>
-      <div v-if="but_success" class="but_success" @click="but_succ">确认收到款项</div>
-    </div>
-    <!--付款方式-->
-    <div class="wallet_box" @click="wallet_box" v-if="item">
-      <div class="wallet">
-        <div class="Bank">
-          <div class="left">
-            <van-icon name="youzan-shield"></van-icon>
-          </div>
-          <div class="right">{{bank}} 钱包</div>
-        </div>
-        <div class="balance">
-          <div class="left">
-            <div> 余额</div>
-            <div>0</div>
-          </div>
-          <!--三角形-->
-          <div class="right" :class="{active: triangle_active}"></div>
-        </div>
-      </div>
+      <div v-if="sellSuccess" class="but_success" @click="successfulPayment">确认收到款项</div>
     </div>
     <!--付款方式钱包-->
-    <div class="dis_but" :class="{display: triangle_active}">
-      <div class="title">请选择钱包</div>
-      <!--钱包选择-->
-      <div class="Choice">
-        <div class="wallet_box" v-for="(item,index) in wallet" :key="index" @click="wallet_click(index)">
-          <div class="wallet">
-            <div class="Bank">
-              <div class="left">
-                <van-icon :name="item.icon"></van-icon>
-              </div>
-              <div class="right">{{item.name}} 钱包</div>
-            </div>
-            <div class="balance">
-              <div class="left">
-                <div>BCT 余额</div>
-                <div>0</div>
-              </div>
-              <!--三角形-->
-              <div class="right" :class="{active: index === icon_index}">
-                <van-icon name="passed"></van-icon>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <sell_wallet :pair="walletPair" @wallet="walletMessage" :index="1" :symbol="symbol"></sell_wallet>
     <!--说明-->
-    <div class="Tips">1.如需帮助请联系 BlockPay 客服，Mixin ID：28749，微信：jc_castle</div>
+    <div class="footTips">1.如需帮助请联系 BlockPay 客服，Mixin ID：28749，微信：jc_castle</div>
     <!--预估到账内容-->
-    <div class="tot_popup">
-      <van-popup v-model="show_tot">
+    <div class="astimated-popup">
+      <van-popup v-model="showAstimated">
         <div>为何是预估到账？</div>
         <div>预估到账金额是根据当前最新挂单价折算的结果，并不代表最终成交价格，它与具体交易队的交易深度和交易数量有关。</div>
         <div>请与最终成交价格为准</div>
@@ -138,18 +105,35 @@
 </template>
 
 <script>
-import { NavBar, Icon, Popup, Toast, Dialog, Step, Steps } from 'vant'
+import { NavBar, Icon, Popup, Toast, Dialog, Step, Steps, Cell, CellGroup, Button } from 'vant'
 import Clipboard from 'clipboard'
+import sell_wallet from '../../../../../components/wallet_mode'
+
 // 付款跳转
 var msgpack = require('msgpack-lite')
 var uuidv4 = require('uuid/v4')
+
 export default {
+  name: 'sell-detail',
+  components: {
+    [NavBar.name]: NavBar,
+    [Icon.name]: Icon,
+    [Popup.name]: Popup,
+    [Toast.name]: Toast,
+    [Dialog.name]: Dialog,
+    [Step.name]: Step,
+    [Steps.name]: Steps,
+    [Cell.name]: Cell,
+    [CellGroup.name]: CellGroup,
+    [Button.name]: Button,
+    // 钱包
+    'sell_wallet': sell_wallet
+  },
   data () {
     return {
       keepTime: '',
       // 时间设定
-      limittime: 0,
-      settime: '',
+      limitTime: 0,
       flag: false,
       mode: [
         {
@@ -167,8 +151,8 @@ export default {
         }
       ],
       item: false,
-      but_success: false,
-      show_tot: false,
+      sellSuccess: false,
+      showAstimated: false,
       bank: 'Mixin',
       triangle_active: false,
       // 钱包数据
@@ -177,42 +161,131 @@ export default {
           name: 'Mixin',
           icon: 'youzan-shield'
         }
-        // {
-        //   name: 'BlockPay',
-        //   icon: 'youzan-shield'
-        // }
       ],
       icon_index: 0,
       title: '',
-      data: [],
+      data: '',
       set_item_M: '',
       set_item_F: '',
       Fun: '',
-      best_sell_price: '',
-      price: '',
       delete_cre: false,
       active: 0,
-      status_t: '待转账',
-      status_c: '已托管,等待承兑商转账',
-      status_b: '完成',
-      data_item: true
+      transferStatus: '待转账',
+      releaseStatus: '已托管,等待承兑商转账',
+      data_item: true,
+      wallet_data: '' // 钱包的数据
+    }
+  },
+  computed: {
+    /**
+     * 获取当前时间
+     * */
+    currentTime () { return new Date(this.data.created) },
+    /**
+     * 获取具体时间
+     * */
+    specificTime () {
+      console.log(this.currentTime)
+      return this.currentTime.getFullYear() + '' + (this.currentTime.getMonth() + 1) +
+        this.currentTime.getDate() + this.currentTime.getHours() + this.currentTime.getMinutes() +
+        this.currentTime.getSeconds() + this.currentTime.getMilliseconds()
+    },
+    /**
+     * 下单时间获取
+     * */
+    orderTime () {
+      return this.currentTime.getFullYear() + '/' + (this.currentTime.getMonth() + 1) + '/' +
+        this.currentTime.getDate() + ' ' + this.currentTime.getHours() + ':' + this.currentTime.getMinutes()
+    },
+    /**
+     * 付款倒计时
+     * */
+    checkLimitTime () {
+      let itemHours = this.currentTime.getHours() > 9 ? this.currentTime.getHours() : '0' + this.currentTime.getHours()
+      let itemMinutes = this.currentTime.getMinutes() > 9 ? this.currentTime.getMinutes() : '0' + this.currentTime.getMinutes()
+      let itemDate = this.currentTime.getDate() > 9 ? this.currentTime.getDate() : '0' + this.currentTime.getDate()
+      let itemMonth = (this.currentTime.getMonth() + 1) > 9 ? (this.currentTime.getMonth() + 1) : '0' + (this.currentTime.getMonth() + 1)
+      let set = this.currentTime.getFullYear() + '' + itemMonth + itemDate + itemHours + itemMinutes
+      let date = new Date()
+      let itemSetHours = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
+      let itemSetMinutes = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
+      let itemSetDate = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
+      let itemSetMonth = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
+      const itemSet = date.getFullYear() + '' + itemSetMonth + itemSetDate + itemSetHours + itemSetMinutes
+      return itemSet - set
+    },
+    settingTime () {
+      let myDate = new Date()
+      myDate.setMinutes(myDate.getMinutes() + this.limitTime)
+      return myDate
+    },
+    best_sell_price () {
+      if (this.data !== '' && this.data.otc_pair.pair) {
+        return this.data.otc_pair.pair.bestorderbookmodel.best_sell_price
+      } else return ''
+    },
+    /**
+     * 预计到账金额
+     * */
+    amountArrival () {
+      if (this.data !== '' && this.data.otc_pair.pair) {
+        return ((Math.floor((this.data.usdt_price * this.best_sell_price) * 100) / 100) * this.data.asset_amount).toFixed(2)
+      } else {
+        return (Math.floor((this.data.usdt_price * this.data.asset_amount) * 100) / 100 * this.data.asset_amount).toFixed(2)
+      }
+    },
+    /**
+     * 股票类型
+     * */
+    symbol () {
+      if (this.data === '') {
+        return ''
+      } else return this.data.otc_pair.pair.base.symbol
+    },
+    walletPair () {
+      if (this.data === '') {
+        return ''
+      } else return this.data.otc_pair.pair
     }
   },
   methods: {
-    async api () {
-      const { data } = await this.$api.otc.orders_get(this.$route.params.id)
-      this.data = data.data
-      console.log(this.data)
-      this.style()
-      // 付款方式logo图片
-      this.logo_img()
-      // 时间控制
-      this.setTime()
-      // 订单完成状态
-      this.status()
+    async getSellOrderDetail () {
+      const { data } = await this.$api.otc.orderDetail(this.$route.params.id)
+      if (data.code === 200) {
+        this.data = data.data
+        this.sellOrderDetail()
+        // 时间控制
+        this.setTime()
+        // 订单完成状态
+        this.status()
+        // 收款方式的 logo
+        let mode = this.mode[0]
+        // 微信付款
+        if (data.data.payment_method === 'wechat') {
+          this.mode[1].price = data.data.wechat_account
+          this.mode[2].price = data.data.wechat_name
+          this.img = 'http://124.156.115.134' + this.data.merchant.wechat_qrcode
+          mode.img = 'wechat'
+        } else if (data.data.payment_method === 'alipay') {
+          // 支付宝付款
+          mode.img = 'alipay'
+          this.mode[0].price = '支付宝'
+          this.mode[1].price = data.data.alipay_account
+          this.mode[2].price = data.data.alipay_name
+          // this.img = data.data.merchant.alipay_qrcode
+          this.img = 'http://124.156.115.134' + this.data.merchant.alipay_qrcode
+        } else {
+          // 银行卡付款
+          mode.img = 'card'
+          mode.price = '银行卡'
+          this.mode[1].price = data.data.bank_account_number
+          this.mode[2].price = data.data.bank_account_name
+          this.off = false
+        }
+      } else { Toast('请求错误，请再次重试！') }
     },
     // 开始渲染数据
-    style () {
+    sellOrderDetail () {
       // 标题
       if (this.data.otc_pair.pair) {
         // 标题
@@ -223,168 +296,100 @@ export default {
         this.title = this.data.otc_pair.asset.symbol
         this.Fun = this.data.otc_pair.asset.symbol
       }
-      // 价格大约
-      if (this.data.otc_pair.pair) {
-        this.best_sell_price = this.data.otc_pair.pair.bestorderbookmodel.best_sell_price
-        this.price = ((Math.floor((this.data.usdt_price * this.best_sell_price) * 100) / 100) * this.data.asset_amount).toFixed(2)
-      } else {
-        this.price = (Math.floor((this.data.usdt_price * this.data.asset_amount) * 100) / 100 * this.data.asset_amount).toFixed(2)
-      }
     },
     // 判断付款状态
     status () {
       // 判断状态码
       if (this.data.status === 0) {
         this.item = true
-        this.StartCountDown()
+        this.countDown()
       } else if (this.data.status === 1) {
-        this.limittime = 0
+        this.limitTime = 0
         this.item = true
-        this.status_t = '已确认转账'
+        this.transferStatus = '已确认转账'
       } else if (this.data.status === 2) {
-        this.limittime = 0
+        this.limitTime = 0
         this.item = false
         this.active = 2
-        this.status_t = '已确认转账'
-        this.status_c = '承兑商确认转账'
-        this.but_success = false
+        this.transferStatus = '已确认转账'
+        this.releaseStatus = '承兑商确认转账'
+        this.sellSuccess = false
         // 订单完成停止计时器
         this.data_item = false
       } else if (this.data.status === 21) {
-        this.limittime = 0
+        this.limitTime = 0
         this.active = 1
         this.item = false
-        this.status_t = '已确认转账'
+        this.transferStatus = '已确认转账'
       } else if (this.data.status === 22) {
-        this.limittime = 0
+        this.limitTime = 0
         this.active = 1
-        this.status_t = '已确认转账'
-        this.status_c = '承兑商已经转账'
-        this.but_success = true
+        this.transferStatus = '已确认转账'
+        this.releaseStatus = '承兑商已经转账'
+        this.sellSuccess = true
       } else if (this.data.status === 23) {
-        this.limittime = 0
+        this.limitTime = 0
         this.active = 1
         this.item = false
-        this.status_t = '已确认转账'
-        this.status_c = '等待承兑商释确认转账'
-        this.but_success = true
+        this.transferStatus = '已确认转账'
+        this.releaseStatus = '等待承兑商释确认转账'
+        this.sellSuccess = true
       } else if (this.data.status === 24) {
-        this.limittime = 0
+        this.limitTime = 0
         this.active = 1
-        this.status_t = '已确认转账'
-        this.status_c = '承兑商确认转账'
-        this.but_success = true
+        this.transferStatus = '已确认转账'
+        this.releaseStatus = '承兑商确认转账'
+        this.sellSuccess = true
       } else if (this.data.status === 30) {
-        this.limittime = 0
+        this.limitTime = 0
         this.delete_cre = true
-        this.but_success = true
+        this.sellSuccess = true
       } else {
-        this.limittime = 0
-        this.but_success = true
-      }
-    },
-    // 付款logo图片
-    async logo_img () {
-      const { data } = await this.$api.otc.payment_patch()
-      // 付款方式图片显示说明
-      let mode = this.mode[0]
-      // 微信付款
-      if (this.data.payment_method === 'wechat') {
-        mode.img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAYCAYAAADpnJ2CAAABiklEQVR4AbWVAWRCURSGf8gIGQyYgUEAgyAAbCCAAAQQGBAYIGAwAAgIwAMJGIsqRTAgQPAQEsKDu//kXHLddV+v+w6f0HnvP/e8/5yLYPzgAXN0yICsSUoyZUeW+l/nlFs45miSRF9scpKRBDM0rhGqacXmRobhE8/wwsQtMZHYyjv/E2swYU9MZPZW1DVGWoLYEQt88ffR/W7DyEIHCn3ab4gVKpjhzbayHlOI9K2QHqZFNsSctKSSCEI78oE17h1PTJy8PnRwjYdNjlanpEdqsLHC04XnltA2+KuWiudoe9y7xQLvWKF6JlSVE5DjxZZf3CRs91nV3zqjXYxw55iuk9PlGQKJGaZ4hoR123lM8cqc3yu+dSqC40BS4lkSdf9zQcY4tSic2LQLQgc5K+jmrl3Wu0DiUkxy4+o72LEJnDISUrDjtKREwTHc0DkalSA2sfPqE62oKWKJDWRmgzd+BKENaUGjLMGjzmbbLoiigmvSk/tMnKa3y0DQ9vdIM9S6gKCK6FqLGX+Ik2Cgy7oRZQAAAABJRU5ErkJggg=='
-        mode.price = '微信'
-        this.mode[1].price = data.data.wechat_account
-        this.mode[2].price = data.data.wechat_name
-        this.img = 'http://124.156.115.134' + this.data.merchant.wechat_qrcode
-      } else if (this.data.payment_method === 'alipay') {
-        // 支付宝付款
-        mode.img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAB7ElEQVR4Ac2WA6weQRSFb62gtuPajetGtW0FNcO6cVK7XdRu2Ia149R2Z6bP9r6T+yb5bZ7k/Bh9gzt3l1hXfzUiS+4iU36GK2AnTq6AP/PYJ/42JhZ+oPAp7CTWYDDUVHu4IDneCaD8kkTgV4r4zA5+akBuivhMI56llyLv768wXkpfYNK3NGXAaHQhpxlHY9KAlpwc6Qojt6W2urZYnYoFWA5XhWhTSaf/dmHYDqc2/v+NFPiZDLmKzv7pxAPAZIvWZPwbjrqN8B242LU6edUtgMZGGjS3XI8R6IRTj/yI2xhiPNofA7CPCyiuRAL8wM9FUy6AH8I5urwE/gwb8FSdS311+ldz1KsIgGIpmWpNGEGSQYbaC7f1gWIyPClD3uaJBgWeld3x/S3MyCwkWwz1AfqsWCzV8EIfIAeJqd6GAcuHx7oFylz4AVlqGl116gQ/c3HABTTkFH1pywPD1Esy//V0wdQMlJe6Rex3MtQ2OvO/fRgZXbziGVqqP+CmXm0m/AED2WT9G0GOU4sg/sYVCZLCyngrLTHRJ9K9Gl4jWzShYDoj+5Ih7keQiSQWcwgTHqKBPrP8wanK/D+QLzwOH4DeOgDu+maeiPwmBS9RuFNJA1pyV9JfhF33BHS9vZVxhFTWjCn2kYZVAyRlGm3AoxGeAAAAAElFTkSuQmCC'
-        this.mode[0].price = '支付宝'
-        this.mode[1].price = data.data.alipay_account
-        this.mode[2].price = data.data.alipay_name
-        // this.img = data.data.merchant.alipay_qrcode
-        this.img = 'http://124.156.115.134' + this.data.merchant.alipay_qrcode
-      } else {
-        // 银行卡付款
-        mode.img = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAABHklEQVR4Ae2WgUYEURSGh70oQIB6gh6gHmBsqhfqHdq2hAJTUYAACMCytqQISUDAVpsEsWi09TX/XFcxYeJ0E/vzMf4z7uc6cJMQWi6l1egU5AUYkfszXZp8TVFmBfwyWbhZU0UcXKrbdWMJ5ZLwNaIwl5CY1BPen8HgAtoT1dn6pJ/dnRoKn64p01mpztQpj1eGwsNlyuTPsDX92W/P+A70j6FQ3BxR5nI3dP4bNDPeochmYZTD+xvsz8HBvP8evWhmLvScb1Cm3/Mo6sLcXLg5BcMHQhgO1BkL+8fUjP6NLLw9MRB+R0h19h+F4x3WYSystVe/rx/zJ0+MXtxHVNstxBO6ZqKw2tiLINxJQrzULenKxjvVWV3W3GLwfAD9KR4TBA12SgAAAABJRU5ErkJggg=='
-        mode.price = '银行卡'
-        this.mode[1].price = data.data.bank_account_number
-        this.mode[2].price = data.data.bank_account_name
-        this.off = false
+        this.limitTime = 0
+        this.sellSuccess = true
       }
     },
     // 时间控制
     async setTime () {
-      // 下单时间
-      let item = new Date(this.data.created)
       // 时间详细显示
-      this.set_item_M = item.getFullYear() + '' + (item.getMonth() + 1) + item.getDate() + item.getHours() + item.getMinutes() + item.getSeconds() + item.getMilliseconds()
-      // 时间下单时间
-      this.set_item_F = item.getFullYear() + '/' + (item.getMonth() + 1) + '/' + item.getDate() + ' ' + item.getHours() + ':' + item.getMinutes()
-      // 当前时间
-      // eslint-disable-next-line camelcase
-      let item_hours = item.getHours() > 9 ? item.getHours() : '0' + item.getHours()
-      // eslint-disable-next-line camelcase
-      let item_minutes = item.getMinutes() > 9 ? item.getMinutes() : '0' + item.getMinutes()
-      // eslint-disable-next-line camelcase
-      let item_date = item.getDate() > 9 ? item.getDate() : '0' + item.getDate()
-      // eslint-disable-next-line camelcase
-      let item_month = (item.getMonth() + 1) > 9 ? (item.getMonth() + 1) : '0' + (item.getMonth() + 1)
-      // eslint-disable-next-line camelcase
-      let set = item.getFullYear() + '' + item_month + item_date + item_hours + item_minutes
-      // 本地时间
-      let date = new Date()
-      // eslint-disable-next-line camelcase
-      let itemSet_hours = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
-      // eslint-disable-next-line camelcase
-      let itemSet_minutes = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
-      // eslint-disable-next-line camelcase
-      let itemSet_date = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
-      // eslint-disable-next-line camelcase
-      let itemSet_month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
-      // eslint-disable-next-line camelcase
-      let itemSet = date.getFullYear() + '' + itemSet_month + itemSet_date + itemSet_hours + itemSet_minutes
-      if ((itemSet - set) <= 15) {
-        this.limittime = 15 - (itemSet - set)
-        this.StartCountDown()
-      } else {
-        this.limittime = 0
-        await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_cancel_order' })
+      if (this.limitTime === 0) {
+        await this.$api.otc.orderUpdate(this.$route.params.id, { op_type: 'user_cancel_order' })
       }
     },
-    // title放回按钮
+    /**
+     * 返回上一页
+     * */
     onClickLeft () {
-      this.$router.push({
-        path: '/lend'
-      })
+      this.$router.go(-1)
     },
     // 弹窗提示
-    tot_T () {
-      this.show_tot = true
+    showTips () {
+      this.showAstimated = true
     },
-    // 时间开始倒计时
-    StartCountDown () {
-      let mydate = new Date()
-      mydate.setMinutes(mydate.getMinutes() + this.limittime)
-      this.settime = mydate
-
+    /**
+     * 倒计时开始
+     * */
+    countDown () {
       let time = setInterval(() => {
-        if (this.flag === true) {
-          clearInterval(time)
-        }
-        this.timeDown()
+        if (this.flag === true) { clearInterval(time) }
+        this.minute()
       }, 100)
     },
-    // 倒计分钟
-    async timeDown () {
-      const endTime = new Date(this.settime)
+    /**
+     *  倒计分钟
+     */
+    minute () {
+      if (this.checkLimitTime <= 15) {
+        this.limitTime = 15 - this.checkLimitTime
+      } else this.limitTime = 0
+      const endTime = new Date(this.settingTime)
       const nowTime = new Date()
       let leftTime = parseInt((endTime.getTime() - nowTime.getTime()) / 1000)
-      // let d = parseInt(leftTime / (24 * 60 * 60))
-      let h = this.formate(parseInt(leftTime / (60 * 60) % 24))
-      let m = this.formate(parseInt(leftTime / 60 % 60))
-      let s = this.formate(parseInt(leftTime % 60))
+      let h = this.second(parseInt(leftTime / (60 * 60) % 24))
+      let m = this.second(parseInt(leftTime / 60 % 60))
+      let s = this.second(parseInt(leftTime % 60))
       if (leftTime <= 0) {
-        await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_cancel_order' })
+        // await this.$api.otc.orders_patch(this.$route.params.id, { op_type: 'user_cancel_order' })
         this.flag = true
         this.item = false
         this.delete_cre = true
@@ -393,26 +398,23 @@ export default {
       this.keepTime = `${h}:${m}:${s}`
     },
     // 倒计秒钟
-    formate (time) {
+    second (time) {
       if (time >= 10) {
         return time
-      } else {
-        return `0${time}`
-      }
+      } else { return `0${time}` }
     },
-    // 支付方式复制
+    /**
+     *  支付信息复制
+     */
     method_click (i) {
       if (i === 1 || i === 2 || i === 3) {
         let clipboard = new Clipboard('.tag-read')
         clipboard.on('success', e => {
-          // 释放内存
           clipboard.destroy()
           Toast('复制成功')
         })
         clipboard.on('error', e => {
-          // 不支持复制
           Toast('该浏览器不支持自动复制')
-          // 释放内存
           clipboard.destroy()
         })
       }
@@ -421,7 +423,7 @@ export default {
       }
     },
     // 付款
-    async but_no () {
+    async paymentButton () {
       Toast('付款成功')
       await this.payment()
     },
@@ -434,7 +436,6 @@ export default {
       // 买入金额
       const amount = this.data.asset_amount
       // 买入的用户ID
-      // const asset = this.pair.base.asset_id
       const asset = this.data.otc_pair.asset.asset_id
       // EOS_ASSET_ID = "f8127159-e473-389d-8e0c-9ac5a4dc8cc6"
       const recipient = '28536b52-f840-4366-8619-3872fb5b3164'
@@ -447,21 +448,22 @@ export default {
       }).then(async () => {
         this.delete_cre = false
         this.item = false
-        this.status_t = '已确认转账'
-        await this.$api.otc.orders_patch(this.data.id, { op_type: 'user_paid_confirm' })
+        this.transferStatus = '已确认转账'
+        await this.$api.otc.orderUpdate(this.data.id, { op_type: 'user_paid_confirm' })
         this.active = 1
       }).catch(() => {
-        // on cancel
         Toast('请稍后重试')
       })
     },
-    // 确认已经收款
-    but_succ () {
+    /**
+     * 确认已经收款
+     * */
+    successfulPayment () {
       if (this.data.status !== 22) {
         if (this.data.status === 1) {
           this.item = true
           Toast('请付款之后再操作')
-          this.but_success = false
+          this.sellSuccess = false
         } else {
           Toast('请等待商家完成操作')
         }
@@ -471,10 +473,10 @@ export default {
           title: '收款状态',
           message: '是否收到款项'
         }).then(async () => {
-          const { data } = await this.$api.otc.orders_patch(this.data.id, { op_type: 'user_received_confirm' })
+          const { data } = await this.$api.otc.orderUpdate(this.data.id, { op_type: 'user_received_confirm' })
           if (data) {
             if (data.code === 200) {
-              this.but_success = false
+              this.sellSuccess = false
               this.active = 2
             } else {
               Toast('数据获取有误，请稍后再试')
@@ -483,12 +485,14 @@ export default {
             Toast('网络错误，请稍后再试')
           }
         }).catch(() => {
-          // on cancel
           Toast('请稍后重试')
         })
       }
     },
     // 钱包选择付款
+    walletMessage (msg) {
+      this.wallet_data = msg
+    },
     wallet_box () {
       if (!this.triangle_active) {
         this.triangle_active = true
@@ -508,10 +512,10 @@ export default {
     }
   },
   mounted () {
-    this.api()
+    this.getSellOrderDetail()
     let set = setInterval(() => {
       if (this.data_item) {
-        this.api()
+        this.getSellOrderDetail()
       } else {
         clearInterval(set)
       }
@@ -523,15 +527,6 @@ export default {
     this.$router.push({
       path: '/lend'
     })
-  },
-  components: {
-    [NavBar.name]: NavBar,
-    [Icon.name]: Icon,
-    [Popup.name]: Popup,
-    [Toast.name]: Toast,
-    [Dialog.name]: Dialog,
-    [Step.name]: Step,
-    [Steps.name]: Steps
   }
 }
 </script>
@@ -539,6 +534,7 @@ export default {
 <style scoped lang="less">
   .otc_out{
     font-size: 16px;
+    height: 100%;
     /*头部订单信息*/
     .top{
       width: 90%;
@@ -598,7 +594,7 @@ export default {
       }
     }
     /*取消*/
-    .delete{
+    .afterPayment{
       text-align: center;
       line-height: 50px;
       border-bottom: 15px solid rgba(0,0,0,.05);
@@ -652,37 +648,38 @@ export default {
       width: 85%;
       margin: 0 auto;
       line-height: 45px;
-      /*用户付款后的信息*/
-      .method{
-        display: flex;
-        border-bottom: 1px solid rgba(0,0,0,.05);
-        justify-content: space-between;
-        padding: 0 5px;
-        .style{
-          display: flex;
-          align-items: center;
-          color: #696969;
-          /*vertical-align: middle;*/
+      padding-bottom: 20px;
+      /* 支付信息 */
+      .van-cell{
+        padding: auto 20px;
+        font-size: 16px;
+        border-bottom: 0.02rem solid rgba(0, 0, 0, 0.05);
+        .sell-payment-box{
+          position: relative;
+          width: 100%;
+          height: 100%;
+          padding-bottom: 10px;
           span{
-            color: #999;
-            /*vertical-align: middle;*/
-          }
-          i{
-            vertical-align: middle;
-          }
-          .img{
-            width: 20px;
-            margin-right: 8px;
-            color: #7FFFAA;
-            padding-top: 5px;
-            img{
-              width: 100%;
-            }
+            position: absolute;
+            right: 0px;
+            padding-top: 3%;
           }
         }
-        .active{
-          color: #999;
-        }
+      }
+      .logo-alipay{
+        position: absolute;
+        right: 50px;
+        color: #1E90FF;
+      }
+      .logo-wechat{
+        position: absolute;
+        right: 50px;
+        color: #32CD32;
+      }
+      .logo-card{
+        position: absolute;
+        right: 50px;
+        color: #00CED1;
       }
       /*用户是否成功支付按钮*/
       .but{
@@ -701,7 +698,6 @@ export default {
         }
       }
     }
-
     /*付款方式*/
     .wallet_box{
       padding: 15px 0 0 0;
@@ -863,14 +859,20 @@ export default {
       background-color: rgba(0,0,0,.3);
       z-index: 1000;
     }
-    .Tips{
+    .footTips{
+      /*font-size: 13px;*/
+      /*width: 90%;*/
+      /*margin: 0 auto;*/
+      /*padding: 38px 0;*/
+      /*color: #999;*/
       font-size: 13px;
-      width: 90%;
-      margin: 0 auto;
-      padding: 38px 0;
+      padding: 0.76rem 0;
       color: #999;
+      text-align: center;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.05);
     }
-    .tot_popup{
+    .astimated-popup{
       font-size: 16px;
       .van-popup{
         padding: 25px 20px;

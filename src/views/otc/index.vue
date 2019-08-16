@@ -1,51 +1,63 @@
 <template>
   <div class="Legal_currency">
-<!--    <div class="header"> 法 币 </div>-->
-    <div class="title_bos">
-      <div>市场</div>
-      <div>最新价</div>
-      <div>涨跌幅</div>
-    </div>
+    <van-row type="flex"  class="otc_title">
+      <van-col span="8">市场</van-col>
+      <van-col span="8" offset="2">最新价</van-col>
+      <van-col span="6"><div class="otc_title_name">24h涨跌</div></van-col>
+    </van-row>
     <!--趋势-->
-    <div class="Mala" v-for="(item,index) in pairs" :key="index" @click="onItemClick(item.id)">
-      <!--名称-->
-      <div class="Market">
-        <div class="img" v-if="item">
-          <img :src="item.asset.icon_url" alt="">
-        </div>
-        <div class="title">{{item.asset.symbol}}</div>
-      </div>
-      <!--价格-->
-      <div class="Price_icon">
-        <p class="Price">
-          <span class="Price_box" v-if="item.asset.symbol.search('USDT') !== -1">{{Math.round(item.setting.usdt_buy_price * 100) / 100}}</span>
-          <span class="Price_box" v-else>{{Math.round((item.pair.bestorderbookmodel.best_buy_price * item.setting.usdt_buy_price) * 100) / 100}}</span>
-          <span class="name">{{item.mode}}</span>
-        </p>
-        <p class="icon">
-          <span class="icon_fire" v-if="item.pair">
-              <img :src="item.pair.bestorderbookmodel.best_buy_exchange.logo_32" v-if="item.pair.bestorderbookmodel.best_buy_exchange.logo_32">
-          </span>
-          <span class="name" v-if="item.pair">{{item.pair.pair}}</span>
-          <span class="name" v-else>{{item.asset.symbol}}</span>
-        </p>
-      </div>
-      <!--按钮-->
-      <div class="Fall_rise" v-if="item.pair" :class="{active: item.pair.bestorderbookmodel.percentage.toString().charAt(0) === '-'}">{{Math.floor(item.pair.bestorderbookmodel.percentage * 1000) / 1000}}%</div>
-      <div class="Fall_rise" v-else>购买</div>
+    <div v-for="(item,index) in pairs" :key="index" @click="onItemClick(item.id)">
+      <van-row type="flex" class="otc-data-list" justify="center">
+        <van-col span="8">
+          <div class="otc-title">
+            <img :src="item.asset.icon_url" alt="">
+            <span>{{item.asset.symbol}}</span>
+          </div>
+        </van-col>
+        <van-col span="8" :offset="2">
+          <p class="price-up">
+            <span v-if="item.asset.symbol.search('USDT') !== -1">
+              {{Math.round(item.setting.usdt_buy_price * 100) / 100}}
+            </span>
+            <span v-else>
+              {{Math.round((item.pair.bestorderbookmodel.best_buy_price * item.setting.usdt_buy_price) * 100) / 100}}
+            </span>
+            <span class="name">{{item.mode}}</span>
+          </p>
+          <p class="price-down">
+            <span class="icon_fire" v-if="item.pair">
+              <img :src="item.pair.bestorderbookmodel.best_buy_exchange.logo_32"
+                   v-if="item.pair.bestorderbookmodel.best_buy_exchange.logo_32">
+            </span>
+            <span class="name" v-if="item.pair">{{item.pair.pair}}</span>
+            <span class="name" v-else>{{item.asset.symbol}}</span>
+          </p>
+        </van-col>
+        <van-col span="6">
+          <div class="up_or_down">
+            <div class="go_up_green" v-if="!item.pair">购买</div>
+            <div class="go_up_green" v-else
+                 :class="{go_down_red: (item.pair.bestorderbookmodel.percentage).toString().charAt(0) === '-'}">
+              {{(Math.floor(item.pair.bestorderbookmodel.percentage * 1000) / 1000).toFixed(2)}}%</div>
+          </div>
+        </van-col>
+      </van-row>
     </div>
   </div>
 </template>
 
 <script>
 import { mapMutations } from 'vuex'
-import { Icon, Toast } from 'vant'
+import { Tab, Tabs, Toast, Row, Col, Button } from 'vant'
 
 export default {
   name: 'otc-list',
   components: {
-    [Icon.name]: Icon,
-    [Toast.name]: Toast
+    [Tab.name]: Tab,
+    [Tabs.name]: Tabs,
+    [Row.name]: Row,
+    [Col.name]: Col,
+    [Button.name]: Button
   },
   data () {
     return {
@@ -101,23 +113,15 @@ export default {
   /*菜单栏*/
   .Legal_currency{
     margin-bottom: 65px;
-    .header{
-      text-align: center;
-      font-size: 18px;
-      line-height: 40px;
-      padding-top: 15px;
-      color: #696969;
-    }
     /*标题*/
-    .title_bos{
-      font-size: 13px;
-      display: flex;
+    .otc_title{
+      padding-top: 12px;
+      padding-left: 20px;
+      font-size: 14px; // 标题的字体的样式
       color: #696969;
-      justify-content: space-between;
-      width: 80%;
-      margin: 0 auto;
-      padding-top: 15px;
-      padding-bottom: 5px;
+      .otc_title_name{
+        padding-left: 17px;
+      }
     }
     /*行情标签*/
     .Mala{
@@ -212,6 +216,57 @@ export default {
       }
       .active{
         background: #B22222;
+      }
+    }
+    .otc-data-list{
+      padding: 10px 0px;
+      padding-left: 5px;
+      font-size: 14px;
+      border-bottom: 1px solid #ccc;
+
+      margin: 0px 15px;
+      display:flex;/*Flex布局*/
+      display: -webkit-flex; /* Safari */
+      align-items:center;/*指定垂直居中*/
+
+      .otc-title{
+        position: relative;
+        img{
+          width: 35px;
+          height: 35px;
+        }
+        span{
+          position: absolute;
+          top: 25%;
+          left: 50%;
+          color: #708090;
+        }
+      }
+      .price-up{
+        color: red;
+        font-size: 20px;
+      }
+      .price-down{
+        color: #ccc;
+        font-size: small;
+      }
+      /*上涨/下降 24h 涨跌的样式*/
+      .up_or_down{
+        margin-left: 15px;
+        width: 80%;
+        font-size: 14px;
+        text-align: center;
+        color: #F5F5F5;
+        .go_up_green{
+          border-radius: 5px;
+          padding: 8px 0px;
+          background-color: green;
+        }
+        .go_down_red{
+          border-radius: 5px;
+          padding: 8px 0px;
+          background-color:#B22222;
+        }
       }
     }
   }

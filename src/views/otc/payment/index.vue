@@ -158,8 +158,7 @@ export default {
                   params: { id: id }
                 })
               } else {
-                this.$router.push({ path: '/receivables' })
-                // sessionStorage.setItem('state', this.index)
+                this.$router.push({ path: '/payment-method' })
               }
             } else if (this.index === 'wechat') {
               // 微信收款时做的事情
@@ -170,9 +169,7 @@ export default {
                 })
               } else {
                 // 如果没有收款账号，跳转填入信息页面
-                this.$router.push({ path: '/receivables' })
-                // console.log(this.index)
-                // sessionStorage.setItem('state', this.index)
+                this.$router.push({ path: '/payment-method' })
               }
             } else {
               // 支付宝收款做的事情
@@ -183,9 +180,7 @@ export default {
                 })
               } else {
                 // 如果没有收款账号，跳转填入信息页面
-                this.$router.push({ path: '/receivables' })
-                // console.log(this.index)
-                // sessionStorage.setItem('state', this.index)
+                this.$router.push({ path: '/payment-method' })
               }
             }
           } else { Toast('请求错误，请再次重试！') }
@@ -239,83 +234,6 @@ export default {
         line-height: 50px;
         color: #696969;
       }
-      /*.WeChat{*/
-      /*  border: 1px solid #FF1493;*/
-      /*  padding: 1px 5px;*/
-      /*  font-size: 12px;*/
-      /*  -webkit-border-radius: 10px;*/
-      /*  -moz-border-radius: 10px;*/
-      /*  border-radius: 10px;*/
-      /*  color: #F8F8FF;*/
-      /*  margin-top: -10px;*/
-      /*  background-color: #FF1493;*/
-      /*}*/
-      /*!*支付去处*!*/
-      /*.mode{*/
-      /*  display: flex;*/
-      /*  align-items: center;*/
-      /*  color: #696969;*/
-      /*  border-bottom: 1px solid #F0F8FF;*/
-      /*  padding: 15px 5px;*/
-      /*  position: relative;*/
-      /*  .img{*/
-      /*    width: 9%;*/
-      /*    margin-right: 15px;*/
-      /*    img{*/
-      /*      width: 100%;*/
-      /*    }*/
-      /*  }*/
-      /*  .title{*/
-      /*    width: 70%;*/
-      /*    font-size: 18px;*/
-      /*    .Bank{*/
-      /*      border: 1px solid #00FA9A;*/
-      /*      padding:1px 7px;*/
-      /*      font-size: 12px;*/
-      /*      -webkit-border-radius: 5px;*/
-      /*      -moz-border-radius: 5px;*/
-      /*      border-radius: 5px;*/
-      /*      margin-left: 8px;*/
-      /*      color: #00FA9A;*/
-      /*      margin-top: -10px;*/
-      /*    }*/
-      /*    .WeChat{*/
-      /*      border: 1px solid #FF1493;*/
-      /*      padding: 1px 5px;*/
-      /*      font-size: 12px;*/
-      /*      -webkit-border-radius: 10px;*/
-      /*      -moz-border-radius: 10px;*/
-      /*      border-radius: 10px;*/
-      /*      color: #F8F8FF;*/
-      /*      margin-top: -10px;*/
-      /*      background-color: #FF1493;*/
-      /*    }*/
-      /*  }*/
-      /*  !*银行卡提示*!*/
-      /*  .explain{*/
-      /*    width: 30%;*/
-      /*    text-align: right;*/
-      /*    font-size: 13px;*/
-      /*    color: #999999;*/
-      /*  }*/
-      /*  !*选择后勾选icon*!*/
-      /*  .hook{*/
-      /*    text-align: right;*/
-      /*    width: 20%;*/
-      /*    color: green;*/
-      /*    font-size: 23px;*/
-      /*  }*/
-      /*}*/
-      /*!*支付按钮*!*/
-      /*.confirmButton{*/
-      /*  background-color: rgba(0,0,0,.08);*/
-      /*  text-align: center;*/
-      /*  padding: 13px 0;*/
-      /*  -webkit-border-radius: 4px;*/
-      /*  -moz-border-radius: 4px;*/
-      /*  border-radius: 4px;*/
-      /*  color: white;*/
-      /*}*/
       /*支付按钮加颜色*/
       .active{
         background-color: #32CD32;;

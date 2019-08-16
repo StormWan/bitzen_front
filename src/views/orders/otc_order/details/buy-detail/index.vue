@@ -45,7 +45,15 @@
           <div v-if="off">
             <div v-if="index === 0" class="payment-box">
               <van-cell :title="item.name" center>
-              <van-icon :name="mode[0].img" color="#1e90ff" size="30px" style="position: absolute;right: 50px;"/>
+                <div v-show="mode[0].img == 'card'">
+                  <van-icon :name="mode[0].img" size="30px" class="logo-card"/>
+                </div>
+                <div v-show="mode[0].img == 'wechat'">
+                  <van-icon :name="mode[0].img" size="30px" class="logo-wechat"/>
+                </div>
+                <div v-show="mode[0].img == 'alipay'">
+                  <van-icon :name="mode[0].img" size="30px" class="logo-alipay"/>
+                </div>
               <span>{{item.price}}</span>
               </van-cell>
             </div>
@@ -58,16 +66,15 @@
             </div>
           </div>
         </div>
-        <!--付款确认-->
-        <div class="but">
-          <div class="but_ok" @click="successfulPayment">我已付款</div>
-          <div class="but_no" @click="cancelOrder">取消订单</div>
-        </div>
+        <van-button type="info" @click="successfulPayment" size="large">我已经付款</van-button>
+        <van-button type="info" @click="cancelOrder" size="large" plain>取消订单</van-button>
       </div>
       <!--取消付款之后显示-->
-      <div class="delete" v-if="delete_cre"><span><van-icon name="close" /></span><span>已取消</span></div>
+      <div class="afterPayment" v-if="delete_cre">
+        <span><van-icon name="close" /></span><span>已取消</span>
+      </div>
       <!--成功付款之后显示-->
-      <div class="delete" v-else>
+      <div class="afterPayment" v-else>
         <div class="status">
           <van-steps direction="vertical" :active="active">
             <van-step>
@@ -83,20 +90,18 @@
         </div>
       </div>
       <!--说明-->
-      <div class="Tips">1.如需帮助请联系 BlockPay 客服，Mixin ID：28749，微信：jc_castle</div>
+      <div class="footTips">1.如需帮助请联系 BlockPay 客服，Mixin ID：28749，微信：jc_castle</div>
       <!--收款码弹出层-->
-      <div class="Tip">
-        <van-popup v-model="show">
-          <div class="Tip_img">
-            <img :src="img" alt="">
-          </div>
-        </van-popup>
+      <van-popup v-model="showCode">
+      <div class="code-img">
+        <img :src="img" alt="">
       </div>
+    </van-popup>
     </div>
 </template>
 
 <script>
-import { NavBar, Icon, Popup, Toast, Step, Steps, Dialog, Cell, CellGroup } from 'vant'
+import { NavBar, Icon, Popup, Toast, Step, Steps, Dialog, Cell, CellGroup, Button } from 'vant'
 import Clipboard from 'clipboard'
 export default {
   components: {
@@ -108,12 +113,14 @@ export default {
     [Steps.name]: Steps,
     [Dialog.name]: Dialog,
     [Cell.name]: Cell,
-    [CellGroup.name]: CellGroup
+    [CellGroup.name]: CellGroup,
+    [Button.name]: Button
   },
   data () {
     return {
       title: '',
       keepTime: '',
+      limitTime: '',
       flag: false,
       mode: [
         {
@@ -140,7 +147,7 @@ export default {
       ],
       item: false,
       item_of: true,
-      show: false,
+      showCode: false,
       data: {},
       // 收款人信息
       alipay_name: '',
@@ -183,7 +190,7 @@ export default {
     /**
      * 付款倒计时
      * */
-    limitTime () {
+    checkLimitTime () {
       let itemHours = this.currentTime.getHours() > 9 ? this.currentTime.getHours() : '0' + this.currentTime.getHours()
       let itemMinutes = this.currentTime.getMinutes() > 9 ? this.currentTime.getMinutes() : '0' + this.currentTime.getMinutes()
       let itemDate = this.currentTime.getDate() > 9 ? this.currentTime.getDate() : '0' + this.currentTime.getDate()
@@ -195,9 +202,7 @@ export default {
       let itemSetDate = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
       let itemSetMonth = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
       const itemSet = date.getFullYear() + '' + itemSetMonth + itemSetDate + itemSetHours + itemSetMinutes
-      if ((itemSet - set) <= 15) {
-        return 15 - (itemSet - set)
-      } else return 0
+      return itemSet - set
     },
     settingTime () {
       let myDate = new Date()
@@ -317,6 +322,9 @@ export default {
     },
     // 分钟
     minute () {
+      if (this.checkLimitTime <= 15) {
+        this.limitTime = 15 - this.checkLimitTime
+      } else this.limitTime = 0
       const endTime = new Date(this.settingTime)
       const nowTime = new Date()
       let leftTime = parseInt((endTime.getTime() - nowTime.getTime()) / 1000)
@@ -336,24 +344,23 @@ export default {
         return time
       } else { return `0${time}` }
     },
-    // 支付方式复制
+    /**
+     *  支付信息复制
+     */
     method_click (i) {
       if (i === 1 || i === 2 || i === 3) {
         let clipboard = new Clipboard('.tag-read')
         clipboard.on('success', e => {
-          // 释放内存
           clipboard.destroy()
           Toast('复制成功')
         })
         clipboard.on('error', e => {
-          // 不支持复制
           Toast('该浏览器不支持自动复制')
-          // 释放内存
           clipboard.destroy()
         })
       }
       if (i === 4) {
-        this.show = true
+        this.showCode = true
       }
     },
     // 取消订单
@@ -418,6 +425,8 @@ export default {
 <style lang="less">
   .otc_order{
     font-size: 16px;
+    height: 100%;
+    .van-button{ margin: 5px auto; }
     /*头部订单信息*/
     .top{
       width: 90%;
@@ -476,7 +485,7 @@ export default {
       }
     }
     /*取消*/
-    .delete{
+    .afterPayment{
       text-align: center;
       line-height: 50px;
       border-bottom: 15px solid rgba(0,0,0,.05);
@@ -540,30 +549,12 @@ export default {
             margin: 10px auto;
             margin-bottom: 0px;
           }
-          /*.img{*/
-          /*  margin: 10px auto;*/
-          /*}*/
         }
         .active{
           color: #999;
         }
       }
       /*用户是否成功支付按钮*/
-      .but{
-        text-align: center;
-        color: #6495ED;
-        div{
-          border: 1px solid #6495ED;
-          margin: 13px 0;
-          -webkit-border-radius: 8px;
-          -moz-border-radius: 8px;
-          border-radius: 8px;
-        }
-        .but_ok{
-          background-color: #6495ED;
-          color: white;
-        }
-      }
     }
     .van-cell{
       padding: auto 20px;
@@ -573,10 +564,6 @@ export default {
         position: relative;
         width: 100%;
         height: 100%;
-        .payment-icon{
-          position: absolute;
-          right: 50px;
-        }
         span{
           position: absolute;
           right: 0px;
@@ -584,17 +571,32 @@ export default {
         }
       }
     }
+    .logo-alipay{
+      position: absolute;
+      right: 50px;
+      color: #1E90FF;
+    }
+    .logo-wechat{
+      position: absolute;
+      right: 50px;
+      color: #32CD32;
+    }
+    .logo-card{
+      position: absolute;
+      right: 50px;
+      color: #00CED1;
+    }
     /*说明*/
-    .Tips{
+    .footTips{
       font-size: 13px;
-      width: 90%;
-      margin: 0 auto;
-      padding: 38px 0;
+      padding: 0.76rem 0;
       color: #999;
+      text-align: center;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.05);
     }
     /*弹出层*/
-    .Tip{
-      .Tip_img{
+      .code-img{
         width: 100%;
         height: 100%;
         margin: 0 auto;
@@ -603,7 +605,6 @@ export default {
           height: 99%;
         }
       }
-    }
     .van-popup{
       width: 80%;
       height: 60%;

@@ -50,11 +50,6 @@
                 <van-checkbox v-model="icon_index"></van-checkbox>
               </van-col>
             </van-row>
-<!--                <div class="right" :class="{active: index === icon_index}">-->
-<!--                  <van-icon name="passed"></van-icon>-->
-<!--                </div>-->
-<!--              </div>-->
-<!--            </div>-->
           </div>
         </div>
       </div>
