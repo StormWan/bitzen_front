@@ -239,7 +239,8 @@ export default {
           if (second) {
             toast.message = `倒计时 ${second} 秒`
             if (data) {
-              if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
+              if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back &&
+                data.data.id_photo_front && data.data.name) {
                 clearInterval(timer)
                 this.lv_certification = false
                 Toast('身份信息上传成功')
@@ -249,7 +250,8 @@ export default {
             // 检测是否上传成功
             if (data) {
               // 检测上传数据完全性质
-              if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back && data.data.id_photo_front && data.data.name) {
+              if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back &&
+                data.data.id_photo_front && data.data.name) {
                 clearInterval(timer)
                 this.lv_certification = false
                 Toast('身份信息提交成功')

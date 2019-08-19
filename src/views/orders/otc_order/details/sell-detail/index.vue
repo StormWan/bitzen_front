@@ -107,7 +107,7 @@
 <script>
 import { NavBar, Icon, Popup, Toast, Dialog, Step, Steps, Cell, CellGroup, Button } from 'vant'
 import Clipboard from 'clipboard'
-import sell_wallet from '../../../../../components/wallet_mode'
+import sellWallet from '../../../../../components/wallet_mode'
 
 // 付款跳转
 var msgpack = require('msgpack-lite')
@@ -127,7 +127,7 @@ export default {
     [CellGroup.name]: CellGroup,
     [Button.name]: Button,
     // 钱包
-    'sell_wallet': sell_wallet
+    'sell_wallet': sellWallet
   },
   data () {
     return {

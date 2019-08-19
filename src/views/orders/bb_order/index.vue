@@ -1,7 +1,8 @@
 <template>
     <div class="bb_order">
       <div class="title">
-        <div v-for="(item,index) in orderTitle" :key="index" @click="changeProcessTab(index)" :class="{active: index === process_tab_index}">{{item.title}}</div>
+        <div v-for="(item,index) in bbOrderTitle" :key="index" @click="changeProcessTab(index)"
+             :class="{active: index === process_tab_index}">{{item.title}}</div>
       </div>
       <div class="BG" v-for="(item,index) in lists" :key="index">
         <!--买入订单详情-->
@@ -14,10 +15,15 @@
               <span>{{Math.floor(item.pay_amount * 100) /100}} </span>{{item.pay_asset.symbol}}
             </md-detail-item>
             <md-detail-item title="平均成交价">
-              <span v-if="!item.exchangeinstantordermodel">- -</span><span v-else>{{Math.floor(item.exchangeinstantordermodel.average_price * 1000000) / 1000000}}</span>{{item.pair.pair}}
+              <span v-if="!item.exchangeinstantordermodel">- -</span>
+              <span v-else>{{Math.floor(item.exchangeinstantordermodel.average_price * 1000000) / 1000000}}</span>
+              {{item.pair.pair}}
             </md-detail-item>
             <md-detail-item title="实际到账">
-              <span v-if="!item.exchangeinstantordermodel">--</span><span v-else>{{Math.floor((item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.filled - item.exchangeinstantordermodel.fee_cost))) * 1000000) / 1000000}} </span> {{item.pair.base.symbol}}
+              <span v-if="!item.exchangeinstantordermodel">--</span>
+              <span v-else>{{Math.floor((item.exchangeinstantordermodel.filled -
+                item.exchangeinstantordermodel.fee_cost - (item.pair.fee * (item.exchangeinstantordermodel.filled -
+                item.exchangeinstantordermodel.fee_cost))) * 1000000) / 1000000}} </span> {{item.pair.base.symbol}}
             </md-detail-item>
             <div class="footer-slot" slot="footer">
               <!--支付状态-->
@@ -47,7 +53,7 @@
                   <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">挂单失败</span>
                   <span v-else>交易未知</span>
                 </div>
-                <div @click="item_pass(index)">
+                <div @click="toDetailsPage(index)">
                   <a>详情</a>
                 </div>
               </div>
@@ -95,7 +101,7 @@
                   <span v-else-if="item.transfer_state && item.transfer_state === 'fail'">挂单失败</span>
                   <span v-else>交易未知</span>
                 </div>
-                <div @click="item_pass(index)">
+                <div @click="toDetailsPage(index)">
                   <a>详情</a>
                 </div>
               </div>
@@ -131,7 +137,7 @@ export default {
   data () {
     return {
       orderData: [], // 获取后台传过来的数据
-      orderTitle: [
+      bbOrderTitle: [
         {
           title: '进行中'
         },
@@ -156,7 +162,7 @@ export default {
   },
   methods: {
     // 点击详情按钮跳转链接
-    item_pass: function (i) {
+    toDetailsPage: function (i) {
       this.$router.push({
         name: 'details',
         params: {
@@ -261,7 +267,9 @@ export default {
       let that = this
       let arrByZM = []
       for (let i = 0; i < that.orderData.length; i++) {
-        if (that.orderData[i].transfer_state.search(that.processTab) !== -1 || (that.orderData[i].state.search(that.processTab) !== -1 && that.orderData[i].transfer_state !== 'completed' && that.orderData[i].transfer_state !== 'fail')) {
+        if (that.orderData[i].transfer_state.search(that.processTab) !== -1 ||
+          (that.orderData[i].state.search(that.processTab) !== -1 &&
+            that.orderData[i].transfer_state !== 'completed' && that.orderData[i].transfer_state !== 'fail')) {
           arrByZM.push(that.orderData[i])
         }
       }

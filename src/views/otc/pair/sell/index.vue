@@ -17,8 +17,10 @@
             </div>
             <!--买入计算-->
             <div class="Calculation">
-              <div>至少支付 ￥<span class="red">{{buyMinCny}}</span>,购买<span class="red">{{buyMinAsset}}</span><span>{{symbol}}</span></div>
-              <div>至支多付 ￥<span class="red">{{buyMaxCny}}</span>,购买 <span class="red">{{buyMaxAsset}}</span> 个 <span>{{symbol}}</span></div>
+              <div>至少支付 ￥<span class="red">{{buyMinCny}}</span>,购买<span class="red">{{buyMinAsset}}</span>
+                <span>{{symbol}}</span></div>
+              <div>至支多付 ￥<span class="red">{{buyMaxCny}}</span>,购买 <span class="red">{{buyMaxAsset}}</span>
+                 个 <span>{{symbol}}</span></div>
             </div>
             <!--金额计算-->
             <div class="md-example-child md-example-child-input-item-1">
@@ -66,8 +68,10 @@
             </div>
             <!--买入计算-->
             <div class="Calculation">
-              <div>最小出售 ￥ <span class="red">{{sellMinAsset}}</span> 个 <span>{{symbol}}</span>,约到账￥<span class="red">{{sellMinCny}}</span></div>
-              <div>最大出售 ￥ <span class="red">{{sellMaxAsset}}</span> 个 <span>{{symbol}}</span>,约到账 <span class="red">{{sellMaxCny}}</span></div>
+              <div>最小出售 ￥ <span class="red">{{sellMinAsset}}</span> 个 <span>{{symbol}}</span>
+                ,约到账￥<span class="red">{{sellMinCny}}</span></div>
+              <div>最大出售 ￥ <span class="red">{{sellMaxAsset}}</span> 个 <span>{{symbol}}</span>
+                ,约到账 <span class="red">{{sellMaxCny}}</span></div>
             </div>
             <!--金额计算-->
             <div class="md-example-child md-example-child-input-item-1">

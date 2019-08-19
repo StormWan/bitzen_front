@@ -1,7 +1,8 @@
 <template>
   <div class="otc_details">
     <div class="title">
-      <div v-for="(item,index) in title" :key="index" @click="title_data(index)" :class="{active: index === act_index}">{{item.title}}</div>
+      <div v-for="(item,index) in otcOrderTitle" :key="index" @click="changeProcessTab(index)"
+           :class="{active: index === active_index}">{{item.title}}</div>
     </div>
     <div class="BG" v-for="(item,index) in lists" :key="index">
       <!--订单详情-->
@@ -14,7 +15,9 @@
             <span>{{item.usdt_amount}} </span>{{item.otc_pair.asset.symbol}}
           </md-detail-item>
           <md-detail-item title="价格">
-            <span v-if="!item.usdt_price">- -</span><span v-else>{{Math.floor(item.usdt_price * 1000) / 1000}}</span>CNY/{{item.otc_pair.asset.symbol}}
+            <span v-if="!item.usdt_price">- -</span>
+            <span v-else>{{Math.floor(item.usdt_price * 1000) / 1000}}</span>
+            CNY/{{item.otc_pair.asset.symbol}}
           </md-detail-item>
           <md-detail-item title="总价">
             <div v-if="!item"><span>- -</span></div>
@@ -48,7 +51,7 @@
                 <span v-else-if="item.status === 2">完成</span>
                 <span v-else class="active">交易未知</span>
               </div>
-              <div @click="item_pass(index)">
+              <div @click="toDetailsPage(index)">
                 <a>详情</a>
               </div>
             </div>
@@ -104,7 +107,7 @@
                 <span v-else-if="item.status === 2">完成</span>
                 <span v-else class="active">交易未知</span>
               </div>
-              <div @click="item_pass(index)">
+              <div @click="toDetailsPage(index)">
                 <a>详情</a>
               </div>
             </div>
@@ -112,7 +115,7 @@
         </md-bill>
       </div>
     </div>
-    <div class="load" v-if="lod"><van-loading type="spinner" /></div>
+    <div class="load" v-if="ifLoading"><van-loading type="spinner" /></div>
     <div class="bottom" v-else>{{bot}}</div>
   </div>
 </template>
@@ -125,9 +128,9 @@ export default {
     return {
       value: 1,
       color: 'red',
-      order: [],
+      otcOrderData: [],
       off: true,
-      title: [
+      otcOrderTitle: [
         {
           title: '进行中'
         },
@@ -140,30 +143,31 @@ export default {
       ],
       title_suo: '',
       price: 30,
-      act_index: 0,
-      ok: '20',
-      limit: 10,
+      active_index: 0,
+      orderStatus: '20',
+      handleScrollLimit: 10,
       offset: 0,
+      scr_off: true,
       status: '',
-      lod: true,
-      bot: '',
-      scr_off: true
+      ifLoading: true,
+      bottomTips: '',
+      createTime: ''
     }
   },
   methods: {
     // 点击详情按钮跳转
-    item_pass (i) {
+    toDetailsPage (i) {
       this.off = false
       if (this.lists[i].side === 'buy') {
         this.$router.push({
-          name: 'otc_order',
+          name: 'details',
           params: {
             id: this.lists[i].id
           }
         })
       } else if (this.lists[i].side === 'sell') {
         this.$router.push({
-          name: 'otc_out',
+          name: 'details',
           params: {
             id: this.lists[i].id
           }
@@ -173,29 +177,29 @@ export default {
       }
     },
     // 点击导航栏(状态)筛选
-    title_data (e) {
-      this.act_index = e
-      this.lod = true
+    changeProcessTab (e) {
+      this.active_index = e
+      this.ifLoading = true
       this.scr_off = true
-      this.limit = 10
+      this.handleScrollLimit = 10
       this.offset = 0
       if (e === 0) {
         // 已完成
         this.title_suo = ''
         this.price = 30
-        this.ok = '20'
+        this.orderStatus = '20'
         this.getPair()
       } else if (e === 1) {
         this.title_suo = '20'
         this.price = 30
-        this.ok = ''
+        this.orderStatus = ''
         this.status = 2
         this.getPair_remove()
       } else {
         // 失败
         this.title_suo = '30'
         this.price = ''
-        this.ok = ''
+        this.orderStatus = ''
         this.status = 30
         this.getPair_remove()
       }
@@ -203,10 +207,10 @@ export default {
     // 获取数据
     async getPair () {
       const { data } = await this.$api.otc.orderList(`?limit=10&offset=${this.offset}`)
-      this.lod = false
-      this.bot = '- - - - - - - 到底了 - - - - - - -'
+      this.ifLoading = false
+      this.bottomTips = '- - - - - - - 到底了 - - - - - - -'
       if (data.code === 200) {
-        this.order = data.data
+        this.otcOrderData = data.data
         await this.setTime()
       } else {
         Toast('获取数据失败，请刷新页面')
@@ -215,10 +219,10 @@ export default {
     // 获取取消状态的数据
     async getPair_remove () {
       const { data } = await this.$api.otc.orderList(`?status=${this.status}&limit=10&offset=${this.offset}`)
-      this.lod = false
-      this.bot = '- - - - - - - 到底了 - - - - - - -'
+      this.ifLoading = false
+      this.bottomTips = '- - - - - - - 到底了 - - - - - - -'
       if (data.code === 200) {
-        this.order = data.data
+        this.otcOrderData = data.data
         await this.setTime()
       } else {
         Toast('获取数据失败，请刷新页面')
@@ -231,22 +235,22 @@ export default {
       let scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight
       if ((scrollHeight - (scrollTop + windowHeight)) <= 20 && this.scr_off) {
         this.scr_off = false
-        this.lod = true
-        this.offset = this.limit + 1
-        this.limit += 10
+        this.ifLoading = true
+        this.offset = this.handleScrollLimit + 1
+        this.handleScrollLimit += 10
         this.meet()
       }
     },
     // 滚轮到底部触发数据追加获取
     async meet () {
       this.scr_off = false
-      if (this.act_index === 0) {
+      if (this.active_index === 0) {
         const { data } = await this.$api.otc.orderList(`?limit=10&offset=${this.offset}`)
         if (data) {
-          this.bot = '- - - - - - - 到底了 - - - - - - -'
+          this.bottomTips = '- - - - - - - 到底了 - - - - - - -'
           if (data.code === 200) {
             data.data.forEach((res) => {
-              this.order.push(res)
+              this.otcOrderData.push(res)
             })
             this.scr_off = true
             this.me_ge()
@@ -254,16 +258,16 @@ export default {
             Toast('获取数据失败，请刷新页面')
           }
         } else {
-          this.bot = '- - - - - - - 请检查网络 - - - - - - -'
+          this.bottomTips = '- - - - - - - 请检查网络 - - - - - - -'
           Toast('网络链接失败')
         }
       } else {
         const { data } = await this.$api.otc.orderList(`?status=${this.status}&limit=10&offset=${this.offset}`)
         if (data) {
-          this.bot = '- - - - - - - 到底了 - - - - - - -'
+          this.bottomTips = '- - - - - - - 到底了 - - - - - - -'
           if (data.code === 200) {
             data.data.forEach((res) => {
-              this.order.push(res)
+              this.otcOrderData.push(res)
             })
             this.scr_off = true
             this.me_ge()
@@ -271,56 +275,28 @@ export default {
             Toast('获取数据失败，请刷新页面')
           }
         } else {
-          this.bot = '- - - - - - - 请检查网络 - - - - - - -'
+          this.bottomTips = '- - - - - - - 请检查网络 - - - - - - -'
           Toast('网络链接失败')
         }
       }
     },
     // 滚轮到底触发数据获取
     me_ge () {
-      if (this.limit > this.order.length) {
+      if (this.handleScrollLimit > this.otcOrderData.length) {
         this.scr_off = false
-        this.lod = false
-        this.bot = '- - - - - - - 到底了 - - - - - - -'
+        this.ifLoading = false
+        this.bottomTips = '- - - - - - - 到底了 - - - - - - -'
       } else {
         this.scr_off = true
-        this.lod = false
+        this.ifLoading = false
       }
     },
     // 下单时间倒计时(超过15分钟自动取消订单)
-    async setTime () {
-      this.order.forEach((i) => {
+    setTime () {
+      this.otcOrderData.forEach((i) => {
         // 下单时间
-        let item = new Date(i.created)
-        // 时间详细显示
-        this.set_item_M = item.getFullYear() + '' + (item.getMonth() + 1) + item.getDate() + item.getHours() + item.getMinutes() + item.getSeconds() + item.getMilliseconds()
-        // 时间下单时间
-        this.set_item_F = item.getFullYear() + '/' + (item.getMonth() + 1) + '/' + item.getDate() + ' ' + item.getHours() + ':' + item.getMinutes()
-        // 当前时间 时间倒计时
-        // eslint-disable-next-line camelcase
-        let item_hours = item.getHours() > 9 ? item.getHours() : '0' + item.getHours()
-        // eslint-disable-next-line camelcase
-        let item_minutes = item.getMinutes() > 9 ? item.getMinutes() : '0' + item.getMinutes()
-        // eslint-disable-next-line camelcase
-        let item_date = item.getDate() > 9 ? item.getDate() : '0' + item.getDate()
-        // eslint-disable-next-line camelcase
-        let item_month = (item.getMonth() + 1) > 9 ? (item.getMonth() + 1) : '0' + (item.getMonth() + 1)
-        // eslint-disable-next-line camelcase
-        let set = item.getFullYear() + '' + item_month + item_date + item_hours + item_minutes
-        // 本地时间
-        let date = new Date()
-        // eslint-disable-next-line camelcase
-        let itemSet_hours = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
-        // eslint-disable-next-line camelcase
-        let itemSet_minutes = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
-        // eslint-disable-next-line camelcase
-        let itemSet_date = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
-        // eslint-disable-next-line camelcase
-        let itemSet_month = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
-        // eslint-disable-next-line camelcase
-        let itemSet = date.getFullYear() + '' + itemSet_month + itemSet_date + itemSet_hours + itemSet_minutes
-        // 监听事件否过了下单期
-        if ((itemSet - set) <= 3) {
+        this.createTime = new Date(i.created)
+        if (this.checkTime <= 3) {
         } else {
           this.$api.otc.orderUpdate(i.id, { op_type: 'user_cancel_order' })
         }
@@ -332,13 +308,34 @@ export default {
     lists: function () {
       let that = this
       let arrByZM = []
-      for (let i = 0; i < that.order.length; i++) {
-        let pan = that.order[i].status.toString().length >= 2 ? that.order[i].status.toString() : that.order[i].status.toString() + '0'
-        if (pan.search(that.title_suo) !== -1 && that.order[i].status !== this.price && pan !== this.ok) {
-          arrByZM.push(that.order[i])
+      for (let i = 0; i < that.otcOrderData.length; i++) {
+        let pan = that.otcOrderData[i].status.toString().length >= 2 ? that.otcOrderData[i].status.toString()
+          : that.otcOrderData[i].status.toString() + '0'
+        if (pan.search(that.title_suo) !== -1 && that.otcOrderData[i].status !== this.price && pan !== this.orderStatus) {
+          arrByZM.push(that.otcOrderData[i])
         }
       }
       return arrByZM
+    },
+    /**
+     * 检查下单时间情况
+     * */
+    checkTime () {
+      let itemHours = this.createTime.getHours > 9 ? this.createTime.getHours : '0' + this.createTime.getHours
+      let itemMinutes = this.createTime.getMinutes > 9 ? this.createTime.getMinutes : '0' + this.createTime.getMinutes
+      let itemDate = this.createTime.getDate > 9 ? this.createTime.getDate : '0' + this.createTime.getDate
+      let itemMonth = (this.createTime.getMonth + 1) > 9
+        ? (this.createTime.getMonth + 1) : '0' + (this.createTime.getMonth + 1)
+      let set = this.createTime.getFullYear + '' + itemMonth + itemDate + itemHours + itemMinutes
+      // 本地时间
+      let date = new Date()
+      let itemSetHours = date.getHours > 9 ? date.getHours : '0' + date.getHours
+      let itemSetMinutes = date.getMinutes > 9 ? date.getMinutes : '0' + date.getMinutes
+      let itemSetDate = date.getDate > 9 ? date.getDate : '0' + date.getDate
+      let itemSetMonth = (date.getMonth + 1) > 9 ? (date.getMonth + 1) : '0' + (date.getMonth + 1)
+      let itemSet = date.getFullYear + '' + itemSetMonth + itemSetDate + itemSetHours + itemSetMinutes
+      // 监听事件否过了下单期
+      return itemSet - set
     }
   },
   components: {

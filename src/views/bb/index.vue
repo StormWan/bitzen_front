@@ -12,12 +12,14 @@
         <div v-for="(item,index) in pairs" :key="index" @click="onItemClick(item.id)">
           <div v-if="item.bestorderbookmodel">
             <van-row type="flex" class="bbdata_list">
-              <van-col span="10"><span>{{item.base.symbol}}</span>/<span class="second_marketname">{{item.quote.symbol}}</span></van-col>
+              <van-col span="10"><span>{{item.base.symbol}}</span>/<span class="second_marketname">
+                {{item.quote.symbol}}</span></van-col>
               <van-col span="7">{{item.bestorderbookmodel.best_buy_price}}</van-col>
               <van-col span="6" offset="1">
                 <div class="up_or_down">
                   <div class="go_up_green" v-if="!item.bestorderbookmodel.percentage">- -</div>
-                  <div class="go_up_green" v-else :class="{go_down_red: (item.bestorderbookmodel.percentage).toString().charAt(0) === '-'}">
+                  <div class="go_up_green" v-else
+                       :class="{go_down_red: (item.bestorderbookmodel.percentage).toString().charAt(0) === '-'}">
                     {{(Math.floor(item.bestorderbookmodel.percentage * 1000) / 1000).toFixed(2)}}%</div>
                 </div>
               </van-col>

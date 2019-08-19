@@ -69,7 +69,8 @@ export default {
       const asset = this.asset_id
       // EOS_ASSET_ID = "f8127159-e473-389d-8e0c-9ac5a4dc8cc6"
       const recipient = '6161a89b-795d-4cd8-b198-eccf0feb6f02'
-      const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}&amount=${amount}&trace=${trace}&memo=${memo}`
+      const payUrl = `https://mixin.one/pay?recipient=${recipient}&asset=${asset}
+      &amount=${amount}&trace=${trace}&memo=${memo}`
       window.location.href = payUrl
       // 支付成功提醒
       Dialog.confirm({

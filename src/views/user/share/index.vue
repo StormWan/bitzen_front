@@ -1,14 +1,12 @@
 <template>
     <div class="share">
       <!--标题-->
-      <div class="title">
         <van-nav-bar
           title="邀请好友"
           left-text="返回"
           left-arrow
           @click-left="onClickLeft"
         />
-      </div>
       <div class="content">
         <div class="user">
           <div class="explanation" @click="explanation">

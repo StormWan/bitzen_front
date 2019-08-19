@@ -1,14 +1,12 @@
 <template>
     <div class="receivables">
       <!--标题-->
-      <div class="title">
         <van-nav-bar
           title="收款方式"
           left-text="返回"
           left-arrow
           @click-left="onClickLeft"
         />
-      </div>
       <div class="content">
         <!--头部收款账号说明-->
         <header>绑定 <span>{{paymentInfo[index].name}}</span> 收款账号</header>
@@ -16,26 +14,35 @@
         <div class="logo_info">
           <!--收款logo-->
           <div class="logo">
-            <div class="img" :class="{active: index === logoIndex}" v-for="(item,index) in paymentInfo" :key="index" @click="paymentMethods(index)">
-              <img :src="item.img" alt="">
+            <div :class="{active: index === logoIndex}" v-for="(item,index) in paymentInfo"
+                 :key="index" @click="paymentMethods(index)">
+              <div v-show="item.img == 'card'">
+                <van-icon :name="item.img" size="40px" class="logo-card"/>
+              </div>
+              <div v-show="item.img == 'wechat'">
+                <van-icon :name="item.img" size="40px" class="logo-wechat"/>
+              </div>
+              <div v-show="item.img == 'alipay'">
+                <van-icon :name="item.img" size="40px" class="logo-alipay"/>
+              </div>
             </div>
           </div>
           <div class="info">
             <!--收款名字-->
             <div class="name">
-              <input type="text" placeholder="姓名" v-model="user_name" @input="submit_inp">
+              <input type="text" placeholder="姓名" v-model="user_name" @input="monitorInput">
             </div>
             <!--收款账号-->
             <div class="account">
-              <input type="text" :placeholder="paymentInfo[index].name" v-model="user_account" @input="submit_inp">
+              <input type="text" :placeholder="paymentInfo[index].name" v-model="user_account" @input="monitorInput">
             </div>
             <!--银行名称-->
             <div class="bank_name" v-if="index === 2">
-              <input type="text" placeholder="银行名称" v-model="user_bankname" @change="submit_inp">
+              <input type="text" placeholder="银行名称" v-model="user_bankname" @change="monitorInput">
             </div>
             <!--开户支行名称-->
             <div class="bank_account" v-if="index === 2">
-              <input type="text" placeholder="开户支行名称(选填)" v-model="user_branchname" @input="submit_inp">
+              <input type="text" placeholder="开户支行名称(选填)" v-model="user_branchname" @input="monitorInput">
             </div>
           </div>
         </div>
@@ -53,7 +60,7 @@
 </template>
 
 <script>
-import { NavBar, Toast } from 'vant'
+import { NavBar, Toast, Icon } from 'vant'
 export default {
   data () {
     return {
@@ -71,15 +78,15 @@ export default {
       paymentInfo: [
         {
           name: '微信账号',
-          img: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAYCAYAAADpnJ2CAAABiklEQVR4AbWVAWRCURSGf8gIGQyYgUEAgyAAbCCAAAQQGBAYIGAwAAgIwAMJGIsqRTAgQPAQEsKDu//kXHLddV+v+w6f0HnvP/e8/5yLYPzgAXN0yICsSUoyZUeW+l/nlFs45miSRF9scpKRBDM0rhGqacXmRobhE8/wwsQtMZHYyjv/E2swYU9MZPZW1DVGWoLYEQt88ffR/W7DyEIHCn3ab4gVKpjhzbayHlOI9K2QHqZFNsSctKSSCEI78oE17h1PTJy8PnRwjYdNjlanpEdqsLHC04XnltA2+KuWiudoe9y7xQLvWKF6JlSVE5DjxZZf3CRs91nV3zqjXYxw55iuk9PlGQKJGaZ4hoR123lM8cqc3yu+dSqC40BS4lkSdf9zQcY4tSic2LQLQgc5K+jmrl3Wu0DiUkxy4+o72LEJnDISUrDjtKREwTHc0DkalSA2sfPqE62oKWKJDWRmgzd+BKENaUGjLMGjzmbbLoiigmvSk/tMnKa3y0DQ9vdIM9S6gKCK6FqLGX+Ik2Cgy7oRZQAAAABJRU5ErkJggg=='
+          img: 'wechat'
         },
         {
           name: '支付宝账号',
-          img: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAAB7ElEQVR4Ac2WA6weQRSFb62gtuPajetGtW0FNcO6cVK7XdRu2Ia149R2Z6bP9r6T+yb5bZ7k/Bh9gzt3l1hXfzUiS+4iU36GK2AnTq6AP/PYJ/42JhZ+oPAp7CTWYDDUVHu4IDneCaD8kkTgV4r4zA5+akBuivhMI56llyLv768wXkpfYNK3NGXAaHQhpxlHY9KAlpwc6Qojt6W2urZYnYoFWA5XhWhTSaf/dmHYDqc2/v+NFPiZDLmKzv7pxAPAZIvWZPwbjrqN8B242LU6edUtgMZGGjS3XI8R6IRTj/yI2xhiPNofA7CPCyiuRAL8wM9FUy6AH8I5urwE/gwb8FSdS311+ldz1KsIgGIpmWpNGEGSQYbaC7f1gWIyPClD3uaJBgWeld3x/S3MyCwkWwz1AfqsWCzV8EIfIAeJqd6GAcuHx7oFylz4AVlqGl116gQ/c3HABTTkFH1pywPD1Esy//V0wdQMlJe6Rex3MtQ2OvO/fRgZXbziGVqqP+CmXm0m/AED2WT9G0GOU4sg/sYVCZLCyngrLTHRJ9K9Gl4jWzShYDoj+5Ih7keQiSQWcwgTHqKBPrP8wanK/D+QLzwOH4DeOgDu+maeiPwmBS9RuFNJA1pyV9JfhF33BHS9vZVxhFTWjCn2kYZVAyRlGm3AoxGeAAAAAElFTkSuQmCC'
+          img: 'alipay'
         },
         {
           name: '银行卡账号',
-          img: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAYAAAByDd+UAAABHklEQVR4Ae2WgUYEURSGh70oQIB6gh6gHmBsqhfqHdq2hAJTUYAACMCytqQISUDAVpsEsWi09TX/XFcxYeJ0E/vzMf4z7uc6cJMQWi6l1egU5AUYkfszXZp8TVFmBfwyWbhZU0UcXKrbdWMJ5ZLwNaIwl5CY1BPen8HgAtoT1dn6pJ/dnRoKn64p01mpztQpj1eGwsNlyuTPsDX92W/P+A70j6FQ3BxR5nI3dP4bNDPeochmYZTD+xvsz8HBvP8evWhmLvScb1Cm3/Mo6sLcXLg5BcMHQhgO1BkL+8fUjP6NLLw9MRB+R0h19h+F4x3WYSystVe/rx/zJ0+MXtxHVNstxBO6ZqKw2tiLINxJQrzULenKxjvVWV3W3GLwfAD9KR4TBA12SgAAAABJRU5ErkJggg=='
+          img: 'card'
         }
       ],
       index: 0,
@@ -180,7 +187,7 @@ export default {
       }
     },
     // 监听输入框
-    submit_inp () {
+    monitorInput () {
       if (this.index !== 2) {
         if (this.user_name && this.user_account) {
           this.submit = true
@@ -224,7 +231,8 @@ export default {
   },
   components: {
     [NavBar.name]: NavBar,
-    [Toast.name]: Toast
+    [Toast.name]: Toast,
+    [Icon.name]: Icon
   }
 }
 </script>
@@ -251,12 +259,14 @@ export default {
           display: flex;
           justify-content: space-around;
           align-items: center;
-          .img{
-            width: 58px;
-            padding: 5px 10px;
-            img{
-              width: 100%;
-            }
+          .logo-alipay{
+            color: #1E90FF;
+          }
+          .logo-wechat{
+            color: #32CD32;
+          }
+          .logo-card{
+            color: #00CED1;
           }
           .active{
             border: 1px solid rgba(0,0,0,.07);

@@ -1,22 +1,18 @@
 <template>
   <div class="user">
     <!--title标题-->
-    <div class="heart">
       <van-nav-bar
         title="我的"
       />
-    </div>
     <!--头部个人信息-->
     <div class="information">
       <!--用户信息-->
       <div class="img">
         <img v-if="Sing" :src="img">
         <img v-else :src="user_img">
-        </div>
-        <div>
-          <van-cell :value="user_name" />
-        </div>
       </div>
+      <van-cell :value="user_name" />
+    </div>
 
     <!--分享页面-->
     <div class="Effect">
@@ -77,7 +73,7 @@
         <van-cell title="退出登陆" icon="share" is-link />
       </a>
     </div>
-    <div class="hei"></div>
+    <div class="footBottom"></div>
   </div>
 </template>
 
@@ -188,7 +184,7 @@ export default {
       }
     }
     /*底部*/
-    .hei{
+    .footBottom{
       height: 50px;
     }
   }
