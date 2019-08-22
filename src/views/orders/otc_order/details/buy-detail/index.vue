@@ -414,7 +414,7 @@ export default {
   },
   destroyed () {
     this.$router.push({
-      path: '/'
+      path: '/otc'
     })
     // 订单完成取消计时器
     this.data_item = false

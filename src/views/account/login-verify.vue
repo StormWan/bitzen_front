@@ -15,7 +15,7 @@
 
 <script>
 import { Captcha, Button, Toast } from 'mand-mobile'
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
   name: 'login-verify',
@@ -31,20 +31,33 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      auth: 'account/auth'
+    }),
     async onSend () {
       if (this.phone === '' || this.areaCode === '' || this.key === '') {
-        this.$router.replace({ name: 'login' })
-      }
-      Toast.loading('加载中...')
-      const { data } = await this.$api.account.verify({ verify_code: this.verifyCode, key: localStorage.getItem('key') })
-      Toast.hide()
-      // console.log(localStorage.getItem('key'))
-      if (data.code === 200) {
-        this.$store.commit({ type: 'account/auth', areaCode: this.areaCode, phone: this.phone, key: data.data.key })
-        Toast.succeed('验证码已发送')
+        this.$router.replace({ name: '/' })
       } else {
-        // console.log(data)
-        Toast.failed('请输入验证码')
+        Toast.loading('加载中...')
+        // const { data } = await this.$api.account.verify({ verify_code: this.verifyCode, key: localStorage.getItem('key') })
+        console.log(this.verifyCode)
+        console.log(this.key)
+        const { data } = await this.$api.account.verify({ verify_code: this.verifyCode, key: this.key })
+        Toast.hide()
+        // console.log(localStorage.getItem('key'))
+        if (data.code === 200) {
+          this.auth({
+            type: 'account/auth',
+            areaCode: this.areaCode,
+            phone: this.phone,
+            key: data.data.key
+          })
+          // this.$store.commit({ type: 'account/auth', areaCode: this.areaCode, phone: this.phone, key: data.data.key })
+          Toast.succeed('验证码已发送')
+        } else {
+          // console.log(data)
+          Toast.info('请输入验证码')
+        }
       }
     },
     submit (code) {
@@ -52,6 +65,8 @@ export default {
       this.verifyCode = code
     },
     async login () {
+      console.log(this.verifyCode)
+      console.log(this.key)
       // console.log({ key: this.key, verify_code: this.verifyCode })
       const { data } = await this.$api.account.verify({ key: this.key, verify_code: this.verifyCode })
       // console.log(data)
@@ -60,7 +75,7 @@ export default {
         localStorage.setItem('token', data.data.token)
         localStorage.setItem('userInfo', JSON.stringify(data.data))
         this.$router.push({
-          path: '/lend'
+          path: '/otc'
         })
         // const userInfo = JSON.parse(localStorage.getItem('userInfo'))
       } else {

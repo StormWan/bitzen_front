@@ -18,6 +18,7 @@ import { mapMutations } from 'vuex'
 import { Tab, Tabs } from 'vant'
 import bb from './bb_order'
 import otc from './otc_order/index'
+
 export default {
   name: 'orders',
   components: {

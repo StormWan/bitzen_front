@@ -1,14 +1,18 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import api from './api'
+import { Toast } from 'vant'
+import { isNotPC } from './common/utils/browser'
 import { getUrlKey } from './common/utils/regexp/url'
+import VConsole from 'vconsole'
 
 Vue.use(Router)
 
 const router = new Router({
   routes: [
     {
-      path: '/',
+      // path: '/',
+      path: '/otc',
       name: 'otc',
       components: {
         default: () => import('./views/otc/index.vue'),
@@ -100,12 +104,22 @@ const router = new Router({
     },
     // 登录
     {
-      path: '/login',
+      path: '/',
+      // path: '/login',
       name: 'login',
       component: () => import('./views/account/login-phone.vue'),
       meta: {
         keepAlive: true,
-        Auth: true
+        Auth: false
+      }
+    },
+    {
+      path: '/login-verify',
+      name: 'login-verify',
+      component: () => import('./views/account/login-verify.vue'),
+      meta: {
+        keepAlive: true,
+        Auth: false
       }
     },
     // 收款
@@ -195,16 +209,6 @@ const router = new Router({
         Auth: true
       }
     },
-    // 注册
-    {
-      path: '/login',
-      name: 'login',
-      component: () => import('./views/user/login/index.vue'),
-      meta: {
-        keepAlive: true,
-        Auth: true
-      }
-    },
     // 活动任务
     {
       path: '/task',
@@ -268,6 +272,11 @@ const router = new Router({
   ]
 })
 
+/**
+ * 1: 判断是否为手机浏览器，是的话就跳转到 login-phone,否就进行 Mixin 验证
+ * 2: 进入 next() 之后，mounted 判断 localStroge 是否存储 token 和 userInfo
+ * 3: 存在就直接到 next() 页面，不存在进行手机注册登录操作
+ * */
 router.beforeEach(async (to, from, next) => {
   // 如果 meta.Auth是False则直接进入路由，否则开始认证
   if (to.matched.some(recode => !recode.meta.Auth)) {
@@ -280,28 +289,59 @@ router.beforeEach(async (to, from, next) => {
       next() // 进入 home 页面
       return
     }
-    // Mixin认证
-    const clientId = '28536b52-f840-4366-8619-3872fb5b3164'
-    const scope = 'PROFILE:READ+ASSETS:READ+PHONE:READ'
-    const oauthUrl = `https://mixin.one/oauth/authorize?client_id=${clientId}&scope=${scope}&code_challenge=PKCE`
-    const code = getUrlKey('code')
-    console.log('code=' + code)
-    if (code === null) {
-      console.log(oauthUrl)
-      window.location.href = oauthUrl
+    let vconsole = new VConsole()
+    if (isNotPC() === true) {
+      if (localStorage.getItem('token') === null || localStorage.getItem('userInfo') === null) {
+        Toast('未登录，跳转登录页面！')
+        router.replace('/')
+      } else next()
     } else {
-      let { data } = await api.account.oauth({ code: code })
-      if (data.code === 200) {
-        console.log(data)
-        localStorage.setItem('token', data.data.token)
-        localStorage.setItem('userInfo', JSON.stringify(data.data))
-        // const userInfo = JSON.parse(localStorage.getItem("userInfo"))
-        next()
-      } else {
-        console.log(data)
+      // Mixin认证
+      const clientId = '28536b52-f840-4366-8619-3872fb5b3164'
+      const scope = 'PROFILE:READ+ASSETS:READ+PHONE:READ'
+      const oauthUrl = `https://mixin.one/oauth/authorize?client_id=${clientId}&scope=${scope}&code_challenge=PKCE`
+      const code = getUrlKey('code')
+      console.log('code=' + code)
+      if (code === null) {
+        console.log(oauthUrl)
         window.location.href = oauthUrl
+      } else {
+        let { data } = await api.account.oauth({ code: code })
+        if (data.code === 200) {
+          console.log(data)
+          localStorage.setItem('token', data.data.token)
+          localStorage.setItem('userInfo', JSON.stringify(data.data))
+          // const userInfo = JSON.parse(localStorage.getItem("userInfo"))
+          next()
+        } else {
+          console.log(data)
+          window.location.href = oauthUrl
+        }
       }
     }
+    // // Mixin认证
+    // const clientId = '28536b52-f840-4366-8619-3872fb5b3164'
+    // const scope = 'PROFILE:READ+ASSETS:READ+PHONE:READ'
+    // const oauthUrl = `https://mixin.one/oauth/authorize?client_id=${clientId}&scope=${scope}&code_challenge=PKCE`
+    // const code = getUrlKey('code')
+    // console.log('code=' + code)
+    // if (code === null) {
+    //   console.log(oauthUrl)
+    //   whatUserAgent()
+    //   // window.location.href = oauthUrl
+    // } else {
+    //   let { data } = await api.account.oauth({ code: code })
+    //   if (data.code === 200) {
+    //     console.log(data)
+    //     localStorage.setItem('token', data.data.token)
+    //     localStorage.setItem('userInfo', JSON.stringify(data.data))
+    //     // const userInfo = JSON.parse(localStorage.getItem("userInfo"))
+    //     next()
+    //   } else {
+    //     console.log(data)
+    //     window.location.href = oauthUrl
+    //   }
+    // }
   }
 })
 

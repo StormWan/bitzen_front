@@ -30,6 +30,9 @@
 <script>
 import { InputItem, Field, Button, Toast, DropMenu } from 'mand-mobile'
 import { NavBar } from 'vant'
+import { mapMutations } from 'vuex'
+import VConsole from 'vconsole'
+
 
 export default {
   name: 'login-phone',
@@ -62,20 +65,36 @@ export default {
       ]
     }
   },
+  mounted () {
+    if (localStorage.getItem('token') !== undefined && localStorage.getItem('token') !== null &&
+      localStorage.getItem('userInfo') !== undefined && localStorage.getItem('userInfo') !== null) {
+      this.$router.push({ name: 'otc' })
+    }
+  },
   methods: {
+    ...mapMutations({
+      auth: 'account/auth'
+    }),
     async submit () {
+      let vconsole = new VConsole()
       Toast.loading('加载中...')
+      console.log(this.phone)
+      console.log(this.areaCode)
       const { data } = await this.$api.account.auth({ phone: this.phone, area_code: this.areaCode })
       console.log(data)
       Toast.hide()
       if (data.code === 200) {
-        // console.log(data.data)
-        localStorage.setItem('key', data.data.key)
-        this.$store.commit({ type: 'account/auth', areaCode: this.areaCode, phone: this.phone, key: data.data.key })
+        // localStorage.setItem('key', data.data.key)
+        this.auth({
+          areaCode: this.areaCode,
+          phone: this.phone,
+          key: data.data.key
+        })
         Toast.succeed('验证码已发送')
         setTimeout(() => {
           this.$router.push({ name: 'login-verify' })
         }, 1000)
+        this.phone = ''
       } else {
         Toast.failed('网络错误，请重试')
       }

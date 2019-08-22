@@ -20,5 +20,29 @@ export let isQQ = function () {
 // 判断是否是Android环境
 export let isAndroid = function () {
   var ua = navigator.userAgent.toLowerCase()
+  console.log('------------------------------')
+  // console.log(ua)
+  console.log(/Android/i.test(ua))
+  console.log('------------------------------')
   return /Android/i.test(ua)
+}
+
+export let isNotPC = function () {
+  const ua = navigator.userAgent.toLowerCase()
+  console.log('------------------------------')
+  console.log(ua)
+  console.log(/Android/i.test(ua))
+  console.log(/(iPhone|iPad|iPod|iOS)/i.test(ua))
+  console.log('------------------------------')
+  if (/Android/i.test(ua) === true || /(iPhone|iPad|iPod|iOS)/i.test(ua) === true) {
+    return true
+  } else return false
+}
+
+// 查看是什么userAgent
+export let whatUserAgent = function () {
+  var ua = navigator.userAgent.toLowerCase()
+  console.log('------------------------------')
+  console.log(ua)
+  console.log('------------------------------')
 }
