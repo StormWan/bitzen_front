@@ -72,7 +72,7 @@
 
 <script>
 import { Icon, Toast, NavBar } from 'vant'
-import { mapMutations } from 'vuex'
+import { mapState } from 'vuex'
 
 export default {
   data () {
@@ -132,12 +132,12 @@ export default {
         })
       }
       return arrByZM
-    }
+    },
+    ...mapState({
+      isHasPassword: state => state.account.is_setup_pin
+    })
   },
   methods: {
-    ...mapMutations({
-      is_setup_pin: state => state.account.is_setup_pin
-    }),
     // 箭头
     toClickLeft () {
       this.$router.go(-1)
@@ -196,9 +196,13 @@ export default {
     },
     // 数据获取
     async getWallet () {
-      console.log(this.is_setup_pin)
-      if (this.is_setup_pin === false) {
-        this.$router.push({ path: 'password' })
+      console.log(this.isHasPassword)
+      if (this.isHasPassword === undefined || this.isHasPassword === '') {
+        Toast('请设置 BlockPay 钱包密码！')
+        setTimeout(() => {
+          this.$router.push({ name: 'password' })
+        }, 2000)
+        // this.$router.push({ path: 'password' })
       }
       const { data } = await this.$api.wallet.walletAssets()
       if (data.code === 200) {

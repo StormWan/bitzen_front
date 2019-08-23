@@ -2,9 +2,6 @@
     <div class="login-phone">
       <van-nav-bar
         title="登陆"
-        left-text="返回"
-        left-arrow
-        @click-left="onClickLeft"
       />
       <!--提示语-->
       <div class="Tips">请输入手机号码</div>
@@ -24,14 +21,14 @@
         手机号错误
       </p>
       <div style="margin: 0 10px;">
-        <md-button type="primary" v-on:click="submit">下一步</md-button>
+        <van-button type="info" size="large" @click="submit">下一步</van-button>
       </div>
     </div>
 </template>
 
 <script>
-import { InputItem, Field, Button, Toast, DropMenu } from 'mand-mobile'
-import { NavBar } from 'vant'
+import { InputItem, Field, Toast, DropMenu } from 'mand-mobile'
+import { NavBar, Button } from 'vant'
 import { mapMutations } from 'vuex'
 import VConsole from 'vconsole'
 
@@ -81,9 +78,11 @@ export default {
       Toast.loading('加载中...')
       console.log(this.phone)
       console.log(this.areaCode)
+      // try {
       const { data } = await this.$api.account.auth({ phone: this.phone, area_code: this.areaCode })
       console.log(data)
       Toast.hide()
+
       if (data.code === 200) {
         // localStorage.setItem('key', data.data.key)
         this.auth({
@@ -99,6 +98,9 @@ export default {
       } else {
         Toast.failed('网络错误，请重试')
       }
+      // } catch (error) {
+      //   console.error(error)
+      // }
     },
     onClickLeft () {
       this.$router.go(-1)
@@ -106,9 +108,9 @@ export default {
   }
 }
 </script>
-
 <style lang="less">
   .login-phone{
+    background-color: white;
     .error{
       float: left;
       width: 100%;
@@ -129,14 +131,7 @@ export default {
       .md-field-item.is-solid .md-field-item-title{
         width: 50px;
         font-size: 22px;
-        /*text-align: center;*/
       }
-    }
-    .md-button.block{
-      height: 55px;
-    }
-    .md-button-content{
-      font-size: 18px;
     }
     .Tips{
       text-align: center;

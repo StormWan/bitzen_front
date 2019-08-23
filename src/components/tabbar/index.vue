@@ -25,7 +25,7 @@
 
 <script>
 import { TabBar, Icon } from 'mand-mobile'
-import { mapState } from 'vuex'
+import { mapMutations } from 'vuex'
 
 export default {
   components: {
@@ -49,7 +49,8 @@ export default {
         return this.$store.state.tabbar.activeTab
       },
       set (value) {
-        this.$store.commit('tabbar/setActiveTab', value)
+        this.setActiveTab(value)
+        // this.$store.commit('tabbar/setActiveTab', value)
       }
     },
     // bb tabbar
@@ -58,6 +59,9 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      setActiveTab: 'tabbar/setActiveTab'
+    }),
     change (item, index, prevIndex) {
       this.$router.replace(item.path)
     }
