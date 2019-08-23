@@ -12,7 +12,10 @@
             <md-icon :name="item.icon"/>
         </div>
           <div class="text">
-            <span v-text="item.label"></span>
+            <div v-if="item.name === 3">
+              <span v-text="bbLabel"></span>
+            </div>
+            <div v-else><span v-text="item.label"></span></div>
           </div>
         </div>
       </template>
@@ -22,6 +25,7 @@
 
 <script>
 import { TabBar, Icon } from 'mand-mobile'
+import { mapState } from 'vuex'
 
 export default {
   components: {
@@ -47,6 +51,10 @@ export default {
       set (value) {
         this.$store.commit('tabbar/setActiveTab', value)
       }
+    },
+    // bb tabbar
+    bbLabel () {
+      return this.$store.state.tabbar.bbName
     }
   },
   methods: {

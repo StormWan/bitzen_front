@@ -54,6 +54,9 @@
               @input="onInputBuyAmountKeyBoard"
               @delete="onDeleteBuyAmountKeyBoard"
             />
+        <div style="margin: 0 10px;">
+          <van-button type="primary" size="large" v-on:click="submitOrder">提交订单</van-button>
+        </div>
       </van-tab>
 
       <!--卖出-->
@@ -62,7 +65,7 @@
           <div class="price-bid">
             <div class="logo-Img" v-if="sellLogo"><img :src="sellLogo" alt=""></div>
             <div class="price-title">{{title}}</div>
-            <div class="price-bid">￥{{sellPrice}}</div>
+            <div class="price-bid" style="color: red">￥{{sellPrice}}</div>
           </div>
           <div class="price-arrival">预计到账:{{estimatedCny}}</div>
         </div>
@@ -86,7 +89,7 @@
             />
 
         <van-field
-          :placeholder="placeholderSell"
+          :placeholder="placeholderSellAmountArrival"
           readonly
           clickable
           :value="sellAmountArrival"
@@ -102,10 +105,11 @@
           @input="onInputSellAmountKeyBoard"
           @delete="onDeleteSellAmountKeyBoard"
         />
+        <div style="margin: 0 10px;">
+          <van-button type="danger" size="large" v-on:click="submitOrder">提交订单</van-button>
+        </div>
       </van-tab>
     </van-tabs>
-
-    <van-button type="primary" size="large" v-on:click="submitOrder">提交订单</van-button>
     <!--Mixin 钱包-->
     <div v-if="activeIndex === 0">
 <!--      <otc_wallet :symbol="symbol"></otc_wallet>-->
@@ -175,6 +179,8 @@ export default {
     onChangeTab (index, title) {
       this.amountBuy = ''
       this.amountSell = ''
+      this.buyAmountArrival = ''
+      this.sellAmountArrival = ''
       this.clearOrder()
       this.activeIndex = index
     },
@@ -401,6 +407,9 @@ export default {
     },
     placeholderBuyAmountArrival () {
       return this.otcPair === null ? '资金池不足' : this.otcPair.asset.symbol + ' 到账'
+    },
+    placeholderSellAmountArrival () {
+      return this.otcPair === null ? '资金池不足' : 'CNY 到账'
     },
     estimatedAsset () {
       return this.amountBuy === '' ? '0' : (parseFloat(this.amountBuy) / this.buyPrice).toFixed(4)

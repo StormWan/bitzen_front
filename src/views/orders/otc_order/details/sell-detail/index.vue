@@ -525,7 +525,7 @@ export default {
     // 离开页面删除计时器
     this.data_item = false
     this.$router.push({
-      path: '/otc'
+      path: '/'
     })
   }
 }

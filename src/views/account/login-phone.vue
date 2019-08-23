@@ -23,7 +23,9 @@
       >
         手机号错误
       </p>
-      <md-button type="primary" v-on:click="submit">下一步</md-button>
+      <div style="margin: 0 10px;">
+        <md-button type="primary" v-on:click="submit">下一步</md-button>
+      </div>
     </div>
 </template>
 
@@ -32,7 +34,6 @@ import { InputItem, Field, Button, Toast, DropMenu } from 'mand-mobile'
 import { NavBar } from 'vant'
 import { mapMutations } from 'vuex'
 import VConsole from 'vconsole'
-
 
 export default {
   name: 'login-phone',
@@ -68,7 +69,7 @@ export default {
   mounted () {
     if (localStorage.getItem('token') !== undefined && localStorage.getItem('token') !== null &&
       localStorage.getItem('userInfo') !== undefined && localStorage.getItem('userInfo') !== null) {
-      this.$router.push({ name: 'otc' })
+      this.$router.push({ name: '/' })
     }
   },
   methods: {

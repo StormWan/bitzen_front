@@ -7,6 +7,7 @@ import otc from './otc'
 import kyc from './kyc'
 import article from './article'
 import wallet from './wallet'
+import password from './password'
 
 // 导出接口
 export default {
@@ -15,5 +16,6 @@ export default {
   otc,
   kyc,
   article,
-  wallet
+  wallet,
+  password
 }

@@ -69,14 +69,20 @@ export default {
     // tabbar导航位置
     this.setActiveTab(3)
     await this.getPairs()
+    await this.setBBTab(this.bbTabTitle[this.active].title_name)
   },
   methods: {
     ...mapMutations({
-      setActiveTab: 'tabbar/setActiveTab'
+      setActiveTab: 'tabbar/setActiveTab',
+      setBBTab: 'tabbar/setBBTab'
     }),
     // 交易所导航栏名称筛选
     tabChange (index, title) {
       this.active = index
+      if (this.active === 0) {
+        this.setBBTab('币币')
+      } else this.setBBTab(this.bbTabTitle[this.active].title_name)
+      console.log(this.active)
       if (index !== 0) {
         this.pairs.filter(item => {
           return item.quote.symbol.search(title) !== -1

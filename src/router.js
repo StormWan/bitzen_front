@@ -11,8 +11,7 @@ Vue.use(Router)
 const router = new Router({
   routes: [
     {
-      // path: '/',
-      path: '/otc',
+      path: '/',
       name: 'otc',
       components: {
         default: () => import('./views/otc/index.vue'),
@@ -104,8 +103,7 @@ const router = new Router({
     },
     // 登录
     {
-      path: '/',
-      // path: '/login',
+      path: '/login',
       name: 'login',
       component: () => import('./views/account/login-phone.vue'),
       meta: {
@@ -191,8 +189,8 @@ const router = new Router({
     },
     // 密码
     {
-      path: '/Password',
-      name: 'Password',
+      path: '/password',
+      name: 'password',
       component: () => import('./views/user/password/index.vue'),
       meta: {
         keepAlive: true,
@@ -291,9 +289,12 @@ router.beforeEach(async (to, from, next) => {
     }
     let vconsole = new VConsole()
     if (isNotPC() === true) {
+      console.log(localStorage.getItem('token'))
+      console.log(localStorage.getItem('userInfo'))
       if (localStorage.getItem('token') === null || localStorage.getItem('userInfo') === null) {
         Toast('未登录，跳转登录页面！')
-        router.replace('/')
+        // console.log(router)
+        router.replace({ name: 'login' })
       } else next()
     } else {
       // Mixin认证

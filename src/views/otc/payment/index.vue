@@ -15,20 +15,22 @@
       </div>
       <van-radio-group v-model="paymentMethod">
         <van-cell-group class="payment-box">
-          <van-cell title="银行卡" value="需要实名认证" clickable icon="card">
-            <van-radio slot="right-icon" name="bank"  @click="mode_click"/>
+          <van-cell title="银行卡" value="需要实名认证" clickable icon="card" @click="click_bank">
+            <van-radio slot="right-icon" name="bank"/>
           </van-cell>
-          <van-cell title="微信" clickable icon="wechat">
-            <van-radio slot="right-icon" name="wechat"  @click="mode_click"/>
+          <van-cell title="支付宝" clickable icon="alipay" @click="click_alipay">
+            <van-radio slot="right-icon" name="alipay"/>
           </van-cell>
-          <van-cell title="支付宝" clickable icon="alipay">
-            <van-radio slot="right-icon" name="alipay"  @click="mode_click"/>
+          <van-cell title="微信" clickable icon="wechat" @click="click_wechat">
+            <van-radio slot="right-icon" name="wechat"/>
           </van-cell>
           <van-tag size="medium" type="success" class="bank-tag" plain>推荐</van-tag>
-          <van-tag size="medium" type="danger" class="wechat-tag">需 0.1 元转账手续费</van-tag>
+          <van-tag size="medium" type="danger" class="wechat-tag">需 0.001 元转账手续费</van-tag>
         </van-cell-group>
       </van-radio-group>
-      <van-button size="large" :class="{active: buttonActive}" @click="submitButton">确认购买</van-button>
+      <div style="margin: 10px;">
+        <van-button size="large" :class="{active: buttonActive}" @click="submitButton">确认购买</van-button>
+      </div>
     </div>
 </template>
 
@@ -87,32 +89,36 @@ export default {
     /**
      * 选择收款方式，如果是选中银行卡，需要直接跳转到实名认证
      * */
-    async mode_click () {
-      if (this.paymentMethod !== 'bank' && this.paymentMethod !== '') {
-        this.buttonActive = true
-      } else {
-        const { data } = await this.$api.kyc.kyc_get()
-        if (data.code === 200) {
-          if (data.data.verified_state !== 1) {
-            // 要实名认证
-            Dialog.confirm({
-              title: '提示',
-              message: '去实名认证'
-            }).then(() => {
-              // on confirm
-              console.log('确定')
-              this.$router.push({
-                path: '/realname_verified'
-              })
-              this.buttonActive = true
-            }).catch(() => {
-              // on cancel
-              console.log('取消')
+    click_alipay () {
+      this.paymentMethod = 'alipay'
+      this.buttonActive = true
+    },
+    click_wechat () {
+      this.paymentMethod = 'wechat'
+      this.buttonActive = true
+    },
+    async click_bank () {
+      const { data } = await this.$api.kyc.kyc_get()
+      if (data.code === 200) {
+        if (data.data.verified_state !== 1) {
+          // 要实名认证
+          Dialog.confirm({
+            title: '提示',
+            message: '去实名认证'
+          }).then(() => {
+            // on confirm
+            console.log('确定')
+            this.$router.push({
+              path: '/realname_verified'
             })
-          }
-        } else {
-          Toast('发生错误啦，请稍后重试')
+            this.buttonActive = true
+          }).catch(() => {
+            // on cancel
+            console.log('取消')
+          })
         }
+      } else {
+        Toast('发生错误啦，请稍后重试')
       }
     },
     /**
@@ -203,6 +209,7 @@ export default {
       position: relative;
       width: 100%;
       height: 100%;
+      padding-bottom: 10px;
       .bank-tag{
         position: absolute;
         top: 8%;
@@ -210,12 +217,11 @@ export default {
       }
       .wechat-tag{
         position: absolute;
-        top: 40%;
+        top: 75%;
         left: 25%;
       }
     }
     .van-button{
-      border-radius: 10px;
       background-color: rgba(0,0,0,.08);
     }
     /*支付按钮加颜色*/

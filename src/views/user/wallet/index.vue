@@ -6,7 +6,7 @@
           title="资金"
           left-text="返回"
           left-arrow
-          @click-left="icon_arrow"
+          @click-left="toClickLeft"
         />
       </div>
       <!--资产卡包-->
@@ -72,6 +72,7 @@
 
 <script>
 import { Icon, Toast, NavBar } from 'vant'
+import { mapMutations } from 'vuex'
 
 export default {
   data () {
@@ -134,8 +135,11 @@ export default {
     }
   },
   methods: {
+    ...mapMutations({
+      is_setup_pin: state => state.account.is_setup_pin
+    }),
     // 箭头
-    icon_arrow () {
+    toClickLeft () {
       this.$router.go(-1)
     },
     // 显示隐藏钱包
@@ -192,6 +196,10 @@ export default {
     },
     // 数据获取
     async getWallet () {
+      console.log(this.is_setup_pin)
+      if (this.is_setup_pin === false) {
+        this.$router.push({ path: 'password' })
+      }
       const { data } = await this.$api.wallet.walletAssets()
       if (data.code === 200) {
         this.surface = data.data[0].asset.symbol

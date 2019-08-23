@@ -32,11 +32,12 @@ export default {
   },
   methods: {
     ...mapMutations({
-      auth: 'account/auth'
+      auth: 'account/auth',
+      isPassword: 'account/isPassword'
     }),
     async onSend () {
       if (this.phone === '' || this.areaCode === '' || this.key === '') {
-        this.$router.replace({ name: '/' })
+        this.$router.replace({ name: '/login' })
       } else {
         Toast.loading('加载中...')
         // const { data } = await this.$api.account.verify({ verify_code: this.verifyCode, key: localStorage.getItem('key') })
@@ -71,13 +72,13 @@ export default {
       const { data } = await this.$api.account.verify({ key: this.key, verify_code: this.verifyCode })
       // console.log(data)
       if (data.code === 200) {
-        // console.log(data)
         localStorage.setItem('token', data.data.token)
         localStorage.setItem('userInfo', JSON.stringify(data.data))
-        this.$router.push({
-          path: '/otc'
-        })
-        // const userInfo = JSON.parse(localStorage.getItem('userInfo'))
+        this.isPassword(data.data.is_setup_pin)
+        if (data.data.is_setup_pin === false) {
+          Toast.info('创建密码')
+          this.$router.push({ path: 'password' })
+        } else this.$router.push({ path: '/' })
       } else {
         Toast.failed(data.desc)
         // console.log(data)

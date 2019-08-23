@@ -29,7 +29,9 @@
 </template>
 
 <script>
-import { PasswordInput, NumberKeyboard, Icon, NavBar } from 'vant'
+import { PasswordInput, NumberKeyboard, Icon, NavBar, Toast } from 'vant'
+import { mapState, mapMutations } from 'vuex'
+
 export default {
   name: 'password',
   components: {
@@ -53,8 +55,20 @@ export default {
   },
   methods: {
     // 返回上一页
+    ...mapState({
+      is_setup_pin: state => state.account.is_setup_pin
+    }),
+    ...mapMutations({
+      isPassword: 'account/isPassword'
+    }),
     onClick () {
-      this.$router.go(-1)
+      if (this.is_setup_pin === '' || this.is_setup_pin === undefined || this.is_setup_pin === null) {
+        Toast('请设置密码再离开！')
+      } else {
+        console.log(this.is_setup_pin)
+        this.$router.push({ path: '/' })
+      }
+      // this.$router.go(-1)
     },
     // 密码输入
     inputNumber (key) {
@@ -83,12 +97,17 @@ export default {
               this.Tips = false
             }, 800)
           } else {
-            await this.$api.pass.setup_pin({ 'pin': this.passwordValue })
-            localStorage.removeItem('New_password')
-            setTimeout(async () => {
-              this.$router.go(-1)
-              this.passwordValue = ''
-            }, 800)
+            const { data } = await this.$api.password.setup_pin({ pin: this.passwordValue })
+            if (data.code === 200) {
+              this.isPassword(true)
+              console.log(this.is_setup_pin)
+              localStorage.removeItem('New_password')
+              setTimeout(async () => {
+                this.$router.push({ path: '/' })
+                // this.$router.go(-1)
+                this.passwordValue = ''
+              }, 800)
+            } else Toast(data.desc)
           }
         } else {
           localStorage.setItem('New_password', this.passwordValue)
@@ -103,43 +122,47 @@ export default {
     async changePassword () {
       // 修改密码
       if (this.passwordValue.length >= 6) {
-        const { data } = await this.$api.pass.update_pin({ 'pin': this.passwordValue })
+        const { data } = await this.$api.password.update_pin({ pin: this.passwordValue })
         console.log(data)
-        // 旧密码
-        if (this.passwordValue === localStorage.getItem('user_pas') && this.New_password === false) {
-          setTimeout(() => {
-            this.passwordValue = ''
-            this.New_password = true
+        if (data.code === 200) {
+          // 旧密码
+          if (this.passwordValue === localStorage.getItem('user_pas') && this.New_password === false) {
+            setTimeout(() => {
+              this.passwordValue = ''
+              this.New_password = true
+              this.again_password = false
+              this.passwordInfo = '输入新的密码'
+            }, 500)
+          } else if (this.again_password === false && this.New_password === true &&
+            localStorage.getItem('user_pas') !== this.passwordValue) {
+            // 新密码
+            this.passwordInfo = '请再次输入'
+            localStorage.setItem('New_password', this.passwordValue)
+            setTimeout(() => {
+              this.passwordValue = ''
+              this.again_password = true
+            }, 500)
+          } else if (this.again_password === true && this.passwordValue === localStorage.getItem('New_password')) {
+            // 再次输入
+            this.passwordInfo = '修改成功'
+            localStorage.setItem('user_pas', this.passwordValue)
+            localStorage.removeItem('New_password')
+            setTimeout(() => {
+              this.passwordValue = ''
+              this.$router.push({ path: '/' })
+              // this.$router.go(-1)
+            }, 1500)
+          } else {
+            this.Tips = true
+            this.Tips_title = '请重新输入原密码'
+            this.New_password = false
             this.again_password = false
-            this.passwordInfo = '输入新的密码'
-          }, 500)
-        } else if (this.again_password === false && this.New_password === true && localStorage.getItem('user_pas') !== this.passwordValue) {
-          // 新密码
-          this.passwordInfo = '请再次输入'
-          localStorage.setItem('New_password', this.passwordValue)
-          setTimeout(() => {
-            this.passwordValue = ''
-            this.again_password = true
-          }, 500)
-        } else if (this.again_password === true && this.passwordValue === localStorage.getItem('New_password')) {
-          // 再次输入
-          this.passwordInfo = '修改成功'
-          localStorage.setItem('user_pas', this.passwordValue)
-          localStorage.removeItem('New_password')
-          setTimeout(() => {
-            this.passwordValue = ''
-            this.$router.go(-1)
-          }, 1500)
-        } else {
-          this.Tips = true
-          this.Tips_title = '请重新输入原密码'
-          this.New_password = false
-          this.again_password = false
-          setTimeout(() => {
-            this.passwordValue = ''
-            this.Tips = false
-          }, 1000)
-        }
+            setTimeout(() => {
+              this.passwordValue = ''
+              this.Tips = false
+            }, 1000)
+          }
+        } else Toast(data.desc)
       }
     }
   },
