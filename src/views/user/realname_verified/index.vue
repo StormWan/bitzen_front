@@ -234,11 +234,12 @@ export default {
           message: '倒计时 5 秒'
         })
         let second = 5
+        const { data } = await this.$api.kyc.kyc_list(Formdata)
         const timer = setInterval(async () => {
           second--
           if (second) {
             toast.message = `倒计时 ${second} 秒`
-            if (data) {
+            if (data.code === 200) {
               if (data.data.id_in_hand && data.data.id_number && data.data.id_photo_back &&
                 data.data.id_photo_front && data.data.name) {
                 clearInterval(timer)
@@ -268,7 +269,7 @@ export default {
           }
         }, 1000)
         // 数据传输
-        const { data } = await this.$api.kyc.kyc_list(Formdata)
+        // const { data } = await this.$api.kyc.kyc_list(Formdata)
       } else {
         Toast('请填入完整信息后再验证')
       }
@@ -313,6 +314,7 @@ export default {
         }
       } else {
         this.lv_certification = true
+        this.successTips = '正在审核中,请耐心等待'
       }
     } else {
       Toast('发生错误啦，请稍后重试')
