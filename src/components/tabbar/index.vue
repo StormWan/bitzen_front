@@ -12,10 +12,7 @@
             <md-icon :name="item.icon"/>
         </div>
           <div class="text">
-            <div v-if="item.name === 3">
-              <span v-text="bbLabel"></span>
-            </div>
-            <div v-else><span v-text="item.label"></span></div>
+            <span v-text="item.label"></span>
           </div>
         </div>
       </template>
@@ -54,9 +51,6 @@ export default {
       }
     },
     // bb tabbar
-    bbLabel () {
-      return this.$store.state.tabbar.bbName
-    }
   },
   methods: {
     ...mapMutations({

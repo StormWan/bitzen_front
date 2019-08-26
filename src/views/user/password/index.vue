@@ -98,16 +98,16 @@ export default {
             }, 800)
           } else {
             const { data } = await this.$api.password.setup_pin({ pin: this.passwordValue })
-            if (data.code === 200) {
-              this.isPassword(true)
-              console.log(this.is_setup_pin)
-              localStorage.removeItem('New_password')
+            // if (data.code === 200) {
+            //   this.isPassword(true)
+            //   console.log(this.is_setup_pin)
+            //   localStorage.removeItem('New_password')
               setTimeout(async () => {
                 this.$router.push({ path: '/' })
                 // this.$router.go(-1)
                 this.passwordValue = ''
               }, 800)
-            } else Toast(data.desc)
+            // } else Toast(data.desc)
           }
         } else {
           localStorage.setItem('New_password', this.passwordValue)
