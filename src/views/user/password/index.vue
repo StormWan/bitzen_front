@@ -47,33 +47,45 @@ export default {
       passwordValue: '',
       showKeyboard: true,
       Tips: false,
-      again_password: false,
-      New_password: false,
       passwordInfo: '',
-      Tips_title: ''
+      Tips_title: '',
+      old_password: '',
+      new_password: '',
+      again_password: ''
+    }
+  },
+  computed: {
+    ...mapState({
+      is_setup_pin: state => state.account.is_setup_pin
+    })
+  },
+  mounted () {
+    console.log(this.is_setup_pin)
+    if (this.is_setup_pin !== undefined) {
+      this.passwordInfo = '请输入原密码'
+      this.title = '修改 BlockPay 密码'
+    } else {
+      this.passwordInfo = '创建新密码'
+      this.title = '创建 BlockPay 新密码'
     }
   },
   methods: {
     // 返回上一页
-    ...mapState({
-      is_setup_pin: state => state.account.is_setup_pin
-    }),
     ...mapMutations({
       isPassword: 'account/isPassword'
     }),
     onClick () {
-      if (this.is_setup_pin === '' || this.is_setup_pin === undefined || this.is_setup_pin === null) {
+      if (this.is_setup_pin === undefined) {
         Toast('请设置密码再离开！')
       } else {
         console.log(this.is_setup_pin)
         this.$router.push({ path: '/' })
       }
-      // this.$router.go(-1)
     },
     // 密码输入
     inputNumber (key) {
       this.passwordValue = (this.passwordValue + key).slice(0, 6)
-      if (!JSON.parse(localStorage.getItem('userInfo')).is_setup_pin) {
+      if (this.is_setup_pin === undefined) {
         this.createPassword()
       } else {
         this.changePassword()
@@ -82,7 +94,10 @@ export default {
     deleteNumber () {
       this.passwordValue = this.passwordValue.slice(0, this.passwordValue.length - 1)
     },
-    // 创建新密码
+    /**
+     *  创建新密码,第一次创建密码时候，第一次输入密码将密码存储在本地，再次输入密码时候获取本地密码数据匹配
+     *  匹配不成功就再次输入新密码，成功就将数据传到后台，并将本地的密码数据清除
+     */
     async createPassword () {
       // 没有设置密码(新建密码)
       if (this.passwordValue.length >= 6) {
@@ -91,23 +106,22 @@ export default {
             this.Tips = true
             this.Tips_title = '请重新输入新密码'
             this.passwordInfo = '重新输入新密码'
-            localStorage.removeItem('New_password')
+            // localStorage.removeItem('New_password')
             setTimeout(() => {
               this.passwordValue = ''
               this.Tips = false
             }, 800)
           } else {
             const { data } = await this.$api.password.setup_pin({ pin: this.passwordValue })
-            // if (data.code === 200) {
-            //   this.isPassword(true)
-            //   console.log(this.is_setup_pin)
-            //   localStorage.removeItem('New_password')
+            if (data.code === 200) {
+              this.isPassword(true)
+              localStorage.removeItem('New_password')
               setTimeout(async () => {
                 this.$router.push({ path: '/' })
                 // this.$router.go(-1)
                 this.passwordValue = ''
               }, 800)
-            // } else Toast(data.desc)
+            } else Toast(data.desc)
           }
         } else {
           localStorage.setItem('New_password', this.passwordValue)
@@ -118,61 +132,55 @@ export default {
         }
       }
     },
-    // 修改旧密码
+    /**
+     *修改旧密码
+     * 先获取state 存储的  is_setup_pin 是否存在,如果存在
+     * 存在输入旧密码,和新密码,然后向后台传送数据
+     */
     async changePassword () {
       // 修改密码
       if (this.passwordValue.length >= 6) {
-        const { data } = await this.$api.password.update_pin({ pin: this.passwordValue })
-        console.log(data)
-        if (data.code === 200) {
-          // 旧密码
-          if (this.passwordValue === localStorage.getItem('user_pas') && this.New_password === false) {
+        console.log(this.passwordValue)
+        console.log(this.old_password + '---' + this.new_password + '---' + this.again_password)
+        if (this.old_password !== '' && this.new_password === '' && this.again_password === '') {
+          this.new_password = this.passwordValue
+          setTimeout(() => {
+            this.passwordValue = ''
+            this.passwordInfo = '请再次输入新密码'
+          }, 1500)
+        } else if (this.old_password !== '' && this.new_password !== '' && this.again_password === '') {
+          this.again_password = this.passwordValue
+          if (this.new_password !== this.again_password) {
+            Toast('两次输入新密码不一致!')
+            this.again_password = ''
             setTimeout(() => {
               this.passwordValue = ''
-              this.New_password = true
-              this.again_password = false
-              this.passwordInfo = '输入新的密码'
-            }, 500)
-          } else if (this.again_password === false && this.New_password === true &&
-            localStorage.getItem('user_pas') !== this.passwordValue) {
-            // 新密码
-            this.passwordInfo = '请再次输入'
-            localStorage.setItem('New_password', this.passwordValue)
-            setTimeout(() => {
-              this.passwordValue = ''
-              this.again_password = true
-            }, 500)
-          } else if (this.again_password === true && this.passwordValue === localStorage.getItem('New_password')) {
-            // 再次输入
-            this.passwordInfo = '修改成功'
-            localStorage.setItem('user_pas', this.passwordValue)
-            localStorage.removeItem('New_password')
-            setTimeout(() => {
-              this.passwordValue = ''
-              this.$router.push({ path: '/' })
-              // this.$router.go(-1)
+              this.passwordInfo = '请再输入新密码'
             }, 1500)
           } else {
-            this.Tips = true
-            this.Tips_title = '请重新输入原密码'
-            this.New_password = false
-            this.again_password = false
-            setTimeout(() => {
+            const { data } = await this.$api.password.update_pin({ old_pin: this.old_password, pin: this.again_password })
+            if (data.code === 200) {
+              Toast('修改密码成功!')
+              setTimeout(() => {
+                this.passwordValue = ''
+                this.old_password = ''
+                this.again_password = ''
+                this.new_password = ''
+                this.$router.push({ path: '/' })
+              }, 1500)
+            } else {
+              Toast(data.desc)
               this.passwordValue = ''
-              this.Tips = false
-            }, 1000)
+            }
           }
-        } else Toast(data.desc)
+        } else {
+          this.old_password = this.passwordValue
+          setTimeout(() => {
+            this.passwordValue = ''
+            this.passwordInfo = '输入新的密码'
+          }, 1500)
+        }
       }
-    }
-  },
-  async activated () {
-    if (JSON.parse(localStorage.getItem('userInfo')).is_setup_pin) {
-      this.passwordInfo = '请输入原密码'
-      this.title = '修改 BlockPay 密码'
-    } else {
-      this.passwordInfo = '创建新密码'
-      this.title = '创建 BlockPay 新密码'
     }
   }
 }

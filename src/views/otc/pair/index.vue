@@ -15,16 +15,17 @@
             <div class="price-bid">
               <div class="logo-Img" v-if="buyLogo"><img :src="buyLogo" alt=""></div>
               <div class="price-title">{{title}}</div>
-              <div class="price-bid">￥{{buyPrice}}</div>
+              <div class="price-bid">￥{{buyPrice}}/${{bestBuyPrice}}</div>
             </div>
             <div class="price-arrival">预计到账:{{estimatedAsset}}</div>
           </div>
+        <p :class="{active: tipsColor}">{{buyTips}}</p>
             <van-field
               readonly
               clickable
               :placeholder="placeholderBuy"
               :value="amountBuy"
-              @touchstart.native.stop="buyKeyboardShow = true"
+              @touchstart.native.stop="clickBuyfield"
             />
             <van-number-keyboard
               :show="buyKeyboardShow"
@@ -42,7 +43,7 @@
               clickable
               :placeholder="placeholderBuyAmountArrival"
               :value="buyAmountArrival"
-              @touchstart.native.stop="buyArrivalKeyboardShow = true"
+              @touchstart.native.stop="clickBuyfield_1"
             />
             <van-number-keyboard
               :show="buyArrivalKeyboardShow"
@@ -65,17 +66,18 @@
           <div class="price-bid">
             <div class="logo-Img" v-if="sellLogo"><img :src="sellLogo" alt=""></div>
             <div class="price-title">{{title}}</div>
-            <div class="price-bid" style="color: red">￥{{sellPrice}}</div>
+            <div class="price-bid" style="color: red">￥{{sellPrice}}/${{bestSellPrice}}</div>
           </div>
           <div class="price-arrival">预计到账:{{estimatedCny}}</div>
         </div>
+        <p :class="{active: tipsColor}">{{sellTips}}</p>
           <!--购买金额-->
             <van-field
               :placeholder="placeholderSell"
               readonly
               clickable
               :value="amountSell"
-              @touchstart.native.stop="sellKeyboardShow = true"
+              @touchstart.native.stop="clickSellfield"
             />
             <van-number-keyboard
               :show="sellKeyboardShow"
@@ -93,7 +95,7 @@
           readonly
           clickable
           :value="sellAmountArrival"
-          @touchstart.native.stop="sellArrivalKeyboardShow = true"
+          @touchstart.native.stop="clickSellfield_1"
         />
         <van-number-keyboard
           :show="sellArrivalKeyboardShow"
@@ -112,8 +114,6 @@
     </van-tabs>
     <!--Mixin 钱包-->
     <div v-if="activeIndex === 0">
-<!--      <otc_wallet :symbol="symbol"></otc_wallet>-->
-
       <otc_wallet :symbol="symbol" :pair="walletOtcPair" @wallet="walletMessage" :index="0"></otc_wallet>
     </div>
   </div>
@@ -152,7 +152,8 @@ export default {
       buyArrivalKeyboardShow: false,
       sellArrivalKeyboardShow: false,
       sellKeyboardShow: false,
-      walletData: '' // 钱包的数据
+      walletData: '', // 钱包的数据
+      tipsColor: false
     }
   },
   methods: {
@@ -184,19 +185,42 @@ export default {
       this.clearOrder()
       this.activeIndex = index
     },
+    clickBuyfield () {
+      this.buyKeyboardShow = true
+      this.buyArrivalKeyboardShow = false
+    },
+    clickBuyfield_1 () {
+      this.buyKeyboardShow = false
+      this.buyArrivalKeyboardShow = true
+    },
+    clickSellfield () {
+      this.sellKeyboardShow = true
+      this.sellArrivalKeyboardShow = false
+    },
+    clickSellfield_1 () {
+      this.sellKeyboardShow = false
+      this.sellArrivalKeyboardShow = true
+    },
+    changeTipsColor () {
+      if (this.buyTips === '输入' + this.placeholderBuy + '超出范围' ||
+      this.sellTips === '输入' + this.placeholderSell + '超出范围') {
+        this.tipsColor = true
+      } else this.tipsColor = false
+    },
     /**
      * 限制第一个输入框的输入
      * */
     onInputBuyKeyBoard (value) {
+      this.sellKeyboardShow = false
       this.amountBuy += value
       // 限制只能输入一个小数点及两位小数
+      if (this.amountBuy.toString().split('.')[1]) {
+        if (this.amountBuy.toString().split('.')[1].length > 2) { Toast('只能输入两位小数！') }
+      }
+      console.log(this.amountBuy.toString().match(/^\d*(\.?\d{0,2})/g)[0])
       this.amountBuy = this.amountBuy.toString().match(/^\d*(\.?\d{0,2})/g)[0] || null
       this.buyAmountArrival = (this.amountBuy / this.buyPrice).toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
-      if (parseInt(this.buyAmountArrival) > this.buyPrice) {
-        this.amountBuy = ''
-        this.buyAmountArrival = ''
-        Toast('输入数据超出范围')
-      }
+      this.changeTipsColor()
     },
     /**
      * 模拟键盘删除时触发的函数
@@ -207,6 +231,9 @@ export default {
         // 删除掉字符串最后一个
         this.amountBuy = this.amountBuy.substring(0, this.amountBuy.length - 1)
         this.buyAmountArrival = (this.amountBuy / this.buyPrice).toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
+        // console.log(this.buyAmountArrival)
+        // if (parseInt(this.buyAmountArrival) === 0) this.buyAmountArrival = ''
+        this.changeTipsColor()
         if (this.amountBuy.length === 0) {
           flag = false
           return false
@@ -222,9 +249,12 @@ export default {
       } else {
         this.buyAmountArrival += value
         // 限制只能输入一个小数点及四位小数
+        if (this.buyAmountArrival.toString().split('.')[1]) {
+          if (this.buyAmountArrival.toString().split('.')[1].length > 4) { Toast('只能输入四位小数！') }
+        }
         this.buyAmountArrival = this.buyAmountArrival.toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
         this.amountBuy = this.buyCny
-        this.checkBuyArrival()
+        this.changeTipsColor()
       }
     },
     /**
@@ -236,6 +266,7 @@ export default {
         // 删除掉字符串最后一个
         this.buyAmountArrival = this.buyAmountArrival.substring(0, this.buyAmountArrival.length - 1)
         this.amountBuy = this.buyCny
+        this.changeTipsColor()
         if (this.buyAmountArrival.length === 0) {
           flag = false
           return false
@@ -246,15 +277,15 @@ export default {
      * 卖出
      * */
     onInputSellKeyBoard (value) {
+      this.buyKeyboardShow = false
       this.amountSell += value
       // 限制只能输入一个小数点及两位小数
+      if (this.amountSell.toString().split('.')[1]) {
+        if (this.amountSell.toString().split('.')[1].length > 2) { Toast('只能输入两位小数！') }
+      }
       this.amountSell = this.amountSell.toString().match(/^\d*(\.?\d{0,2})/g)[0] || null
       this.sellAmountArrival = (this.amountSell * this.sellPrice).toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
-      if (parseInt(this.amountSell) > this.sellPrice) {
-        this.amountSell = ''
-        this.sellAmountArrival = ''
-        Toast('输入数据超出范围')
-      }
+      this.changeTipsColor()
     },
     onDeleteSellKeyBoard () {
       let flag = true
@@ -262,6 +293,7 @@ export default {
         // 删除掉字符串最后一个
         this.amountSell = this.amountSell.substring(0, this.amountSell.length - 1)
         this.sellAmountArrival = (this.amountSell * this.sellPrice).toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
+        this.changeTipsColor()
         if (this.amountSell.length === 0) {
           flag = false
           return false
@@ -274,9 +306,13 @@ export default {
       } else {
         this.sellAmountArrival += value
         // 限制只能输入一个小数点及两位小数
-        this.sellAmountArrival = this.sellAmountArrival.toString().match(/^\d*(\.?\d{0,2})/g)[0] || null
+        if (this.sellAmountArrival.toString().split('.')[1]) {
+          if (this.sellAmountArrival.toString().split('.')[1].length > 4) { Toast('只能输入四位小数！') }
+        }
+        this.sellAmountArrival = this.sellAmountArrival.toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
         this.amountSell = this.sellCny
-        this.checkSellArrival()
+        this.changeTipsColor()
+        // this.checkSellArrival()
       }
     },
     onDeleteSellAmountKeyBoard () {
@@ -285,6 +321,7 @@ export default {
         // 删除掉字符串最后一个
         this.sellAmountArrival = this.sellAmountArrival.substring(0, this.sellAmountArrival.length - 1)
         this.amountSell = this.sellCny
+        this.changeTipsColor()
         if (this.sellAmountArrival.length === 0) {
           flag = false
           return false
@@ -345,22 +382,6 @@ export default {
         return false
       } else return true
     },
-    checkBuyArrival () {
-      if (parseInt(this.buyAmountArrival) > parseInt(this.buyPrice)) {
-        Toast('输入数据超出范围！请再次输入')
-        this.buyAmountArrival = ''
-        this.amountBuy = ''
-        return false
-      } else return true
-    },
-    checkSellArrival () {
-      if (parseInt(this.sellAmountArrival) > parseInt(this.sellPrice)) {
-        Toast('输入数据超出范围！请再次输入')
-        this.sellAmountArrival = ''
-        this.amountSell = ''
-        return true
-      } else return false
-    },
     successfulPayment () {
       if (this.data.status !== 22) {
         if (this.data.status === 1) {
@@ -399,6 +420,20 @@ export default {
   },
   // 计算
   computed: {
+    buyTips () {
+      if (this.otcPair !== null) {
+        if (parseInt(this.buyAmountArrival) > this.buyPrice) {
+          return '输入' + this.placeholderBuy + '超出范围'
+        } else return this.otcPair.asset.symbol + '最小下单' + this.otcPair.buy_min + ',最大下单' + this.buyPrice
+      } else return '资金池不足'
+    },
+    sellTips () {
+      if (this.otcPair !== null) {
+        if (parseInt(this.sellAmountArrival) > this.sellPrice) {
+          return '输入' + this.placeholderSell + '超出范围'
+        } else return this.otcPair.asset.symbol + '最小下单' + this.otcPair.sell_min + ',最大下单' + this.sellPrice
+      } else return '资金池不足'
+    },
     placeholderBuy () {
       return this.otcPair === null ? '资金池不足' : 'CNY 数量'
     },
@@ -418,7 +453,7 @@ export default {
       return this.amountSell === '' ? '0' : (parseFloat(this.amountSell) * this.sellPrice).toFixed(4)
     },
     title () {
-      return this.otcPair === null ? '' : this.otcPair.asset.symbol
+      return this.otcPair === null ? '' : this.otcPair.pair.pair
     },
     symbol () {
       return this.otcPair === null ? '' : this.otcPair.asset.symbol
@@ -465,6 +500,12 @@ export default {
       } else {
         return (this.otcPair.pair.bestorderbookmodel.best_buy_price * this.otcPair.setting.usdt_buy_price).toFixed(2)
       }
+    },
+    bestBuyPrice () {
+      return this.otcPair === null ? 0 : (this.otcPair.pair.bestorderbookmodel.best_buy_price).toFixed(2)
+    },
+    bestSellPrice () {
+      return this.otcPair === null ? 0 : (this.otcPair.pair.bestorderbookmodel.best_sell_price).toFixed(2)
     },
     sellPrice () {
       if (this.otcPair === null) {
@@ -521,7 +562,7 @@ export default {
     font-size: 27px;
     padding: 30px 0px;
     .price-bid{
-      width: 130px;
+      /*width: 150px;*/
       border-radius: 50%;
       margin: 0 auto;
       color: #FFFAFA;
@@ -529,9 +570,9 @@ export default {
       .logo-Img{
         display: flex;
         width: 35px;
-        margin: 3px 0px;
+        margin: 3px auto;
         padding-bottom: 5px;
-        margin-left: 35%;
+        /*margin-left: 35%;*/
         img{
           width: 100%;
           -webkit-border-radius: 50%;
@@ -546,7 +587,7 @@ export default {
         justify-content: center;
       }
       .price-bid{
-        margin: 5px 0;
+        margin: 10px 0;
         color: #228B22;
       }
       .active{
@@ -563,4 +604,10 @@ export default {
       transform: translate(-50%,0);
     }
   }
+  p{
+    font-size: 12px;
+    padding: 15px;
+    color: #1989fa;
+  }
+  .active{ color: red; }
 </style>

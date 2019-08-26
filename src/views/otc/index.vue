@@ -65,10 +65,11 @@ export default {
       pairs: []
     }
   },
-  async mounted () {
-    this.setActiveTab(2)
-  },
+  // async mounted () {
+  //   this.setActiveTab(2)
+  // },
   async activated () {
+    this.setActiveTab(2)
     await this.getOtcPairs()
     // 设置定时器，每隔2秒获取数据
     let timer = await setInterval(() => {
