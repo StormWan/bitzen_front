@@ -161,13 +161,18 @@ export default {
             const { data } = await this.$api.password.update_pin({ old_pin: this.old_password, pin: this.again_password })
             if (data.code === 200) {
               Toast('修改密码成功!')
-              setTimeout(() => {
-                this.passwordValue = ''
-                this.old_password = ''
-                this.again_password = ''
-                this.new_password = ''
-                this.$router.push({ path: '/' })
-              }, 1500)
+              let { dataAccount } = await this.$api.account.oauth({ code: localStorage.getItem('code') })
+              if (dataAccount.code === 200) {
+                console.log(dataAccount)
+                localStorage.setItem('userInfo', JSON.stringify(dataAccount.data))
+                setTimeout(() => {
+                  this.passwordValue = ''
+                  this.old_password = ''
+                  this.again_password = ''
+                  this.new_password = ''
+                  this.$router.push({ path: '/' })
+                }, 1500)
+              } else Toast(dataAccount.desc)
             } else {
               Toast(data.desc)
               this.passwordValue = ''

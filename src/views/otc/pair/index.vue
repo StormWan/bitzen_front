@@ -424,14 +424,20 @@ export default {
       if (this.otcPair !== null) {
         if (parseInt(this.buyAmountArrival) > this.buyPrice) {
           return '输入' + this.placeholderBuy + '超出范围'
-        } else return this.otcPair.asset.symbol + '最小下单' + this.otcPair.buy_min + ',最大下单' + this.buyPrice
+        } else {
+          return 'CNY 最小下单' + (this.otcPair.buy_min * this.buyPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0] +
+            ',最大下单' + (this.otcPair.buy_max * this.buyPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0]
+        }
       } else return '资金池不足'
     },
     sellTips () {
       if (this.otcPair !== null) {
         if (parseInt(this.sellAmountArrival) > this.sellPrice) {
           return '输入' + this.placeholderSell + '超出范围'
-        } else return this.otcPair.asset.symbol + '最小下单' + this.otcPair.sell_min + ',最大下单' + this.sellPrice
+        } else {
+          return 'CNY 最小下单' + (this.otcPair.sell_min * this.sellPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0] +
+            ',最大下单' + (this.otcPair.sell_max * this.sellPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0]
+        }
       } else return '资金池不足'
     },
     placeholderBuy () {

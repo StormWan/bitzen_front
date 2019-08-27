@@ -16,7 +16,7 @@
       </div>
       <!--购买转账人-->
       <div class="turn_name">你出售 {{data.asset_amount}} {{title}}
-        <span v-if="title !== 'USDT'">,价值约 {{Math.floor(best_sell_price * 100) / 100}} {{Fun}}</span>
+        <span v-if="title !== 'USDT'">,价值约 {{Math.floor(best_sell_price_1 * 100) / 100}} {{Fun}}</span>
       </div>
       <!--单价-->
       <div class="price">
@@ -219,9 +219,9 @@ export default {
       myDate.setMinutes(myDate.getMinutes() + this.limitTime)
       return myDate
     },
-    best_sell_price () {
+    best_sell_price_1 () {
       if (this.data !== '' && this.data.otc_pair.pair) {
-        return this.data.otc_pair.pair.bestorderbookmodel.best_sell_price
+        return this.data.otc_pair.pair.bestorderbookmodel.best_sell_price_1
       } else return ''
     },
     /**
@@ -229,7 +229,7 @@ export default {
      * */
     amountArrival () {
       if (this.data !== '' && this.data.otc_pair.pair) {
-        return ((Math.floor((this.data.usdt_price * this.best_sell_price) * 100) / 100) * this.data.asset_amount).toFixed(2)
+        return ((Math.floor((this.data.usdt_price * this.best_sell_price_1) * 100) / 100) * this.data.asset_amount).toFixed(2)
       } else {
         return (Math.floor((this.data.usdt_price * this.data.asset_amount) * 100) / 100 * this.data.asset_amount).toFixed(2)
       }

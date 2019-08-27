@@ -14,7 +14,7 @@
         <div class="logo_info">
           <!--收款logo-->
           <div class="logo">
-            <div :class="{active: index === logoIndex}" v-for="(item,index) in paymentInfo"
+          <div :class="{active: index === logoIndex}" v-for="(item,index) in paymentInfo"
                  :key="index" @click="paymentMethods(index)">
               <div v-show="item.img == 'card'">
                 <van-icon :name="item.img" size="40px" class="logo-card"/>
@@ -60,8 +60,15 @@
 </template>
 
 <script>
-import { NavBar, Toast, Icon } from 'vant'
+import { NavBar, Toast, Icon, Tabs, Tab } from 'vant'
 export default {
+  components: {
+    [NavBar.name]: NavBar,
+    [Toast.name]: Toast,
+    [Icon.name]: Icon,
+    [Tabs.name]: Tabs,
+    [Tab.name]: Tab
+  },
   data () {
     return {
       tipsList: [
@@ -90,6 +97,7 @@ export default {
         }
       ],
       index: 0,
+      choosePayment: '', // 选择收款方式
       submit: false,
       // 用户名
       user_name: '',
@@ -109,6 +117,8 @@ export default {
      */
     onClickLeft () {
       this.$router.go(-1)
+      this.logoIndex = 0
+      this.index = 0
     },
     /**
      * 切换收款方式
@@ -228,11 +238,6 @@ export default {
         this.logoIndex = 1
       }
     }
-  },
-  components: {
-    [NavBar.name]: NavBar,
-    [Toast.name]: Toast,
-    [Icon.name]: Icon
   }
 }
 </script>
@@ -259,6 +264,10 @@ export default {
           display: flex;
           justify-content: space-around;
           align-items: center;
+          .van-tabs {
+            position: relative;
+            width: 100%;
+          }
           .logo-alipay{
             color: #1E90FF;
           }
