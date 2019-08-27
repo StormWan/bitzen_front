@@ -15,7 +15,7 @@ const mutations = {
   },
   isPassword (state, params) {
     state.is_setup_pin = params.is_setup_pin
-    console.log('state.is_setup_pin: ' + state.is_setup_pin)
+    console.log('state.is_setup_pin: ' + state.is_setup_pin + '----' + params.is_setup_pin)
   }
 }
 const getters = {}

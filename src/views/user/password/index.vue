@@ -56,12 +56,12 @@ export default {
   },
   computed: {
     ...mapState({
-      is_setup_pin: state => state.account.is_setup_pin
+      is_set_password: state => state.account.is_setup_pin
     })
   },
-  mounted () {
-    console.log(this.is_setup_pin)
-    if (this.is_setup_pin !== undefined) {
+  async mounted () {
+    console.log(this.is_set_password)
+    if (this.is_set_password === true) {
       this.passwordInfo = '请输入原密码'
       this.title = '修改 BlockPay 密码'
     } else {
@@ -75,17 +75,17 @@ export default {
       isPassword: 'account/isPassword'
     }),
     onClick () {
-      if (this.is_setup_pin === undefined) {
+      if (this.is_set_password !== true) {
         Toast('请设置密码再离开！')
       } else {
-        console.log(this.is_setup_pin)
+        console.log(this.is_set_password)
         this.$router.push({ path: '/' })
       }
     },
     // 密码输入
     inputNumber (key) {
       this.passwordValue = (this.passwordValue + key).slice(0, 6)
-      if (this.is_setup_pin === undefined) {
+      if (this.is_set_password !== true) {
         this.createPassword()
       } else {
         this.changePassword()
@@ -114,11 +114,11 @@ export default {
           } else {
             const { data } = await this.$api.password.setup_pin({ pin: this.passwordValue })
             if (data.code === 200) {
-              this.isPassword(true)
               localStorage.removeItem('New_password')
               setTimeout(async () => {
                 this.$router.push({ path: '/' })
                 // this.$router.go(-1)
+                this.isPassword({ is_setup_pin: true })
                 this.passwordValue = ''
               }, 800)
             } else Toast(data.desc)
@@ -161,10 +161,10 @@ export default {
             const { data } = await this.$api.password.update_pin({ old_pin: this.old_password, pin: this.again_password })
             if (data.code === 200) {
               Toast('修改密码成功!')
-              let { dataAccount } = await this.$api.account.oauth({ code: localStorage.getItem('code') })
-              if (dataAccount.code === 200) {
-                console.log(dataAccount)
-                localStorage.setItem('userInfo', JSON.stringify(dataAccount.data))
+              // let { dataAccount } = await this.$api.account.oauth({ code: localStorage.getItem('code') })
+              // if (dataAccount.code === 200) {
+              //   console.log(dataAccount)
+              //   localStorage.setItem('userInfo', JSON.stringify(dataAccount.data))
                 setTimeout(() => {
                   this.passwordValue = ''
                   this.old_password = ''
@@ -172,7 +172,7 @@ export default {
                   this.new_password = ''
                   this.$router.push({ path: '/' })
                 }, 1500)
-              } else Toast(dataAccount.desc)
+              // } else Toast(data.desc)
             } else {
               Toast(data.desc)
               this.passwordValue = ''

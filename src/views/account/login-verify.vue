@@ -28,6 +28,7 @@ export default {
   data () {
     return {
       verifyCode: ''
+      // buttonType: 'disabled'
     }
   },
   methods: {
@@ -74,7 +75,7 @@ export default {
       if (data.code === 200) {
         localStorage.setItem('token', data.data.token)
         localStorage.setItem('userInfo', JSON.stringify(data.data))
-        this.isPassword(data.data.is_setup_pin)
+        // this.isPassword(true)
         if (data.data.is_setup_pin === false) {
           Toast.info('创建密码')
           this.$router.push({ path: 'password' })
