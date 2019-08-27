@@ -197,11 +197,9 @@ export default {
     // 数据获取
     async getWallet () {
       console.log(this.isHasPassword)
-      if (this.isHasPassword === undefined || this.isHasPassword === '') {
+      if (this.isHasPassword !== true) {
         Toast('请设置 BlockPay 钱包密码！')
-        setTimeout(() => {
-          this.$router.push({ name: 'password' })
-        }, 2000)
+        this.$router.push({ name: 'password' })
         // this.$router.push({ path: 'password' })
       }
       const { data } = await this.$api.wallet.walletAssets()
