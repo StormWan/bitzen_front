@@ -33,23 +33,26 @@
         <!--钱包选择-->
         <div class="Choice">
           <div class="wallet_box" v-for="(item,index) in wallet" :key="index" @click="wallet_click(index)">
-            <van-row type="flex" justify="space-between" class="walletInfo">
-              <van-col span="11">
-                <div  class="BankIcon">
-                  <van-icon :name="item.icon"></van-icon>
-                  {{item.name}} 钱包
-                </div>
-              </van-col>
-              <van-col span="5" offset="4">
-                <div class="bank-balance">
-                  <div>{{symbol}} 余额</div>
-                  <div class="balance-right">{{Math.floor(pair.buy_price * 100) / 100}}</div>
-                </div>
-              </van-col>
-              <van-col span="3">
-                <van-checkbox v-model="icon_index"></van-checkbox>
-              </van-col>
-            </van-row>
+            <van-radio-group v-model="chooseWallet">
+                <van-cell>
+                  <van-row type="flex" justify="space-between" class="walletInfo">
+                    <van-col span="11">
+                      <div  class="BankIcon">
+                        <van-icon :name="item.icon"></van-icon>
+                        {{item.name}} 钱包
+                      </div>
+                    </van-col>
+                    <van-col span="5" offset="4">
+                      <div class="bank-balance">
+                        <div>{{symbol}} 余额</div>
+                        <div class="balance-right">{{Math.floor(pair.buy_price * 100) / 100}}</div>
+                      </div>
+                    </van-col>
+                    <van-col span="3"/>
+                  </van-row>
+                  <van-radio slot="right-icon" :name="icon_index"/>
+                </van-cell>
+            </van-radio-group>
           </div>
         </div>
       </div>
@@ -57,13 +60,16 @@
 </template>
 
 <script>
-import { Icon, Row, Col, Checkbox } from 'vant'
+import { Icon, Row, Col, Checkbox, RadioGroup, Radio, Cell } from 'vant'
 export default {
   components: {
     [Icon.name]: Icon,
     [Row.name]: Row,
     [Col.name]: Col,
-    [Checkbox.name]: Checkbox
+    [Checkbox.name]: Checkbox,
+    [Radio.name]: Radio,
+    [RadioGroup.name]: RadioGroup,
+    [Cell.name]: Cell
   },
   data () {
     return {
@@ -78,8 +84,8 @@ export default {
           icon: 'youzan-shield'
         }
       ],
-      icon_index: 0
-      // symbol: ''
+      icon_index: 0,
+      chooseWallet: ''
     }
   },
   methods: {

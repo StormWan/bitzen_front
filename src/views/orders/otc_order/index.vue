@@ -116,7 +116,7 @@
       </div>
     </div>
     <div class="load" v-if="ifLoading"><van-loading type="spinner" /></div>
-    <div class="bottom" v-else>{{bot}}</div>
+    <div class="bottom" v-else>{{bottomTips}}</div>
   </div>
 </template>
 
@@ -160,14 +160,14 @@ export default {
       this.off = false
       if (this.lists[i].side === 'buy') {
         this.$router.push({
-          name: 'details',
+          name: 'buy-detail',
           params: {
             id: this.lists[i].id
           }
         })
       } else if (this.lists[i].side === 'sell') {
         this.$router.push({
-          name: 'details',
+          name: 'sell-detail',
           params: {
             id: this.lists[i].id
           }
@@ -306,16 +306,18 @@ export default {
   computed: {
     // 获取到的数据在这里渲染到页面
     lists: function () {
-      let that = this
-      let arrByZM = []
-      for (let i = 0; i < that.otcOrderData.length; i++) {
-        let pan = that.otcOrderData[i].status.toString().length >= 2 ? that.otcOrderData[i].status.toString()
-          : that.otcOrderData[i].status.toString() + '0'
-        if (pan.search(that.title_suo) !== -1 && that.otcOrderData[i].status !== this.price && pan !== this.orderStatus) {
-          arrByZM.push(that.otcOrderData[i])
+      if (this.otcOrderData.length !== 0) {
+        let that = this
+        let arrByZM = []
+        for (let i = 0; i < that.otcOrderData.length; i++) {
+          let pan = that.otcOrderData[i].status.toString().length >= 2 ? that.otcOrderData[i].status.toString()
+            : that.otcOrderData[i].status.toString() + '0'
+          if (pan.search(that.title_suo) !== -1 && that.otcOrderData[i].status !== this.price && pan !== this.orderStatus) {
+            arrByZM.push(that.otcOrderData[i])
+          }
         }
-      }
-      return arrByZM
+        return arrByZM
+      } return ''
     },
     /**
      * 检查下单时间情况

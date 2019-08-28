@@ -28,25 +28,21 @@ export default {
   data () {
     return {
       verifyCode: ''
-      // buttonType: 'disabled'
     }
   },
   methods: {
     ...mapMutations({
-      auth: 'account/auth',
-      isPassword: 'account/isPassword'
+      auth: 'account/auth'
     }),
     async onSend () {
       if (this.phone === '' || this.areaCode === '' || this.key === '') {
         this.$router.replace({ name: '/login' })
       } else {
         Toast.loading('加载中...')
-        // const { data } = await this.$api.account.verify({ verify_code: this.verifyCode, key: localStorage.getItem('key') })
         console.log(this.verifyCode)
         console.log(this.key)
         const { data } = await this.$api.account.verify({ verify_code: this.verifyCode, key: this.key })
         Toast.hide()
-        // console.log(localStorage.getItem('key'))
         if (data.code === 200) {
           this.auth({
             type: 'account/auth',
@@ -54,35 +50,28 @@ export default {
             phone: this.phone,
             key: data.data.key
           })
-          // this.$store.commit({ type: 'account/auth', areaCode: this.areaCode, phone: this.phone, key: data.data.key })
           Toast.succeed('验证码已发送')
         } else {
-          // console.log(data)
           Toast.info('请输入验证码')
         }
       }
     },
     submit (code) {
-      // console.log(code)
       this.verifyCode = code
     },
     async login () {
       console.log(this.verifyCode)
       console.log(this.key)
-      // console.log({ key: this.key, verify_code: this.verifyCode })
       const { data } = await this.$api.account.verify({ key: this.key, verify_code: this.verifyCode })
-      // console.log(data)
       if (data.code === 200) {
         localStorage.setItem('token', data.data.token)
         localStorage.setItem('userInfo', JSON.stringify(data.data))
-        // this.isPassword(true)
         if (data.data.is_setup_pin === false) {
           Toast.info('创建密码')
           this.$router.push({ path: 'password' })
         } else this.$router.push({ path: '/' })
       } else {
         Toast.failed(data.desc)
-        // console.log(data)
       }
     }
   },

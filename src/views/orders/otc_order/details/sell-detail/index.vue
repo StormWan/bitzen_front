@@ -511,23 +511,29 @@ export default {
       this.triangle_active = false
     }
   },
-  mounted () {
+  async activated () {
     this.getSellOrderDetail()
     let set = setInterval(() => {
       if (this.data_item) {
         this.getSellOrderDetail()
+        console.log('sell-detail')
       } else {
         clearInterval(set)
       }
     }, 3000)
   },
-  destroyed () {
-    // 离开页面删除计时器
-    this.data_item = false
-    this.$router.push({
-      path: '/'
-    })
+  watch: {
+    '$route' () {
+      this.data_item = false
+    }
   }
+  // destroyed () {
+  //   // 离开页面删除计时器
+  //   this.data_item = false
+  //   this.$router.push({
+  //     path: '/'
+  //   })
+  // }
 }
 </script>
 

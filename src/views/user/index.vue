@@ -99,8 +99,8 @@ export default {
     this.setActiveTab(5)
     let user = JSON.parse(localStorage.getItem('userInfo'))
     this.Sing = false
-    this.user_name = user.full_name
-    this.user_ID = user.identity_num
+    this.user_name = user.user.username// full_name
+    this.user_ID = user.user.id
     this.Exse_none = true
   },
   methods: {

@@ -4,7 +4,7 @@ import api from './api'
 import { Toast } from 'vant'
 import { isNotPC } from './common/utils/browser'
 import { getUrlKey } from './common/utils/regexp/url'
-import VConsole from 'vconsole'
+// import VConsole from 'vconsole'
 
 Vue.use(Router)
 
@@ -287,7 +287,7 @@ router.beforeEach(async (to, from, next) => {
       next() // 进入 home 页面
       return
     }
-    let vconsole = new VConsole()
+    // let vconsole = new VConsole()
     if (isNotPC() === true) {
       console.log(localStorage.getItem('token'))
       console.log(localStorage.getItem('userInfo'))

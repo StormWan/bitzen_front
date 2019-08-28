@@ -29,7 +29,7 @@
         </van-cell-group>
       </van-radio-group>
       <div style="margin: 10px;">
-        <van-button size="large" :class="{active: buttonActive}" @click="submitButton">确认购买</van-button>
+        <van-button size="large" type="info" :disabled="buttonDisable"  @click="submitButton">确认购买</van-button>
       </div>
     </div>
 </template>
@@ -72,7 +72,7 @@ export default {
     return {
       // 付款选项列表
       on_hook: Number,
-      buttonActive: false,
+      buttonDisable: true,
       paymentMethod: '',
       index: 0,
       title: '',
@@ -91,11 +91,11 @@ export default {
      * */
     click_alipay () {
       this.paymentMethod = 'alipay'
-      this.buttonActive = true
+      this.buttonDisable = false
     },
     click_wechat () {
       this.paymentMethod = 'wechat'
-      this.buttonActive = true
+      this.buttonDisable = false
     },
     async click_bank () {
       const { data } = await this.$api.kyc.kyc_get()
@@ -111,7 +111,7 @@ export default {
             this.$router.push({
               path: '/realname_verified'
             })
-            this.buttonActive = true
+            this.buttonDisable = false
           }).catch(() => {
             // on cancel
             console.log('取消')
@@ -125,7 +125,7 @@ export default {
      *  点击提交按钮
      * */
     async submitButton () {
-      if (this.buttonActive) {
+      if (this.buttonDisable === false) {
         if (this.order_side === 'buy') {
           const params = {
             otc_pair: this.order_otc_pair,
@@ -155,10 +155,11 @@ export default {
           console.log('sell: ' + JSON.stringify(params))
           let { data } = await this.$api.otc.orderCreate(params)
           if (data.code === 200) {
+            console.log(data.data)
             const id = data.data.id
             // 判断是否为银行卡选项，如果为银行卡选项，就查看后台是否有收款账号，没有就转入信息页面添加
             if (this.paymentMethod === 'bank') {
-              if (this.data.bank_account_name) {
+              if (this.data.bank_account_name !== null) {
                 this.$router.push({
                   name: 'sell-detail',
                   params: { id: id }
@@ -168,7 +169,7 @@ export default {
               }
             } else if (this.index === 'wechat') {
               // 微信收款时做的事情
-              if (this.data.wechat_name) {
+              if (this.data.wechat_name !== null) {
                 this.$router.push({
                   name: 'sell-detail',
                   params: { id: id }
@@ -179,7 +180,7 @@ export default {
               }
             } else {
               // 支付宝收款做的事情
-              if (this.data.alipay_name) {
+              if (this.data.alipay_name !== null) {
                 this.$router.push({
                   name: 'sell-detail',
                   params: { id: id }
@@ -217,16 +218,9 @@ export default {
       }
       .wechat-tag{
         position: absolute;
-        top: 75%;
+        top: 70%;
         left: 25%;
       }
-    }
-    .van-button{
-      background-color: rgba(0,0,0,.08);
-    }
-    /*支付按钮加颜色*/
-    .active{
-      background-color: #1E90FF;
     }
     .cashier{
       width: 90%;
@@ -239,11 +233,6 @@ export default {
       .top{
         line-height: 50px;
         color: #696969;
-      }
-      /*支付按钮加颜色*/
-      .active{
-        background-color: #32CD32;;
-        color: white;
       }
     }
   }

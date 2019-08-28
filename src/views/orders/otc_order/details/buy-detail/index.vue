@@ -37,6 +37,7 @@
           <van-icon name="clock-o" />
         </span>
         <span>等待支付 {{keepTime}}</span>
+<!--        <span>等待支付<van-count-down :time="timeDown" /></span>-->
       </div>
       <!--支付方式-->
       <div class="method_bos" v-if="item">
@@ -102,6 +103,7 @@
 
 <script>
 import { NavBar, Icon, Popup, Toast, Step, Steps, Dialog, Cell, CellGroup, Button } from 'vant'
+
 import Clipboard from 'clipboard'
 export default {
   components: {
@@ -118,6 +120,7 @@ export default {
   },
   data () {
     return {
+      timeDown: 15 * 60 * 60,
       title: '',
       keepTime: '',
       limitTime: '',
@@ -403,21 +406,19 @@ export default {
   },
   async activated () {
     await this.getBuyOrderDetail()
-    // 设置定时器，每隔2秒获取数据
-    let timer = await setInterval(() => {
-      this.getBuyOrderDetail()
-    }, 4000)
-    // 在离开页面时清楚定时器
-    this.$once('hook:deactivated', () => {
-      clearInterval(timer)
-    })
+    let set = setInterval(() => {
+      if (this.data_item) {
+        this.getBuyOrderDetail()
+        console.log('buy-detail')
+      } else {
+        clearInterval(set)
+      }
+    }, 3000)
   },
-  destroyed () {
-    this.$router.push({
-      path: '/'
-    })
-    // 订单完成取消计时器
-    this.data_item = false
+  watch: {
+    '$route' () {
+      this.data_item = false
+    }
   }
 }
 </script>

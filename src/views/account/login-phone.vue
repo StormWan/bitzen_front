@@ -30,7 +30,7 @@
 import { InputItem, Field, Toast, DropMenu } from 'mand-mobile'
 import { NavBar, Button } from 'vant'
 import { mapMutations } from 'vuex'
-import VConsole from 'vconsole'
+// import VConsole from 'vconsole'
 
 export default {
   name: 'login-phone',
@@ -74,7 +74,7 @@ export default {
       auth: 'account/auth'
     }),
     async submit () {
-      let vconsole = new VConsole()
+      // let vconsole = new VConsole()
       Toast.loading('加载中...')
       console.log(this.phone)
       console.log(this.areaCode)

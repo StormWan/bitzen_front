@@ -219,7 +219,9 @@ export default {
         background: #B22222;
       }
     }
+    p{ padding: 0px; }
     .otc-data-list{
+      height: 59.2px;
       padding: 10px 0px;
       padding-left: 5px;
       font-size: 14px;

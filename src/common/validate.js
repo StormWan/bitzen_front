@@ -39,7 +39,7 @@ let checkCode = function (value) {
     for (let i = 0; i < 17; i++) {
       sum += value[i] * factor[i]
     }
-    if (parity[sum % 11] == code.toUpperCase()) {
+    if (parity[sum % 11] === code.toUpperCase()) {
       return true
     }
   }

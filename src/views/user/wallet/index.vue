@@ -72,7 +72,6 @@
 
 <script>
 import { Icon, Toast, NavBar } from 'vant'
-import { mapState } from 'vuex'
 
 export default {
   data () {
@@ -132,10 +131,7 @@ export default {
         })
       }
       return arrByZM
-    },
-    ...mapState({
-      isHasPassword: state => state.account.is_setup_pin
-    })
+    }
   },
   methods: {
     // 箭头
@@ -196,11 +192,10 @@ export default {
     },
     // 数据获取
     async getWallet () {
-      console.log(this.isHasPassword)
-      if (this.isHasPassword !== true) {
+      const isPassword = JSON.parse(localStorage.getItem('userInfo').is_setup_pin)
+      if (isPassword !== true) {
         Toast('请设置 BlockPay 钱包密码！')
         this.$router.push({ name: 'password' })
-        // this.$router.push({ path: 'password' })
       }
       const { data } = await this.$api.wallet.walletAssets()
       if (data.code === 200) {

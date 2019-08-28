@@ -15,9 +15,11 @@
             <div class="price-bid">
               <div class="logo-Img" v-if="buyLogo"><img :src="buyLogo" alt=""></div>
               <div class="price-title">{{title}}</div>
-              <div class="price-bid">￥{{buyPrice}}/${{bestBuyPrice}}</div>
+              <div class="price-bid">￥{{buyPrice}} / ${{bestBuyPrice}}</div>
             </div>
-            <div class="price-arrival">预计到账:{{estimatedAsset}}</div>
+            <div class="price-arrival" v-if="this.otcPair !== null">
+              预计到账: {{estimatedAsset}} {{this.otcPair.asset.symbol}}
+            </div>
           </div>
         <p :class="{active: tipsColor}">{{buyTips}}</p>
             <van-field
@@ -56,7 +58,7 @@
               @delete="onDeleteBuyAmountKeyBoard"
             />
         <div style="margin: 0 10px;">
-          <van-button type="primary" size="large" v-on:click="submitOrder">提交订单</van-button>
+          <van-button type="primary" size="large" :disabled="disabledButton" v-on:click="submitOrder">提交订单</van-button>
         </div>
       </van-tab>
 
@@ -66,9 +68,9 @@
           <div class="price-bid">
             <div class="logo-Img" v-if="sellLogo"><img :src="sellLogo" alt=""></div>
             <div class="price-title">{{title}}</div>
-            <div class="price-bid" style="color: red">￥{{sellPrice}}/${{bestSellPrice}}</div>
+            <div class="price-bid" style="color: red">￥{{sellPrice}} / ${{bestSellPrice}}</div>
           </div>
-          <div class="price-arrival">预计到账:{{estimatedCny}}</div>
+          <div class="price-arrival">预计到账:{{estimatedCny}} CNY</div>
         </div>
         <p :class="{active: tipsColor}">{{sellTips}}</p>
           <!--购买金额-->
@@ -108,7 +110,7 @@
           @delete="onDeleteSellAmountKeyBoard"
         />
         <div style="margin: 0 10px;">
-          <van-button type="danger" size="large" v-on:click="submitOrder">提交订单</van-button>
+          <van-button type="danger" size="large" :disabled="disabledButton" v-on:click="submitOrder">提交订单</van-button>
         </div>
       </van-tab>
     </van-tabs>
@@ -120,7 +122,7 @@
 </template>
 
 <script>
-import { Tab, Tabs, NavBar, Button, NumberKeyboard, Field, Toast, Row, Col } from 'vant'
+import { Tab, Tabs, NavBar, Button, NumberKeyboard, Field, Toast, Row, Col, Dialog } from 'vant'
 import Footer from './footer'
 import Wallet from '../../../components/wallet_mode'
 import { mapMutations } from 'vuex'
@@ -137,6 +139,7 @@ export default {
     [Footer.name]: Footer,
     [Row.name]: Row,
     [Col.name]: Col,
+    [Dialog.name]: Dialog,
     'otc_wallet': Wallet
   },
   data () {
@@ -153,7 +156,8 @@ export default {
       sellArrivalKeyboardShow: false,
       sellKeyboardShow: false,
       walletData: '', // 钱包的数据
-      tipsColor: false
+      tipsColor: false,
+      disabledButton: false
     }
   },
   methods: {
@@ -185,6 +189,9 @@ export default {
       this.clearOrder()
       this.activeIndex = index
     },
+    /**
+     * 控制数字键盘的切换
+     * */
     clickBuyfield () {
       this.buyKeyboardShow = true
       this.buyArrivalKeyboardShow = false
@@ -201,11 +208,20 @@ export default {
       this.sellKeyboardShow = false
       this.sellArrivalKeyboardShow = true
     },
+    /**
+     * 控制提示的颜色
+     * */
     changeTipsColor () {
-      if (this.buyTips === '输入' + this.placeholderBuy + '超出范围' ||
-      this.sellTips === '输入' + this.placeholderSell + '超出范围') {
+      if (this.buyTips === 'CNY 最小下单 ' + this.otcBuyMin + ',最大下单 ' + this.otcBuyMax +
+        '。输入 ' + this.placeholderBuy + ' 超出范围' ||
+      this.sellTips === 'CNY 最小下单 ' + this.otcSellMin + ',最大下单 ' + this.otcSellMax +
+        '。输入 ' + this.placeholderSell + ' 超出范围') {
+        this.disabledButton = true
         this.tipsColor = true
-      } else this.tipsColor = false
+      } else {
+        this.disabledButton = false
+        this.tipsColor = false
+      }
     },
     /**
      * 限制第一个输入框的输入
@@ -217,7 +233,6 @@ export default {
       if (this.amountBuy.toString().split('.')[1]) {
         if (this.amountBuy.toString().split('.')[1].length > 2) { Toast('只能输入两位小数！') }
       }
-      console.log(this.amountBuy.toString().match(/^\d*(\.?\d{0,2})/g)[0])
       this.amountBuy = this.amountBuy.toString().match(/^\d*(\.?\d{0,2})/g)[0] || null
       this.buyAmountArrival = (this.amountBuy / this.buyPrice).toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
       this.changeTipsColor()
@@ -333,54 +348,27 @@ export default {
      * */
     submitOrder () {
       // quote
-      if (this.checkAmountBuy(this.amountBuy) === true || this.checkAmountSell(this.amountSell)) { // 验证输入数据是否超出范围
-        const side = this.activeIndex === 0 ? 'buy' : 'sell'
-        const amount = this.activeIndex === 0 ? this.amountBuy : this.amountSell
-        const price = this.activeIndex === 0 ? this.buyPrice : this.sellPrice
-        if (side === 'buy') {
-          this.setBuyOrder({
-            otc_pair: this.otcPair.id,
-            currency_amount: amount,
-            price: price,
-            payment_method: ''
-          })
-        } else {
-          this.setSellOrder({
-            otc_pair: this.otcPair.id,
-            asset_amount: amount,
-            price: price,
-            payment_method: ''
-          })
-        }
-        this.$router.push({
-          path: '/payment'
+      const side = this.activeIndex === 0 ? 'buy' : 'sell'
+      const amount = this.activeIndex === 0 ? this.amountBuy : this.amountSell
+      const price = this.activeIndex === 0 ? this.buyPrice : this.sellPrice
+      if (side === 'buy') {
+        this.setBuyOrder({
+          otc_pair: this.otcPair.id,
+          currency_amount: amount,
+          price: price,
+          payment_method: ''
+        })
+      } else {
+        this.setSellOrder({
+          otc_pair: this.otcPair.id,
+          asset_amount: amount,
+          price: price,
+          payment_method: ''
         })
       }
-    },
-    /**
-     * 检测输入数据是否超出范围
-     * */
-    checkAmountBuy (amount) {
-      if (amount < this.buyMinCny & amount !== '') {
-        this.amount = ''
-        Toast('输入数据超出范围！请再次输入')
-        return false
-      } else if (amount > this.buyMaxCny & amount !== ''){
-        this.amount = ''
-        Toast('输入数据超出范围！请再次输入')
-        return false
-      } else return true
-    },
-    checkAmountSell (amount) {
-      if (amount < this.sellMinCny & amount !== '') {
-        this.amountSell = ''
-        Toast('输入数据超出范围！请再次输入')
-        return false
-      } else if (amount > this.sellMaxCny & amount !== '') {
-        this.amountSell = ''
-        Toast('输入数据超出范围！请再次输入')
-        return false
-      } else return true
+      this.$router.push({
+        path: '/payment'
+      })
     },
     successfulPayment () {
       if (this.data.status !== 22) {
@@ -420,26 +408,57 @@ export default {
   },
   // 计算
   computed: {
+    /**
+     * otc 买入的消息提示 tips,如果超出范围，直接按钮不可用使用
+     * */
+    otcBuyMax () {
+      if (this.buyPrice !== null) {
+        return (this.otcPair.buy_max * this.buyPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0]
+      } else return ''
+    },
+    otcBuyMin () {
+      if (this.buyPrice !== null) {
+        return (this.otcPair.buy_min * this.buyPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0]
+      } else return ''
+    },
     buyTips () {
       if (this.otcPair !== null) {
-        if (parseInt(this.buyAmountArrival) > this.buyPrice) {
-          return '输入' + this.placeholderBuy + '超出范围'
+        if (parseFloat(this.amountBuy) > parseFloat(this.otcBuyMax) ||
+          parseFloat(this.amountBuy) < parseFloat(this.otcBuyMin)) {
+          return 'CNY 最小下单 ' + this.otcBuyMin + ',最大下单 ' + this.otcBuyMax +
+            '。输入 ' + this.placeholderBuy + ' 超出范围'
         } else {
-          return 'CNY 最小下单' + (this.otcPair.buy_min * this.buyPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0] +
-            ',最大下单' + (this.otcPair.buy_max * this.buyPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0]
+          return 'CNY 最小下单' + this.otcBuyMin + ',最大下单' + this.otcBuyMax
         }
       } else return '资金池不足'
+    },
+    /**
+     * otc 卖出的消息提示 tips,如果超出范围，直接按钮不可用使用
+     * */
+    otcSellMax () {
+      if (this.buyPrice !== null) {
+        return (this.otcPair.sell_max * this.sellPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0]
+      } else return ''
+    },
+    otcSellMin () {
+      if (this.buyPrice !== null) {
+        return (this.otcPair.sell_min * this.sellPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0]
+      } else return ''
     },
     sellTips () {
       if (this.otcPair !== null) {
-        if (parseInt(this.sellAmountArrival) > this.sellPrice) {
-          return '输入' + this.placeholderSell + '超出范围'
+        if (parseFloat(this.sellAmountArrival) > parseFloat(this.otcSellMax) ||
+          parseFloat(this.sellAmountArrival) < parseFloat(this.otcSellMin)) {
+          return 'CNY 最小下单 ' + this.otcSellMin + ',最大下单 ' + this.otcSellMax +
+            '。输入 ' + this.placeholderSell + ' 超出范围'
         } else {
-          return 'CNY 最小下单' + (this.otcPair.sell_min * this.sellPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0] +
-            ',最大下单' + (this.otcPair.sell_max * this.sellPrice).toString().match(/^\d*(\.?\d{0,2})/g)[0]
+          return 'CNY 最小下单 ' + this.otcSellMin + ',最大下单' + this.otcSellMax
         }
       } else return '资金池不足'
     },
+    /**
+     * 输入框的 placeholder
+     * */
     placeholderBuy () {
       return this.otcPair === null ? '资金池不足' : 'CNY 数量'
     },

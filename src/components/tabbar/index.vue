@@ -49,7 +49,7 @@ export default {
         this.setActiveTab(value)
         // this.$store.commit('tabbar/setActiveTab', value)
       }
-    },
+    }
     // bb tabbar
   },
   methods: {
