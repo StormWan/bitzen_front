@@ -33,13 +33,15 @@
         </div>
       </div>
     </div>
+    <div class="explain">
+      <p>支付时请不要做任何备注</p>
+      <p>交易涉及的账户必须是实名本人账号</p>
+    </div>
     <!--时间倒计时-->
     <div class="down" v-if="item">
-        <span>
-          <van-icon name="clock-o" />
-        </span>
-      <span>等待支付<van-count-down  :time="CountDownTime" @finish="countTimeFinish"/></span>
-      <!--      <span>等待支付 {{// keepTime}}</span>-->
+      <span><van-icon name="clock-o" size="22px" color="#00CED1"/></span>
+      <span>等待支付</span>
+      <van-count-down  :time="CountDownTime" @finish="countTimeFinish"/>
     </div>
     <!--支付方式-->
     <div class="method_bos" v-if="item">
@@ -78,18 +80,14 @@
     <div class="afterPayment" v-else>
       <div class="status">
         <van-steps direction="vertical" :active="active">
-          <van-step>
-            <h3>{{transferStatus}}</h3>
-          </van-step>
-          <van-step>
-            <h3>{{releaseStatus}}</h3>
-          </van-step>
-          <van-step>
-            <h3>完成</h3>
-          </van-step>
+          <van-step><h3>{{transferStatus}}</h3></van-step>
+          <van-step><h3>{{releaseStatus}}</h3></van-step>
+          <van-step><h3>完成</h3></van-step>
         </van-steps>
       </div>
-      <div v-if="sellSuccess" class="but_success" @click="successfulPayment">确认收到款项</div>
+      <div style="margin: 0px 10px;">
+        <van-button type="info" @click="successfulPayment" size="large" v-if="sellSuccess">确认收到款项</van-button>
+      </div>
     </div>
     <!--付款方式钱包-->
       <sell_wallet :pair="walletPair" @wallet="walletMessage" :index="1" :symbol="symbol"></sell_wallet>
@@ -247,6 +245,9 @@ export default {
       } else return this.data.otc_pair.pair
     }
   },
+  mounted () {
+    this.status()
+  },
   methods: {
     async getSellOrderDetail () {
       const { data } = await this.$api.otc.orderDetail(this.$route.params.id)
@@ -297,14 +298,17 @@ export default {
       }
     },
     // 判断付款状态
-    status () {
+    async status () {
       // 判断状态码
       if (this.data.status === 0) {
         this.item = true
+        this.sellSuccess = false
+        this.delete_cre = false
         // this.countDown
       } else if (this.data.status === 1) {
         this.item = true
         this.transferStatus = '已确认转账'
+        this.delete_cre = false
       } else if (this.data.status === 2) {
         this.item = false
         this.active = 2
@@ -313,26 +317,31 @@ export default {
         this.sellSuccess = false
         // 订单完成停止计时器
         this.data_item = false
+        this.delete_cre = false
       } else if (this.data.status === 21) {
         this.active = 1
         this.item = false
         this.transferStatus = '已确认转账'
+        this.delete_cre = false
       } else if (this.data.status === 22) {
         this.active = 1
         this.transferStatus = '已确认转账'
         this.releaseStatus = '承兑商已经转账'
         this.sellSuccess = true
+        this.delete_cre = false
       } else if (this.data.status === 23) {
         this.active = 1
         this.item = false
         this.transferStatus = '已确认转账'
         this.releaseStatus = '等待承兑商释确认转账'
         this.sellSuccess = true
+        this.delete_cre = false
       } else if (this.data.status === 24) {
         this.active = 1
         this.transferStatus = '已确认转账'
         this.releaseStatus = '承兑商确认转账'
         this.sellSuccess = true
+        this.delete_cre = false
       } else if (this.data.status === 30) {
         this.delete_cre = true
         this.sellSuccess = true
@@ -351,7 +360,7 @@ export default {
      * 返回上一页
      * */
     onClickLeft () {
-      this.$router.go(-1)
+      this.$router.push({ name: 'orders' })
     },
     // 弹窗提示
     showTips () {
@@ -458,6 +467,7 @@ export default {
         // this.item = false
         this.delete_cre = true
         this.flag = true
+        this.sellSuccess = false
         Toast('取消订单成功')
       }).catch(() => {
         // on cancel
@@ -557,23 +567,31 @@ export default {
         }
       }
     }
+    /*提示说明*/
+    .explain{
+      text-align: center;
+      padding: 14px 0;
+      p{
+        font-size: 20px;
+        color: #FA8072;
+        padding: 5px;
+      }
+    }
     /*时间倒计时*/
     .down{
       text-align: center;
-      line-height: 70px;
+      line-height: 40px;
       font-size: 18px;
       color: #696969;
+      padding-bottom: 10px;
       span{
         vertical-align: middle;
         i{
           vertical-align: middle;
-          font-size: 22px;
-          color: #00CED1;
+          margin-right: 10px;
         }
       }
-      span:nth-child(1){
-        margin-right: 12px;
-      }
+      .van-count-down { font-size: 18px; }
     }
     /*取消*/
     .afterPayment{
@@ -582,26 +600,10 @@ export default {
       border-bottom: 15px solid rgba(0,0,0,.05);
       border-top: 15px solid rgba(0,0,0,.05);
       .status{
-        width: 60%;
+        width: 55%;
         margin: 0 auto;
         padding: 15px 0;
         text-align: left;
-        h3{
-          line-height: 25px;
-          font-size: 14px;
-          text-align: justify;
-        }
-        .van-step--vertical {
-          .van-step__circle{
-            top: 21px;
-          }
-          .van-step__line{
-            top: 21px;
-          }
-        }
-        .van-step--vertical.van-step--process .van-icon{
-          top: 16px;
-        }
       }
       span{
         vertical-align: middle;
@@ -627,13 +629,13 @@ export default {
     }
     /*支付方式*/
     .method_bos{
-      width: 85%;
+      width: 90%;
       margin: 0 auto;
       line-height: 45px;
       padding-bottom: 20px;
       /* 支付信息 */
       .van-cell{
-        padding: auto 20px;
+        padding: 10px;
         font-size: 16px;
         border-bottom: 0.02rem solid rgba(0, 0, 0, 0.05);
         .sell-payment-box{
@@ -680,173 +682,7 @@ export default {
         }
       }
     }
-    /*付款方式*/
-    .wallet_box{
-      padding: 15px 0 0 0;
-      margin-top: 15px;
-      font-size: 15px;
-      .wallet{
-        width: 90%;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 20px 0 20px;
-        /*全局*/
-        .Bank,.balance{
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        /*银行*/
-        .Bank{
-          color: #696969;
-          .left{
-            font-size: 20px;
-            color: #00BFFF;
-          }
-          .right{
-            font-size: 15px;
-            padding-left: 5px;
-          }
-        }
-        /*余额*/
-        .balance{
-          .left{
-            font-size: 13px;
-            color: #999;
-            text-align: right;
-            div:nth-last-child(1){
-              padding-top: 5px;
-            }
-          }
-          .right{
-            border: 10px solid transparent;
-            border-top-color: black;
-            margin-left: 10px;
-            -webkit-transition: .1s;
-            -moz-transition: .1s;
-            -ms-transition: .1s;
-            -o-transition: .1s;
-            transition: .1s;
-          }
-          .active{
-            border: 10px solid transparent;
-            border-bottom-color: black;
-          }
-        }
-      }
-    }
-    /*付款方式钱包*/
-    .dis_but{
-      position: fixed;
-      z-index: 1001;
-      bottom: 0;
-      background-color: white;
-      width: 100%;
-      text-align: center;
-      -webkit-transition: .3s;
-      -moz-transition: .3s;
-      -ms-transition: .3s;
-      -o-transition: .3s;
-      transition: .3s;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      height: 0;
-      .title{
-        text-align: center;
-        line-height: 50px;
-        font-size: 18px;
-        border-bottom: 1px solid rgba(0,0,0,.05);
-      }
-      /*隐藏滚轮条*/
-      .Choice::-webkit-scrollbar {
-        display: none;
-      }
-      /*钱包列表*/
-      .Choice{
-        height: 100%;
-        overflow: auto;
-        .wallet_box{
-          font-size: 15px;
-          margin: 0;
-          padding: 6px 0;
-          /*padding: 0;*/
-          .wallet{
-            width: 90%;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 5px 20px;
-            /*全局*/
-            .Bank,.balance{
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              color: #696969;
-            }
-            /*付款*/
-            .Bank{
-              .left{
-                font-size: 20px;
-                color: #00BFFF;
-              }
-              .right{
-                font-size: 15px;
-                padding-left: 5px;
-              }
-            }
-            /*余额*/
-            .balance{
-              .left{
-                font-size: 13px;
-                color: #999;
-                text-align: right;
-                div:nth-last-child(1){
-                  padding-top: 5px;
-                }
-              }
-              .right{
-                border: none;
-                margin-left: 5px;
-                -webkit-transition: .1s;
-                -moz-transition: .1s;
-                -ms-transition: .1s;
-                -o-transition: .1s;
-                transition: .1s;
-                width: 30px;
-                font-size: 0px;
-                color: #32CD32;
-              }
-              .active{
-                font-size: 20px;
-              }
-            }
-          }
-        }
-      }
-    }
-    /*弹出钱包选择框*/
-    .display{
-      height: 40%;
-    }
-    /*遮罩层*/
-    .mask{
-      left: 0;
-      top: 0;
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,.3);
-      z-index: 1000;
-    }
     .footTips{
-      /*font-size: 13px;*/
-      /*width: 90%;*/
-      /*margin: 0 auto;*/
-      /*padding: 38px 0;*/
-      /*color: #999;*/
       font-size: 13px;
       padding: 0.76rem 0;
       color: #999;
@@ -872,7 +708,6 @@ export default {
         }
         div{
           text-indent: 2em;
-          /*margin: 8px 0;*/
           line-height: 22px;
         }
       }

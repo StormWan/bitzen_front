@@ -33,11 +33,9 @@
       </div>
       <!--时间倒计时-->
       <div class="down" v-if="item">
-        <span>
-          <van-icon name="clock-o" />
-        </span>
-<!--        <span>等待支付 {{// keepTime}}</span>-->
-        <span>等待支付<van-count-down  :time="CountDownTime" @finish="countTimeFinish"/></span>
+        <span><van-icon name="clock-o" size="22px" color="#00CED1"/></span>
+        <span>等待支付</span>
+       <van-count-down  :time="CountDownTime" @finish="countTimeFinish"/>
       </div>
       <!--支付方式-->
       <div class="method_bos" v-if="item">
@@ -78,15 +76,9 @@
       <div class="afterPayment" v-else>
         <div class="status">
           <van-steps direction="vertical" :active="active">
-            <van-step>
-              <h3>{{transferStatus}}</h3>
-            </van-step>
-            <van-step>
-              <h3>{{releaseStatus}}</h3>
-            </van-step>
-            <van-step>
-              <h3>完成</h3>
-            </van-step>
+            <van-step><h3> {{transferStatus}} </h3></van-step>
+            <van-step><h3> {{releaseStatus}} </h3></van-step>
+            <van-step><h3> 完成</h3> </van-step>
           </van-steps>
         </div>
       </div>
@@ -303,7 +295,7 @@ export default {
      * 返回上一页
      * */
     onClickLeft () {
-      this.$router.go(-1)
+      this.$router.push({ name: 'orders' })
     },
     /**
      *  支付信息复制
@@ -417,30 +409,28 @@ export default {
     /*提示说明*/
     .explain{
       text-align: center;
-      line-height: 30px;
-      padding: 13px 0;
-      color: #FA8072;
-      p:nth-last-child(1){
-        font-size: 13px;
+      padding: 14px 0;
+      p{
+        font-size: 20px;
+        color: #FA8072;
+        padding: 5px;
       }
     }
     /*时间倒计时*/
     .down{
       text-align: center;
-      line-height: 70px;
+      line-height: 40px;
       font-size: 18px;
       color: #696969;
+      padding-bottom: 10px;
       span{
         vertical-align: middle;
         i{
           vertical-align: middle;
-          font-size: 22px;
-          color: #00CED1;
+          margin-right: 10px;
         }
       }
-      span:nth-child(1){
-        margin-right: 12px;
-      }
+      .van-count-down { font-size: 18px; }
     }
     /*取消*/
     .afterPayment{
@@ -448,27 +438,11 @@ export default {
       line-height: 50px;
       border-bottom: 15px solid rgba(0,0,0,.05);
       border-top: 15px solid rgba(0,0,0,.05);
-      .status{
+      .status {
         width: 55%;
         margin: 0 auto;
         padding: 15px 0;
         text-align: left;
-        h3{
-          line-height: 25px;
-          font-size: 15px;
-          text-align: justify;
-        }
-        .van-step--vertical {
-          .van-step__circle{
-            top: 21px;
-          }
-          .van-step__line{
-            top: 21px;
-          }
-        }
-        .van-step--vertical.van-step--process .van-icon{
-          top: 16px;
-        }
       }
       span{
         vertical-align: middle;
@@ -486,7 +460,7 @@ export default {
     }
     /*支付方式*/
     .method_bos{
-      width: 85%;
+      width: 90%;
       margin: 0 auto;
       line-height: 45px;
       /*用户付款后的信息*/
@@ -494,7 +468,7 @@ export default {
         display: flex;
         border-bottom: 1px solid rgba(0,0,0,.05);
         justify-content: space-between;
-        padding: 0 5px;
+        /*padding: 0 5px;*/
         .style{
           display: flex;
           align-items: center;

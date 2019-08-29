@@ -40,9 +40,7 @@ export default {
       ]
     }
   },
-  mounted () {
-    // document.body.scrollTop = 0
-    // document.documentElement.scrollTop = 0
+  async activated () {
     this.setActiveTab(4)
   },
   methods: {

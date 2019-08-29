@@ -246,8 +246,6 @@ export default {
         // 删除掉字符串最后一个
         this.amountBuy = this.amountBuy.substring(0, this.amountBuy.length - 1)
         this.buyAmountArrival = (this.amountBuy / this.buyPrice).toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
-        // console.log(this.buyAmountArrival)
-        // if (parseInt(this.buyAmountArrival) === 0) this.buyAmountArrival = ''
         this.changeTipsColor()
         if (this.amountBuy.length === 0) {
           flag = false
@@ -327,7 +325,6 @@ export default {
         this.sellAmountArrival = this.sellAmountArrival.toString().match(/^\d*(\.?\d{0,4})/g)[0] || null
         this.amountSell = this.sellCny
         this.changeTipsColor()
-        // this.checkSellArrival()
       }
     },
     onDeleteSellAmountKeyBoard () {
@@ -347,28 +344,38 @@ export default {
      * 下单按钮，保存数据到state
      * */
     submitOrder () {
-      // quote
-      const side = this.activeIndex === 0 ? 'buy' : 'sell'
-      const amount = this.activeIndex === 0 ? this.amountBuy : this.amountSell
-      const price = this.activeIndex === 0 ? this.buyPrice : this.sellPrice
-      if (side === 'buy') {
-        this.setBuyOrder({
-          otc_pair: this.otcPair.id,
-          currency_amount: amount,
-          price: price,
-          payment_method: ''
-        })
+      if (this.amountBuy === '' || this.amountBuy === 0 || this.amountSell === '' || this.amountSell === 0 ||
+      this.buyAmountArrival === '' || this.buyAmountArrival === 0 || this.sellAmountArrival === '' ||
+      this.sellAmountArrival === 0) {
+        Toast('请正确输入信息！')
       } else {
-        this.setSellOrder({
-          otc_pair: this.otcPair.id,
-          asset_amount: amount,
-          price: price,
-          payment_method: ''
+        // quote
+        const side = this.activeIndex === 0 ? 'buy' : 'sell'
+        const amount = this.activeIndex === 0 ? this.amountBuy : this.amountSell
+        const price = this.activeIndex === 0 ? this.buyPrice : this.sellPrice
+        if (side === 'buy') {
+          this.setBuyOrder({
+            otc_pair: this.otcPair.id,
+            currency_amount: amount,
+            price: price,
+            payment_method: ''
+          })
+        } else {
+          this.setSellOrder({
+            otc_pair: this.otcPair.id,
+            asset_amount: amount,
+            price: price,
+            payment_method: ''
+          })
+        }
+        this.amountBuy = ''
+        this.amountSell = ''
+        this.sellAmountArrival = ''
+        this.buyAmountArrival = ''
+        this.$router.push({
+          path: '/payment'
         })
       }
-      this.$router.push({
-        path: '/payment'
-      })
     },
     successfulPayment () {
       if (this.data.status !== 22) {

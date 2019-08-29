@@ -105,11 +105,11 @@ export default {
     [Icon.name]: Icon,
     [NavBar.name]: NavBar
   },
-  async mounted () {
+  async activated () {
     await this.getWallet()
   },
   computed: {
-    lists: function () {
+    lists () {
       let _this = this
       let arrByZM = []
       for (let i = 0; i < this.wallet_data.length; i++) {
@@ -192,7 +192,7 @@ export default {
     },
     // 数据获取
     async getWallet () {
-      const isPassword = JSON.parse(localStorage.getItem('userInfo').is_setup_pin)
+      const isPassword = JSON.parse(localStorage.getItem('userInfo')).is_setup_pin
       if (isPassword !== true) {
         Toast('请设置 BlockPay 钱包密码！')
         this.$router.push({ name: 'password' })

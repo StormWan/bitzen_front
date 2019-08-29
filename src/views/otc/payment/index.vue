@@ -60,6 +60,8 @@ export default {
     })
   },
   async activated () {
+    this.paymentMethod = 'bank'
+    if (this.paymentMethod === 'bank') { this.click_bank() }
     if (sessionStorage.getItem('page') === '0') {
       this.title = '付款方式'
     } else {
@@ -73,7 +75,7 @@ export default {
       // 付款选项列表
       on_hook: Number,
       buttonDisable: true,
-      paymentMethod: '',
+      paymentMethod: 'bank',
       index: 0,
       title: '',
       data: []
