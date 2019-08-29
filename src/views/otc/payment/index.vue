@@ -138,11 +138,8 @@ export default {
           let { data } = await this.$api.otc.orderCreate(params)
           if (data.code === 200) {
             const id = data.data.id
-            // 创建订单时的事情
-            this.$router.push({
-              name: 'buy-detail',
-              params: { id: id }
-            })
+            this.data = data.data.merchant
+            this.checkPaymentAccount(id, 'buy-detail')
           } else { Toast('请求错误，请再次重试') }
         } else if (this.order_side === 'sell') {
           const params = {
@@ -155,42 +152,49 @@ export default {
           console.log('sell: ' + JSON.stringify(params))
           let { data } = await this.$api.otc.orderCreate(params)
           if (data.code === 200) {
-            console.log(data.data)
+            // console.log(data.data.merchant)
             const id = data.data.id
+            this.data = data.data.merchant
             // 判断是否为银行卡选项，如果为银行卡选项，就查看后台是否有收款账号，没有就转入信息页面添加
-            if (this.paymentMethod === 'bank') {
-              if (this.data.bank_account_name !== null) {
-                this.$router.push({
-                  name: 'sell-detail',
-                  params: { id: id }
-                })
-              } else {
-                this.$router.push({ path: '/payment-method' })
-              }
-            } else if (this.index === 'wechat') {
-              // 微信收款时做的事情
-              if (this.data.wechat_name !== null) {
-                this.$router.push({
-                  name: 'sell-detail',
-                  params: { id: id }
-                })
-              } else {
-                // 如果没有收款账号，跳转填入信息页面
-                this.$router.push({ path: '/payment-method' })
-              }
-            } else {
-              // 支付宝收款做的事情
-              if (this.data.alipay_name !== null) {
-                this.$router.push({
-                  name: 'sell-detail',
-                  params: { id: id }
-                })
-              } else {
-                // 如果没有收款账号，跳转填入信息页面
-                this.$router.push({ path: '/payment-method' })
-              }
-            }
+            this.checkPaymentAccount(id, 'sell-detail')
           } else { Toast('请求错误，请再次重试！') }
+        }
+      }
+    },
+    /**
+     * 检查后台是否有账号
+     * */
+    checkPaymentAccount (id, otcOrder) {
+      if (this.paymentMethod === 'bank') {
+        if (this.data.bank_account_name !== null) {
+          this.$router.push({
+            name: otcOrder,
+            params: { id: id }
+          })
+        } else {
+          this.$router.push({ path: '/payment-method' })
+        }
+      } else if (this.index === 'wechat') {
+        // 微信收款时做的事情
+        if (this.data.wechat_account !== null) {
+          this.$router.push({
+            name: otcOrder,
+            params: { id: id }
+          })
+        } else {
+          // 如果没有收款账号，跳转填入信息页面
+          this.$router.push({ path: '/payment-method' })
+        }
+      } else {
+        // 支付宝收款做的事情
+        if (this.data.alipay_account !== null) {
+          this.$router.push({
+            name: otcOrder,
+            params: { id: id }
+          })
+        } else {
+          // 如果没有收款账号，跳转填入信息页面
+          this.$router.push({ path: '/payment-method' })
         }
       }
     }

@@ -151,7 +151,8 @@ export default {
       status: '',
       ifLoading: true,
       bottomTips: '',
-      createTime: ''
+      createTime: '',
+      newtime: ''
     }
   },
   methods: {
@@ -296,8 +297,8 @@ export default {
       this.otcOrderData.forEach((i) => {
         // 下单时间
         this.createTime = new Date(i.created)
-        if (this.checkTime <= 3) {
-        } else {
+        // console.log(this.createTime)
+        if (this.checkTime !== 1) {
           this.$api.otc.orderUpdate(i.id, { op_type: 'user_cancel_order' })
         }
       })
@@ -305,7 +306,7 @@ export default {
   },
   computed: {
     // 获取到的数据在这里渲染到页面
-    lists: function () {
+    lists () {
       if (this.otcOrderData.length !== 0) {
         let that = this
         let arrByZM = []
@@ -320,24 +321,24 @@ export default {
       } return ''
     },
     /**
-     * 检查下单时间情况
+     * 检查下单时间情况,获取每个订单的创建时间 createtime，然后也获取进入这个页面的当前时间newtime。
+     * 将这两个时间互减，获取分钟数和秒数，查看是否已经到时间，如果已经到时间就将订单切换到别的地方
      * */
     checkTime () {
-      let itemHours = this.createTime.getHours > 9 ? this.createTime.getHours : '0' + this.createTime.getHours
-      let itemMinutes = this.createTime.getMinutes > 9 ? this.createTime.getMinutes : '0' + this.createTime.getMinutes
-      let itemDate = this.createTime.getDate > 9 ? this.createTime.getDate : '0' + this.createTime.getDate
-      let itemMonth = (this.createTime.getMonth + 1) > 9
-        ? (this.createTime.getMonth + 1) : '0' + (this.createTime.getMonth + 1)
-      let set = this.createTime.getFullYear + '' + itemMonth + itemDate + itemHours + itemMinutes
-      // 本地时间
-      let date = new Date()
-      let itemSetHours = date.getHours > 9 ? date.getHours : '0' + date.getHours
-      let itemSetMinutes = date.getMinutes > 9 ? date.getMinutes : '0' + date.getMinutes
-      let itemSetDate = date.getDate > 9 ? date.getDate : '0' + date.getDate
-      let itemSetMonth = (date.getMonth + 1) > 9 ? (date.getMonth + 1) : '0' + (date.getMonth + 1)
-      let itemSet = date.getFullYear + '' + itemSetMonth + itemSetDate + itemSetHours + itemSetMinutes
-      // 监听事件否过了下单期
-      return itemSet - set
+      const newtime = new Date()
+      const counttime = newtime.getTime() - this.createTime.getTime()
+      // 计算出相差分钟数
+      const minutes = Math.floor(((counttime % (24 * 3600 * 1000)) % (3600 * 1000)) / (60 * 1000))
+      // 计算出相差秒数
+      const seconds = Math.round((((counttime % (24 * 3600 * 1000)) % (3600 * 1000)) % (60 * 1000)) / 1000)
+      // console.log(newtime)
+      // console.log(this.createTime)
+      // console.log('相差' + minutes + '分钟，' + '相差' + seconds + '秒')
+      if (minutes < 15) {
+        return 1
+      } else if (minutes === 0 && seconds === 0) {
+        return 1
+      } else return 0
     }
   },
   components: {

@@ -36,8 +36,8 @@
         <span>
           <van-icon name="clock-o" />
         </span>
-        <span>等待支付 {{keepTime}}</span>
-<!--        <span>等待支付<van-count-down :time="timeDown" /></span>-->
+<!--        <span>等待支付 {{// keepTime}}</span>-->
+        <span>等待支付<van-count-down  :time="CountDownTime" @finish="countTimeFinish"/></span>
       </div>
       <!--支付方式-->
       <div class="method_bos" v-if="item">
@@ -102,7 +102,7 @@
 </template>
 
 <script>
-import { NavBar, Icon, Popup, Toast, Step, Steps, Dialog, Cell, CellGroup, Button } from 'vant'
+import { NavBar, Icon, Popup, Toast, Step, Steps, Dialog, Cell, CellGroup, Button, CountDown } from 'vant'
 
 import Clipboard from 'clipboard'
 export default {
@@ -116,14 +116,14 @@ export default {
     [Dialog.name]: Dialog,
     [Cell.name]: Cell,
     [CellGroup.name]: CellGroup,
-    [Button.name]: Button
+    [Button.name]: Button,
+    [CountDown.name]: CountDown
   },
   data () {
     return {
       timeDown: 15 * 60 * 60,
       title: '',
       keepTime: '',
-      limitTime: '',
       flag: false,
       mode: [
         {
@@ -167,7 +167,8 @@ export default {
       transferStatus: '待转账',
       releaseStatus: '等待承兑商释放USDT',
       // 数据状态
-      data_item: true
+      data_item: true,
+      newtime: ''
     }
   },
   computed: {
@@ -175,6 +176,24 @@ export default {
      * 获取当前时间
      * */
     currentTime () { return new Date(this.data.created) },
+    /**
+     * 获取下单时间和进入这个页面的时间，计算出需要倒计时多久时间
+     * */
+    CountDownTime () {
+      const counttime = this.newtime.getTime() - this.currentTime.getTime()
+      // 计算出相差分钟数
+      const minutes = Math.floor(((counttime % (24 * 3600 * 1000)) % (3600 * 1000)) / (60 * 1000))
+      // 计算出相差秒数
+      const seconds = Math.round((((counttime % (24 * 3600 * 1000)) % (3600 * 1000)) % (60 * 1000)) / 1000)
+      console.log(this.newtime)
+      console.log(this.currentTime)
+      console.log('相差' + minutes + '分钟，' + '相差' + seconds + '秒')
+      if (minutes < 15) {
+        return 15 * 60 * 1000 - counttime
+      } else if (minutes === 0 && seconds === 0) {
+        return 15 * 60 * 1000
+      } else return ''
+    },
     /**
      * 获取具体时间
      * */
@@ -189,28 +208,6 @@ export default {
     orderTime () {
       return this.currentTime.getFullYear() + '/' + (this.currentTime.getMonth() + 1) + '/' +
         this.currentTime.getDate() + ' ' + this.currentTime.getHours() + ':' + this.currentTime.getMinutes()
-    },
-    /**
-     * 付款倒计时
-     * */
-    checkLimitTime () {
-      let itemHours = this.currentTime.getHours() > 9 ? this.currentTime.getHours() : '0' + this.currentTime.getHours()
-      let itemMinutes = this.currentTime.getMinutes() > 9 ? this.currentTime.getMinutes() : '0' + this.currentTime.getMinutes()
-      let itemDate = this.currentTime.getDate() > 9 ? this.currentTime.getDate() : '0' + this.currentTime.getDate()
-      let itemMonth = (this.currentTime.getMonth() + 1) > 9 ? (this.currentTime.getMonth() + 1) : '0' + (this.currentTime.getMonth() + 1)
-      let set = this.currentTime.getFullYear() + '' + itemMonth + itemDate + itemHours + itemMinutes
-      let date = new Date()
-      let itemSetHours = date.getHours() > 9 ? date.getHours() : '0' + date.getHours()
-      let itemSetMinutes = date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()
-      let itemSetDate = date.getDate() > 9 ? date.getDate() : '0' + date.getDate()
-      let itemSetMonth = (date.getMonth() + 1) > 9 ? (date.getMonth() + 1) : '0' + (date.getMonth() + 1)
-      const itemSet = date.getFullYear() + '' + itemSetMonth + itemSetDate + itemSetHours + itemSetMinutes
-      return itemSet - set
-    },
-    settingTime () {
-      let myDate = new Date()
-      myDate.setMinutes(myDate.getMinutes() + this.limitTime)
-      return myDate
     }
   },
   methods: {
@@ -221,6 +218,7 @@ export default {
       const { data } = await this.$api.otc.orderDetail(this.$route.params.id)
       if (data.code === 200) {
         this.data = data.data
+        this.newtime = new Date()
         // 标题
         this.title = data.data.otc_pair.asset.symbol
         this.alipay_name = data.data.merchant.alipay_name
@@ -236,7 +234,7 @@ export default {
         // 姓名
         this.mode[2].price = data.data.merchant.alipay_name
         // 时间控制
-        await this.setItem()
+        // await this.setItem()
         // 订单完成状态
         this.status()
         // 付款方式图片显示说明
@@ -266,13 +264,10 @@ export default {
     status () {
       if (this.data.status === 0) {
         this.item = true
-        this.countDown()
       } else if (this.data.status === 1) {
-        this.limitTime = 0
         this.item = false
         this.transferStatus = '已确认转账'
       } else if (this.data.status === 2) {
-        this.limitTime = 0
         this.item = false
         this.transferStatus = '已确认转账'
         this.releaseStatus = '承兑商已经释放USDT'
@@ -280,22 +275,19 @@ export default {
         // 订单成功取消计时器
         this.data_item = false
       } else if (this.data.status === 11) {
-        this.limitTime = 0
+        // this.limitTime = 0
         this.active = 1
         this.item = false
         this.transferStatus = '已确认转账'
       } else if (this.data.status === 12) {
-        this.limitTime = 0
         this.item = false
         this.active = 1
         this.transferStatus = '已确认转账'
         this.releaseStatus = '承兑商已经释放USDT'
       } else if (this.data.status === 30) {
-        this.limitTime = 0
         this.item = false
         this.delete_cre = true
       } else {
-        this.limitTime = 0
         this.item = false
         Toast('数据错误')
       }
@@ -303,49 +295,15 @@ export default {
     /**
      * 下单时间控制
      * */
-    async setItem () {
-      if (this.limitTime === 0) {
-        await this.$api.otc.orderUpdate(this.$route.params.id, { op_type: 'user_cancel_order' })
-      }
+    countTimeFinish () {
+      Toast('订单已取消')
+      this.$api.otc.orderUpdate(this.$route.params.id, { op_type: 'user_cancel_order' })
     },
     /**
      * 返回上一页
      * */
     onClickLeft () {
       this.$router.go(-1)
-    },
-    /**
-     * 倒计时开始
-     * */
-    countDown () {
-      let time = setInterval(() => {
-        if (this.flag === true) { clearInterval(time) }
-        this.minute()
-      }, 100)
-    },
-    // 分钟
-    minute () {
-      if (this.checkLimitTime <= 15) {
-        this.limitTime = 15 - this.checkLimitTime
-      } else this.limitTime = 0
-      const endTime = new Date(this.settingTime)
-      const nowTime = new Date()
-      let leftTime = parseInt((endTime.getTime() - nowTime.getTime()) / 1000)
-      let h = this.second(parseInt(leftTime / (60 * 60) % 24))
-      let m = this.second(parseInt(leftTime / 60 % 60))
-      let s = this.second(parseInt(leftTime % 60))
-      if (leftTime <= 0) {
-        this.flag = true
-        this.item = false
-        Toast('订单已取消')
-      }
-      this.keepTime = `${h}:${m}:${s}`
-    },
-    // 秒钟
-    second (time) {
-      if (time >= 10) {
-        return time
-      } else { return `0${time}` }
     },
     /**
      *  支付信息复制
@@ -409,7 +367,6 @@ export default {
     let set = setInterval(() => {
       if (this.data_item) {
         this.getBuyOrderDetail()
-        console.log('buy-detail')
       } else {
         clearInterval(set)
       }
