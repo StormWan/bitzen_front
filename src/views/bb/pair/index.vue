@@ -154,10 +154,14 @@ export default {
       this.active_index = e
       // 红点提示
       if (e === 1) {
-        this.brief = '最小下单 ' + (Math.floor(this.pair.sell_min * 100)) / 100 + ' ' + this.pair.base.symbol + ', 最大下单 ' + ((Math.floor(this.pair.sell_max * 100)) / 100).toFixed(this.pair.sell_decimal_digit) + ' ' + this.pair.base.symbol
+        this.brief = '最小下单 ' + (Math.floor(this.pair.sell_min * 100)) / 100 + ' ' + this.pair.base.symbol +
+          ', 最大下单 ' + ((Math.floor(this.pair.sell_max * 100)) / 100).toFixed(this.pair.sell_decimal_digit) + ' ' +
+          this.pair.base.symbol
         this.exchangeValue = ''
       } else {
-        this.brief = '最小下单 ' + (Math.floor(this.pair.buy_min * 100)) / 100 + ' ' + this.pair.quote.symbol + ', 最大下单 ' + ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
+        this.brief = '最小下单 ' + (Math.floor(this.pair.buy_min * 100)) / 100 + ' ' +
+          this.pair.quote.symbol + ', 最大下单 ' +
+          ((Math.floor(this.pair.buy_max * 100)) / 100).toFixed(this.pair.buy_decimal_digit) + ' ' + this.pair.quote.symbol
         this.exchangeValue = ''
       }
     },
@@ -252,7 +256,8 @@ export default {
         }
         if (this.exchangeValue) {
           that.exchangeTip = '请输入正确金额'
-          if (this.exchangeValue === '0' || this.exchangeValue === '.' || Math.floor(this.pair.buy_min * 100) / 100 > this.exchangeValue) {
+          if (this.exchangeValue === '0' || this.exchangeValue === '.' ||
+            Math.floor(this.pair.buy_min * 100) / 100 > this.exchangeValue) {
             that.order_active = false
           } else {
             that.order_active = true

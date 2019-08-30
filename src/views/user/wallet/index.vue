@@ -136,7 +136,7 @@ export default {
   methods: {
     // 箭头
     toClickLeft () {
-      this.$router.go(-1)
+      this.$router.push({ name: 'user' })
     },
     // 显示隐藏钱包
     icon_click () {

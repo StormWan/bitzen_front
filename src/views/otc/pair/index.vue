@@ -344,10 +344,12 @@ export default {
      * 下单按钮，保存数据到state
      * */
     submitOrder () {
-      if (this.amountBuy === '' || this.amountBuy === 0 || this.amountSell === '' || this.amountSell === 0 ||
-      this.buyAmountArrival === '' || this.buyAmountArrival === 0 || this.sellAmountArrival === '' ||
-      this.sellAmountArrival === 0) {
-        Toast('请正确输入信息！')
+      if (this.activeIndex === 0 & (this.amountBuy === '' || this.amountBuy === 0 ||
+        this.buyAmountArrival === '' || this.buyAmountArrival === 0)) {
+        Toast('请正确输入信息！不允许为空哦！')
+      } else if (this.activeIndex !== 0 & (this.amountSell === '' || this.amountSell === 0 ||
+        this.sellAmountArrival === '' || this.sellAmountArrival === 0)) {
+        Toast('请正确输入信息！不允许为空哦！')
       } else {
         // quote
         const side = this.activeIndex === 0 ? 'buy' : 'sell'

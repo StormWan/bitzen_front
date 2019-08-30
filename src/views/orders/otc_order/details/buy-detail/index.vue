@@ -177,9 +177,9 @@ export default {
       const minutes = Math.floor(((counttime % (24 * 3600 * 1000)) % (3600 * 1000)) / (60 * 1000))
       // 计算出相差秒数
       const seconds = Math.round((((counttime % (24 * 3600 * 1000)) % (3600 * 1000)) % (60 * 1000)) / 1000)
-      console.log(this.newtime)
-      console.log(this.currentTime)
-      console.log('相差' + minutes + '分钟，' + '相差' + seconds + '秒')
+      // console.log(this.newtime)
+      // console.log(this.currentTime)
+      // console.log('相差' + minutes + '分钟，' + '相差' + seconds + '秒')
       if (minutes < 15) {
         return 15 * 60 * 1000 - counttime
       } else if (minutes === 0 && seconds === 0) {
@@ -524,7 +524,7 @@ export default {
       padding: 0.76rem 0;
       color: #999;
       text-align: center;
-      height: 100%;
+      /*height: 100%;*/
       background-color: rgba(0, 0, 0, 0.05);
     }
     /*弹出层*/

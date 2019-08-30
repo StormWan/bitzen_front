@@ -687,7 +687,7 @@ export default {
       padding: 0.76rem 0;
       color: #999;
       text-align: center;
-      height: 100%;
+      /*height: 100%;*/
       background-color: rgba(0, 0, 0, 0.05);
     }
     .astimated-popup{
