@@ -306,6 +306,7 @@ router.beforeEach(async (to, from, next) => {
       if (code === null) {
         console.log(oauthUrl)
         window.location.href = oauthUrl
+        // next()
       } else {
         let { data } = await api.account.oauth({ code: code })
         if (data.code === 200) {

@@ -69,7 +69,7 @@ instance.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlenco
 
 /**
  * 请求拦截器
- * 每次请求前，如果存在token则在请求头中携带token
+ * 每次请求前，如果存在 token 则在请求头中携带token
  */
 instance.interceptors.request.use(
   config => {
